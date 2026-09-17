@@ -5,3 +5,5 @@ export { ProgramaEducativo } from "./ProgramaEducativo";
 export { Docente } from "./Docente";
 export { Estudiante } from "./Estudiante";
 export { UsuarioRol } from "./UsuarioRol";
+export { Sesion } from "./Sesion";
+export { PasswordResetToken } from "./PasswordResetToken";

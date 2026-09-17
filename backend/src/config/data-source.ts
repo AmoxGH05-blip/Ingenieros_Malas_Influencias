@@ -1,6 +1,16 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { Rol, Usuario, Facultad, ProgramaEducativo, Docente, Estudiante, UsuarioRol } from "../entities";
+import {
+  Rol,
+  Usuario,
+  Facultad,
+  ProgramaEducativo,
+  Docente,
+  Estudiante,
+  UsuarioRol,
+  Sesion,
+  PasswordResetToken,
+} from "../entities";
 
 export const AppDataSource = new DataSource({
   type: "mssql",
@@ -15,5 +25,15 @@ export const AppDataSource = new DataSource({
   },
   synchronize: false,
   logging: false,
-  entities: [Rol, Usuario, Facultad, ProgramaEducativo, Docente, Estudiante, UsuarioRol],
+  entities: [
+    Rol,
+    Usuario,
+    Facultad,
+    ProgramaEducativo,
+    Docente,
+    Estudiante,
+    UsuarioRol,
+    Sesion,
+    PasswordResetToken,
+  ],
 });

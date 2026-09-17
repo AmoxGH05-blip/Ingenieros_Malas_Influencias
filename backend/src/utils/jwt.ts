@@ -5,6 +5,7 @@ export interface AppJwtPayload {
   correo: string;
   tipoCuenta: "Estudiante" | "Docente";
   roles: string[];
+  jti: string;
 }
 
 function getSecret(): string {
@@ -15,8 +16,12 @@ function getSecret(): string {
   return secret;
 }
 
+export function getSessionDurationHours(): number {
+  return Number(process.env.SESSION_DURATION_HOURS ?? 8);
+}
+
 export function signToken(payload: AppJwtPayload): string {
-  const expiresIn = process.env.JWT_EXPIRES_IN ?? "8h";
+  const expiresIn = `${getSessionDurationHours()}h`;
   return jwt.sign(payload, getSecret(), { expiresIn } as jwt.SignOptions);
 }
 
