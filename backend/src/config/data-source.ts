@@ -10,6 +10,14 @@ import {
   UsuarioRol,
   Sesion,
   PasswordResetToken,
+  TipoPregunta,
+  InstrumentoEvaluacion,
+  SeccionInstrumento,
+  Pregunta,
+  OpcionRespuesta,
+  PeriodoEvaluacion,
+  Evaluacion,
+  RespuestaEvaluacion,
 } from "../entities";
 
 export const AppDataSource = new DataSource({
@@ -35,5 +43,13 @@ export const AppDataSource = new DataSource({
     UsuarioRol,
     Sesion,
     PasswordResetToken,
+    TipoPregunta,
+    InstrumentoEvaluacion,
+    SeccionInstrumento,
+    Pregunta,
+    OpcionRespuesta,
+    PeriodoEvaluacion,
+    Evaluacion,
+    RespuestaEvaluacion,
   ],
 });
