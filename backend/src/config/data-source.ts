@@ -1,0 +1,19 @@
+import "reflect-metadata";
+import { DataSource } from "typeorm";
+import { Rol, Usuario } from "../entities";
+
+export const AppDataSource = new DataSource({
+  type: "mssql",
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT ?? 1433),
+  database: process.env.DB_NAME,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  options: {
+    encrypt: (process.env.DB_ENCRYPT ?? "true") === "true",
+    trustServerCertificate: false,
+  },
+  synchronize: false,
+  logging: false,
+  entities: [Rol, Usuario],
+});
