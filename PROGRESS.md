@@ -19,6 +19,17 @@
 
 ---
 
+## Infraestructura de despliegue
+
+**Adelantado antes de tiempo (17-sep-2026)** respecto al plan original (era SCRUM-71, Sprint 7) porque el equipo necesitaba ver los avances sin depender de correr el proyecto en la máquina de alguien.
+
+- **Backend → Render** (free tier), desplegado desde `render.yaml` en la raíz del repo. Se duerme tras 15 min sin tráfico (~30-50s en despertar).
+- **Frontend → Vercel** (free tier), root directory `frontend`, con `frontend/vercel.json` para el ruteo de SPA.
+- Ambos quedan conectados a `main`: cada push dispara redeploy automático.
+- **No se adaptó el proyecto al hosting** — el backend ya usaba `process.env.PORT` y CORS abierto; solo se agregaron archivos de configuración (`render.yaml`, `vercel.json`, `.node-version`), ningún cambio de código de la app.
+- Guía completa paso a paso (incluye qué variables de entorno poner en cada plataforma): `docs/despliegue.md`.
+- URLs reales: **pendiente de llenar aquí una vez que el equipo complete el signup/deploy** (requiere que alguien cree las cuentas de Render/Vercel — eso no se puede automatizar).
+
 ## Equipo (roles fijos)
 
 | Integrante | Nombre en Jira | Área |
@@ -175,6 +186,7 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
 - [ ] **SCRUM-69** — Pruebas de usabilidad y ajustes de navegación (Responsable: Nieto Guerra Emiliano)
 - [ ] **SCRUM-70** — Pruebas de escalabilidad (soporte multi-campus / carrera configurable) (Responsable: Amoxhua Ochoa)
 - [ ] **SCRUM-71** — Plan y pruebas de despliegue en ambiente de demo/producción (Responsable: Mauricio Mondragón)
+  - **Adelanto (17-sep-2026):** la infraestructura de despliegue (Render + Vercel) ya se preparó y documentó antes de tiempo, para que el equipo pueda ver los avances sin correr nada localmente — ver sección "Infraestructura de despliegue" arriba y `docs/despliegue.md`. Lo que falta para cerrar esta tarea formalmente en Sprint 7: pruebas de carga/despliegue con el sistema ya completo (depende de SCRUM-58/68/70).
 - [ ] **SCRUM-72** — Checklist final contra la rúbrica de evaluación del proyecto (Responsable: Mauricio Mondragón)
 
 ---

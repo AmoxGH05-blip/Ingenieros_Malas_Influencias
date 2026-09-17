@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Backend (Express + TypeScript) del Sistema de Informacion de Evaluacion Docente Adaptable",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc -p tsconfig.json",
