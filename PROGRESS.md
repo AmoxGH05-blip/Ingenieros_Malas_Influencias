@@ -28,7 +28,10 @@
 - Ambos quedan conectados a `main`: cada push dispara redeploy automático.
 - **No se adaptó el proyecto al hosting** — el backend ya usaba `process.env.PORT` y CORS abierto; solo se agregaron archivos de configuración (`render.yaml`, `vercel.json`, `.node-version`), ningún cambio de código de la app.
 - Guía completa paso a paso (incluye qué variables de entorno poner en cada plataforma): `docs/despliegue.md`.
-- URLs reales: **pendiente de llenar aquí una vez que el equipo complete el signup/deploy** (requiere que alguien cree las cuentas de Render/Vercel — eso no se puede automatizar).
+- **URLs en producción (desplegado 17-sep-2026):**
+  - Frontend: https://ingenieros-malas-influencias.vercel.app
+  - Backend: https://dygsis-backend.onrender.com (`/api/health` para verificar que esté despierto)
+  - Cuenta de demo para probar: número de cuenta `DEMO0001`, password `Demo2026!` (rol Estudiante).
 
 ## Equipo (roles fijos)
 
