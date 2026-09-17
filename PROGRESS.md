@@ -39,13 +39,18 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
 - [x] **SCRUM-17** — Crear proyecto Scrum en Jira, configurar épicas y backlog inicial (Responsable: Mauricio Mondragón)
   - Completada antes de iniciar este seguimiento con Claude Code — sin detalle de implementación registrado aquí. Si tienes contexto de cómo se hizo, agrégalo.
 - [x] **SCRUM-18** — Formalizar documento de requerimientos funcionales y no funcionales (Responsable: Mauricio Mondragón)
-  - Completada antes de iniciar este seguimiento — sin detalle registrado aquí.
+  - **Qué se hizo:** Jira ya estaba marcado como Finalizado pero no existía ningún documento en el repo — se detectó el hueco (17-sep) y se formalizó el documento de RF/RNF que faltaba.
+  - **Cómo se hizo:** se extrajeron los RF01–RF09 y los no funcionales directamente de las épicas y tareas ya cargadas en `documentacion.pdf`/Jira (no se inventó alcance nuevo, solo se formalizó lo que ya estaba repartido en tareas) en una tabla trazable por épica.
+  - Archivo: `docs/requerimientos.md`.
 - [x] **SCRUM-19** — Definir stack tecnológico definitivo y crear repositorios (frontend / backend) (Responsable: Todos)
   - Completada antes de iniciar este seguimiento. Nota: en la práctica se decidió **un solo repositorio** (`Ingenieros_Malas_Influencias`, monorepo con carpetas `backend/` y `database/`) en vez de repos separados — ver decisión registrada en SCRUM-25.
 - [x] **SCRUM-20** — Diagrama entidad-relación conceptual + borrador de modelo físico en SQL Server (Responsable: Amoxhua Ochoa)
   - **Qué se hizo:** DER conceptual (20 entidades) y borrador de script T-SQL.
   - **Cómo se hizo:** entregado como `SCRUM20_der.zip` en GitHub (`der_conceptual.png/.mmd`, `modelo_datos.md`, `modelo_fisico_sqlserver.sql`). Este borrador fue la base de SCRUM-24, pero los nombres de tabla/constraints cambiaron al implementarse de verdad (ver SCRUM-24) — el zip quedó como referencia histórica, el script real vive en `database/evaluacion_docente_schema.sql`.
-- [ ] **SCRUM-21** — Diagramas de casos de uso (UML) para los 4 roles de usuario (Responsable: Juan Antonio) — *Jira dice Finalizado pero sin evidencia en el repo; confirmar y documentar aquí.*
+- [x] **SCRUM-21** — Diagramas de casos de uso (UML) para los 4 roles de usuario (Responsable: Juan Antonio)
+  - **Qué se hizo:** mismo caso que SCRUM-18 — estaba Finalizado en Jira sin evidencia en el repo. Se generaron los 4 diagramas de casos de uso (Estudiante, Docente, Coordinador, Administrador) más una vista general, cada caso de uso trazado al RF/RNF correspondiente.
+  - **Cómo se hizo:** diagramas en formato Mermaid dentro de un `.md` (GitHub los renderiza nativamente, no requieren herramienta externa ni imagen adjunta). Los casos de uso por rol se derivaron de las pantallas/APIs ya definidas en el backlog de sprints (ej. "Panel de administración de usuarios" → caso de uso de Administrador).
+  - Archivo: `docs/casos_de_uso.md`.
 - [ ] **SCRUM-22** — Wireframes de pantallas clave (login, dashboard alumno, dashboard coordinación) (Responsable: Nieto Guerra Emiliano) — estado Jira: **En revisión**
 - [ ] **SCRUM-23** — Definir convención de ramas, commits y ambiente de desarrollo compartido (Responsable: Todos) — estado Jira: **En curso**
 
