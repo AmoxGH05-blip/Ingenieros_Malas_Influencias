@@ -51,8 +51,15 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
   - **Qué se hizo:** mismo caso que SCRUM-18 — estaba Finalizado en Jira sin evidencia en el repo. Se generaron los 4 diagramas de casos de uso (Estudiante, Docente, Coordinador, Administrador) más una vista general, cada caso de uso trazado al RF/RNF correspondiente.
   - **Cómo se hizo:** diagramas en formato Mermaid dentro de un `.md` (GitHub los renderiza nativamente, no requieren herramienta externa ni imagen adjunta). Los casos de uso por rol se derivaron de las pantallas/APIs ya definidas en el backlog de sprints (ej. "Panel de administración de usuarios" → caso de uso de Administrador).
   - Archivo: `docs/casos_de_uso.md`.
-- [ ] **SCRUM-22** — Wireframes de pantallas clave (login, dashboard alumno, dashboard coordinación) (Responsable: Nieto Guerra Emiliano) — estado Jira: **En revisión**
-- [ ] **SCRUM-23** — Definir convención de ramas, commits y ambiente de desarrollo compartido (Responsable: Todos) — estado Jira: **En curso**
+- [x] **SCRUM-22** — Wireframes de pantallas clave (login, dashboard alumno, dashboard coordinación) (Responsable: Nieto Guerra Emiliano)
+  - **Qué se hizo:** wireframes de baja fidelidad para las 3 pantallas — login (documentando lo ya construido en SCRUM-29), dashboard de alumno y dashboard de coordinación (ambos aún por construir).
+  - **Cómo se hizo:** diagramas de caja en ASCII dentro de un `.md` (sin herramienta externa), cada elemento trazado a su RF/caso de uso en `docs/requerimientos.md`/`docs/casos_de_uso.md`, para que quien construya la pantalla real no pierda ningún requerimiento en el camino. Explícitamente marcados como referencia de contenido, no de diseño final — Nieto Guerra Emiliano define la dirección visual real.
+  - Archivo: `docs/wireframes.md`.
+
+- [x] **SCRUM-23** — Definir convención de ramas, commits y ambiente de desarrollo compartido (Responsable: Todos)
+  - **Qué se hizo:** se formalizó por escrito la convención que ya se venía siguiendo de facto en todos los commits de este repo (Conventional Commits en español + referencia a SCRUM-XX), más el modelo de ramas (trabajo directo en `main` para cambios chicos, rama `feature/SCRUM-XX-...` + PR para cambios grandes) y la guía de ambiente compartido (Node 24, credenciales vía `.env`, cómo levantar backend+frontend juntos).
+  - **Cómo se hizo:** `docs/convenciones-desarrollo.md`. Se aprovechó para agregar `backend/README.md`, que no existía (el frontend ya tenía el suyo desde SCRUM-28).
+  - Archivos: `docs/convenciones-desarrollo.md`, `backend/README.md`.
 
 ---
 
