@@ -83,12 +83,12 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
   - **Qué se hizo:** proyecto frontend creado (Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui base) con rutas protegidas por rol (Estudiante/Docente/Coordinador/Administrador). Se hizo como **estructura básica para entregar al encargado** — no es diseño final, es el andamiaje para que Nieto Guerra Emiliano continúe.
   - **Cómo se hizo:** carpeta `frontend/` en el mismo monorepo. `react-router-dom` para rutas, `ProtectedRoute` (exige sesión + rol) y `RoleRedirect` (manda "/" al dashboard del rol del usuario). Componentes base de shadcn/ui creados a mano (Button, Input, Label, Card — sin CLI interactivo, siguiendo el patrón oficial). Proxy de Vite (`/api` → `localhost:3000`) para hablar con el backend en dev sin configurar CORS. Ver `frontend/README.md` para instrucciones completas y decisiones pendientes de revisar (ahí se documentó, por ejemplo, que el JWT se guarda en `localStorage` por simplicidad y no en cookie httpOnly).
   - Verificado en navegador real (no solo compilación): `npm run build` limpio, login/logout, redirección por rol, y bloqueo al intentar entrar a una ruta de otro rol.
-  - Commit: `<pendiente de completar tras el push>`.
+  - Commit: `961c230`.
 
 - [x] **SCRUM-29** — Pantallas de login y recuperación de contraseña (Responsable: Nieto Guerra Emiliano)
   - **Qué se hizo:** pantallas de Login, "Olvidé mi contraseña" y "Restablecer contraseña", conectadas de verdad a los endpoints de SCRUM-26/27 (no son mockups).
   - **Cómo se hizo:** `src/pages/auth/{LoginPage,ForgotPasswordPage,ResetPasswordPage}.tsx`, con `AuthContext` para manejar la sesión. Probado end-to-end en navegador contra el backend y la base de datos reales: login válido redirige al dashboard correcto, logout limpia la sesión, y el flujo de recuperación manda la petición real al backend (con un usuario de prueba insertado y eliminado en la misma sesión de trabajo).
-  - Commit: `<pendiente de completar tras el push>`.
+  - Commit: `961c230`.
 - [ ] **SCRUM-30** — Pruebas de autenticación + checklist de seguridad (cifrado de contraseñas) (Responsable: Mauricio Mondragón) — vencida 13-sep
 - [ ] **SCRUM-31** — Actualizar tablero Jira con historias completadas y preparar demo interna (Responsable: Mauricio Mondragón) — vencida 13-sep
 
