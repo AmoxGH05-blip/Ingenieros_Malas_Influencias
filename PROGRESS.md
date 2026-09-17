@@ -89,8 +89,15 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
   - **Qué se hizo:** pantallas de Login, "Olvidé mi contraseña" y "Restablecer contraseña", conectadas de verdad a los endpoints de SCRUM-26/27 (no son mockups).
   - **Cómo se hizo:** `src/pages/auth/{LoginPage,ForgotPasswordPage,ResetPasswordPage}.tsx`, con `AuthContext` para manejar la sesión. Probado end-to-end en navegador contra el backend y la base de datos reales: login válido redirige al dashboard correcto, logout limpia la sesión, y el flujo de recuperación manda la petición real al backend (con un usuario de prueba insertado y eliminado en la misma sesión de trabajo).
   - Commit: `961c230`.
-- [ ] **SCRUM-30** — Pruebas de autenticación + checklist de seguridad (cifrado de contraseñas) (Responsable: Mauricio Mondragón) — vencida 13-sep
-- [ ] **SCRUM-31** — Actualizar tablero Jira con historias completadas y preparar demo interna (Responsable: Mauricio Mondragón) — vencida 13-sep
+- [x] **SCRUM-30** — Pruebas de autenticación + checklist de seguridad (cifrado de contraseñas) (Responsable: Mauricio Mondragón)
+  - **Qué se hizo:** 16 pruebas automatizadas del módulo de autenticación (login, recuperación de contraseña, JWT, hashing de tokens) + checklist de seguridad de 15 puntos.
+  - **Cómo se hizo:** se agregó Vitest al backend (`npm test`, `npm run test:coverage`). Las pruebas mockean la capa de repositorios (`vi.mock`) — no tocan la base de datos real, corren rápido y deterministas. `bcrypt` y JWT se prueban con su comportamiento real (no mockeados), incluyendo casos negativos (token manipulado, secreto distinto, contraseña incorrecta). Cobertura: 95.6% en `AuthService.ts`, 100% en `jwt.ts`. El checklist de seguridad (`docs/seguridad-checklist.md`) evalúa 15 controles contra el código real; 12 cumplen, 3 quedan correctamente diferidos a SCRUM-62/EP10 (Sprint 6).
+  - Archivos: `backend/src/services/AuthService.test.ts`, `backend/src/utils/{jwt,resetToken}.test.ts`, `docs/pruebas-autenticacion.md`, `docs/seguridad-checklist.md`.
+
+- [x] **SCRUM-31** — Actualizar tablero Jira con historias completadas y preparar demo interna (Responsable: Mauricio Mondragón)
+  - **Qué se hizo:** tablero Jira ya estaba sincronizado tarea por tarea durante todo el sprint (cada SCRUM-24 a SCRUM-30 se transicionó a Finalizado con comentario al cerrarse). Se preparó además un guion de demo interna de ~10 minutos cubriendo base de datos, backend, frontend y seguridad.
+  - **Cómo se hizo:** `docs/demo-sprint1.md` con pasos concretos (comandos para levantar backend/frontend, qué mostrar y en qué orden, checklist de seguridad al final).
+  - Archivo: `docs/demo-sprint1.md`.
 
 ---
 
