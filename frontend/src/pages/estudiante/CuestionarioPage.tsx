@@ -4,6 +4,7 @@ import { ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useAsignaciones } from "@/pages/estudiante/useAsignaciones";
 import {
   enviarEvaluacion,
   getAsignacion,
@@ -18,6 +19,7 @@ export function CuestionarioPage() {
   const { asignacionId } = useParams();
   const navigate = useNavigate();
   const id = Number(asignacionId);
+  const { refresh } = useAsignaciones();
 
   const [asignacion, setAsignacion] = useState<Asignacion | null | undefined>(undefined); // undefined = cargando
   const [instrumento, setInstrumento] = useState<Instrumento | null>(null);
@@ -63,6 +65,7 @@ export function CuestionarioPage() {
     setEnviando(true);
     try {
       await enviarEvaluacion(asignacion.id, respuestas);
+      await refresh();
       navigate("/estudiante", { replace: true, state: { evaluado: asignacion.docente } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo enviar la evaluación.");
@@ -84,7 +87,7 @@ export function CuestionarioPage() {
       </div>
 
       {/* Barra de avance pegada arriba mientras se responde */}
-      <div className="sticky top-16 z-10 -mx-1 rounded-lg border border-border bg-card/95 p-3 shadow-sm backdrop-blur">
+      <div className="sticky top-[72px] z-10 -mx-1 rounded-lg border border-border bg-card p-3">
         <div className="mb-2 flex justify-between text-xs text-muted-foreground">
           <span>Respondidas</span>
           <span>{respondidas} de {totalPreguntas}</span>

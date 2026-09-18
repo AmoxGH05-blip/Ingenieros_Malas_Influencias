@@ -2,14 +2,15 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/** Píldora de estado: fondo suave + borde del mismo tono, como en la referencia visual. */
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium",
+  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
   {
     variants: {
       variant: {
-        neutral: "bg-secondary text-secondary-foreground",
-        success: "bg-success/15 text-success",
-        warning: "bg-warning/15 text-warning",
+        neutral: "border-border bg-secondary text-secondary-foreground",
+        success: "border-success/25 bg-success/10 text-success",
+        warning: "border-warning/25 bg-warning/10 text-warning",
       },
     },
     defaultVariants: { variant: "neutral" },

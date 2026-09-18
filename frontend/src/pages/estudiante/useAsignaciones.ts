@@ -1,20 +1,19 @@
-import { useEffect, useState } from "react";
-import { getAsignaciones, type Asignacion } from "@/lib/evaluaciones-api";
+import { createContext, useContext } from "react";
+import type { Asignacion } from "@/lib/evaluaciones-api";
 
-/** Carga las asignaciones (docente + materia) del alumno con estado de carga/error. */
-export function useAsignaciones() {
-  const [asignaciones, setAsignaciones] = useState<Asignacion[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+export interface EvaluacionesState {
+  asignaciones: Asignacion[] | null;
+  error: string | null;
+  isLoading: boolean;
+  /** Vuelve a pedir las asignaciones (p. ej. tras enviar una evaluación). */
+  refresh: () => Promise<void>;
+}
 
-  useEffect(() => {
-    let activo = true;
-    getAsignaciones()
-      .then((data) => activo && setAsignaciones(data))
-      .catch(() => activo && setError("No se pudo cargar tu lista de docentes."));
-    return () => {
-      activo = false;
-    };
-  }, []);
+export const EvaluacionesContext = createContext<EvaluacionesState | null>(null);
 
-  return { asignaciones, error, isLoading: asignaciones === null && error === null };
+/** Asignaciones (docente + materia) del alumno, compartidas entre sidebar y páginas. */
+export function useAsignaciones(): EvaluacionesState {
+  const context = useContext(EvaluacionesContext);
+  if (!context) throw new Error("useAsignaciones debe usarse dentro de EvaluacionesProvider");
+  return context;
 }

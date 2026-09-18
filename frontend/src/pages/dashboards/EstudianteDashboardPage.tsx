@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { CheckCircle2, Clock, TrendingUp, Users, X } from "lucide-react";
+import { CheckCircle2, ClipboardList, GraduationCap, X } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { useAuth } from "@/context/AuthContext";
+import { ProgressRing } from "@/components/dashboard/ProgressRing";
 import { DocentesTable } from "@/pages/estudiante/DocentesTable";
 import { useAsignaciones } from "@/pages/estudiante/useAsignaciones";
 
-/** Dashboard del estudiante: progreso (SCRUM-36) + docentes por evaluar (SCRUM-35). */
+/** Dashboard del estudiante: avance (SCRUM-36) + docentes por evaluar (SCRUM-35). */
 export function EstudianteDashboardPage() {
-  const { usuario } = useAuth();
   const { asignaciones, error, isLoading } = useAsignaciones();
   const location = useLocation();
   const evaluado = (location.state as { evaluado?: string } | null)?.evaluado;
@@ -23,60 +20,61 @@ export function EstudianteDashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Hola, {usuario?.correo.split("@")[0]}</h1>
-        <p className="text-sm text-muted-foreground">Este es el avance de tu evaluación docente del ciclo actual.</p>
-      </div>
-
       {evaluado && !avisoCerrado && (
-        <div role="status" className="flex items-center gap-3 rounded-lg border border-success/40 bg-success/10 px-4 py-3 text-sm">
+        <div role="status" className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm">
           <CheckCircle2 className="size-5 shrink-0 text-success" aria-hidden />
-          <span className="flex-1">Tu evaluación de <strong>{evaluado}</strong> se registró correctamente. ¡Gracias!</span>
-          <button type="button" aria-label="Cerrar aviso" onClick={() => setAvisoCerrado(true)} className="rounded p-1 hover:bg-secondary">
+          <span className="flex-1">
+            Tu evaluación de <strong>{evaluado}</strong> se registró correctamente. ¡Gracias!
+          </span>
+          <button type="button" aria-label="Cerrar aviso" onClick={() => setAvisoCerrado(true)} className="rounded p-1 hover:bg-card">
             <X className="size-4" />
           </button>
         </div>
       )}
 
       {error && (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </p>
       )}
 
-      {isLoading ? (
-        <div aria-busy className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-[116px] animate-pulse rounded-lg bg-card" />
-          ))}
+      {isLoading && (
+        <div aria-busy className="space-y-4">
+          <div className="h-32 animate-pulse rounded-xl bg-card" />
+          <div className="h-64 animate-pulse rounded-xl bg-card" />
         </div>
-      ) : (
-        asignaciones && (
-          <>
-            <section aria-label="Resumen de avance" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <MetricCard label="Docentes totales" value={total} hint="Asignados a tu grupo" icon={Users} />
-              <MetricCard label="Evaluados" value={completadas} hint="Cuestionarios enviados" icon={CheckCircle2} tone="success" />
-              <MetricCard label="Pendientes" value={pendientes} hint={pendientes ? "Aún por responder" : "Todo al día"} icon={Clock} tone="warning" />
-              <MetricCard label="Avance" value={`${avance}%`} hint={`${completadas} de ${total} completadas`} icon={TrendingUp} tone="brand" />
-            </section>
+      )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Mi progreso</CardTitle>
-                <CardDescription>
-                  {pendientes
-                    ? `Te ${pendientes === 1 ? "falta 1 evaluación" : `faltan ${pendientes} evaluaciones`} para terminar.`
-                    : "Completaste todas tus evaluaciones."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Progress value={avance} label="Avance de evaluaciones completadas" />
-              </CardContent>
-            </Card>
+      {asignaciones && (
+        <>
+          <section aria-labelledby="avance-titulo" className="space-y-3">
+            <h2 id="avance-titulo" className="text-[15px] font-semibold">
+              Tu avance en el ciclo actual
+            </h2>
+            <div className="grid gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch">
+              <MetricCard
+                label="Pendientes por evaluar"
+                value={pendientes}
+                icon={ClipboardList}
+                alert={pendientes ? "Responde antes del cierre" : undefined}
+                to="/estudiante/evaluaciones"
+              />
+              <MetricCard label="Evaluaciones enviadas" value={completadas} icon={CheckCircle2} />
+              <MetricCard label="Docentes asignados" value={total} icon={GraduationCap} />
+              <div className="flex items-center justify-center gap-4 rounded-xl border border-border bg-card px-6 py-4">
+                <ProgressRing value={avance} label="Avance de evaluaciones" />
+                <div className="text-sm">
+                  <p className="font-semibold">Avance</p>
+                  <p className="text-muted-foreground">
+                    {completadas} de {total} completadas
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-            <DocentesTable asignaciones={asignaciones} limit={5} verTodasHref="/estudiante/evaluaciones" />
-          </>
-        )
+          <DocentesTable asignaciones={asignaciones} limit={5} verTodasHref="/estudiante/evaluaciones" />
+        </>
       )}
     </div>
   );

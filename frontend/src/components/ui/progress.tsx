@@ -17,7 +17,7 @@ export function Progress({ value, label, className }: ProgressProps) {
       aria-valuenow={Math.round(clamped)}
       className={cn("h-2 w-full overflow-hidden rounded-full bg-secondary", className)}
     >
-      <div className="h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${clamped}%` }} />
+      <div className="h-full rounded-full bg-success transition-[width] duration-500" style={{ width: `${clamped}%` }} />
     </div>
   );
 }

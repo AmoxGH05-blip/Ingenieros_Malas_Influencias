@@ -8,9 +8,7 @@ import { GraduationCap } from "lucide-react";
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-12 text-sidebar-foreground lg:flex">
-        <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-brand/15 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-brand/10 blur-3xl" aria-hidden />
+      <aside className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
         <div className="relative flex items-center gap-3">
           <span className="flex size-10 items-center justify-center rounded-xl bg-brand text-brand-foreground">
             <GraduationCap className="size-6" aria-hidden />
