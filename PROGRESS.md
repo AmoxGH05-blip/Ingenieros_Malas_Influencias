@@ -138,7 +138,9 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
 - [ ] **SCRUM-33** — API: listar docentes por alumno, registrar respuestas, bloquear evaluación duplicada (Responsable: Juan Antonio)
 - [ ] **SCRUM-34** — API de seguimiento de avance por alumno (completadas / pendientes) (Responsable: Juan Antonio)
 - [ ] **SCRUM-35** — Pantalla de cuestionario de evaluación docente (Responsable: Nieto Guerra Emiliano)
+  - **En progreso (18-sep-2026), no completa todavía:** PR [#1](https://github.com/AmoxGH05-blip/Ingenieros_Malas_Influencias/pull/1) mergeado a `main` (commit `1f73f19`) — cuestionario de 15 preguntas (4 secciones, escala oficial) y tabla de docentes con filtros, ya visible en producción. **Sigue sin marcarse completa** porque usa datos simulados (`frontend/src/lib/evaluaciones-api.ts`) mientras las APIs reales de SCRUM-33/34 no existan — al publicarse esos endpoints, solo hay que reemplazar el cuerpo de las funciones, las pantallas no cambian.
 - [ ] **SCRUM-36** — Pantalla "Mis evaluaciones" (progreso, pendientes/completadas) (Responsable: Nieto Guerra Emiliano)
+  - **En progreso (18-sep-2026), no completa todavía:** mismo PR #1 — tarjetas de métricas (docentes totales/evaluados/pendientes/% avance) y barra de progreso, ya en producción con datos simulados. Falta pantalla de "Historial" y "Perfil" (aparecen como "Pronto"), y conectar a la API real (SCRUM-34) para marcarse completa.
 - [ ] **SCRUM-37** — Pruebas funcionales del flujo alumno y preparación del Prototipo 1 (Responsable: Mauricio Mondragón)
 - [ ] **SCRUM-38** — Actualizar casos de uso y documentación para la entrega del Prototipo 1 (Responsable: Mauricio Mondragón)
 
