@@ -1,7 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { ChevronDown, GraduationCap, LogOut, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { ChevronDown, LogOut, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavGroup } from "@/layouts/nav-config";
+import iconoBlanco from "@/assets/branding/dygsis-icono-blanco.png";
 
 interface SidebarProps {
   groups: NavGroup[];
@@ -33,9 +34,7 @@ export function Sidebar({ groups, badges, collapsed, mobileOpen, onToggleCollaps
         )}
       >
         <div className={cn("flex h-[72px] items-center gap-3 px-4", collapsed && "lg:justify-center lg:px-0")}>
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground">
-            <GraduationCap className="size-6" aria-hidden />
-          </span>
+          <img src={iconoBlanco} alt="" className="size-10 shrink-0 object-contain" />
           <span className={cn("truncate text-lg font-semibold tracking-tight", collapsed && "lg:hidden")}>DYGSIS</span>
           <button
             type="button"

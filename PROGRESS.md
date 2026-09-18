@@ -39,6 +39,16 @@ No corresponde a un SCRUM-XX específico (es un agregado a EP0 pedido directamen
   - Backend: https://dygsis-backend.onrender.com (`/api/health` para verificar que esté despierto)
   - Cuenta de demo para probar: número de cuenta `DEMO0001`, password `Demo2026!` (rol Estudiante).
 
+## Branding — Logo oficial de DYGSIS (18-sep-2026)
+
+No corresponde a un SCRUM-XX específico (agregado pedido directamente por el usuario, fuera del backlog original). Se integró el logo oficial de DYGSIS (insignia con calavera estilo One Piece + "Ingenieros Malas Influencias") en dos variantes de color.
+
+- **Qué se hizo:**
+  - Se creó `recursos/branding/` en la raíz del repo con los 4 PNG del logo (2 completos con texto + 2 solo-ícono, cada uno en blanco/negro) para que cualquier integrante del equipo los tome directamente de GitHub — ver `recursos/README.md`.
+  - Se integró el logo en el frontend: panel de marca del login (`AuthShell.tsx`, logo completo), encabezado móvil del login (ícono + texto, con variante clara/oscura automática), sidebar de la app (ícono + texto, reemplazando el ícono genérico `GraduationCap`), y favicon del sitio (`frontend/public/favicon.png`).
+- **Cómo se hizo:** a partir de los 2 PNG originales (500×500) provistos por el usuario se recortaron con Pillow variantes solo-ícono (emblema sin el texto "DYGSIS") para los espacios reducidos, y se generó un favicon de 256×256. Los mismos 4 archivos se copiaron a `frontend/src/assets/branding/` para que los componentes de React los importen directamente (Vite los resuelve como URL). Verificado con `npm run build` (sin errores de tipos) y visualmente en el navegador: login (desktop y mobile), sidebar expandido/colapsado y favicon.
+  - Commit: (ver historial de `main` en GitHub, commit de branding del 18-sep-2026).
+
 ## Equipo (roles fijos)
 
 | Integrante | Nombre en Jira | Área |
