@@ -9,6 +9,8 @@ import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import { EstudianteDashboardPage } from "@/pages/dashboards/EstudianteDashboardPage";
 import { DocenteDashboardPage } from "@/pages/dashboards/DocenteDashboardPage";
 import { CoordinadorDashboardPage } from "@/pages/dashboards/CoordinadorDashboardPage";
+import { EvaluacionesPage } from "@/pages/estudiante/EvaluacionesPage";
+import { CuestionarioPage } from "@/pages/estudiante/CuestionarioPage";
 import { AdministradorDashboardPage } from "@/pages/dashboards/AdministradorDashboardPage";
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
 
             <Route element={<ProtectedRoute allowedRoles={["Estudiante"]} />}>
               <Route path="/estudiante" element={<EstudianteDashboardPage />} />
+              <Route path="/estudiante/evaluaciones" element={<EvaluacionesPage />} />
+              <Route path="/estudiante/evaluar/:asignacionId" element={<CuestionarioPage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["Docente"]} />}>

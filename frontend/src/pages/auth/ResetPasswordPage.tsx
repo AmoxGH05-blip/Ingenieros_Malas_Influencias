@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { resetPassword } from "@/lib/auth-api";
 import { ApiError } from "@/lib/api";
+import { AuthShell } from "@/pages/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,8 +40,8 @@ export function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted p-4">
-        <Card className="w-full max-w-sm">
+      <AuthShell>
+        <Card className="w-full border-0 bg-transparent shadow-none">
           <CardHeader>
             <CardTitle>Enlace inválido</CardTitle>
             <CardDescription>Falta el token de recuperación en la URL.</CardDescription>
@@ -51,13 +52,13 @@ export function ResetPasswordPage() {
             </Link>
           </CardContent>
         </Card>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted p-4">
-      <Card className="w-full max-w-sm">
+    <AuthShell>
+      <Card className="w-full border-0 bg-transparent shadow-none">
         <CardHeader>
           <CardTitle>Nueva contraseña</CardTitle>
           <CardDescription>Elige una contraseña de al menos 8 caracteres</CardDescription>
@@ -101,6 +102,6 @@ export function ResetPasswordPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </AuthShell>
   );
 }

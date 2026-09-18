@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { forgotPassword } from "@/lib/auth-api";
 import { ApiError } from "@/lib/api";
+import { AuthShell } from "@/pages/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,8 +31,8 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted p-4">
-      <Card className="w-full max-w-sm">
+    <AuthShell>
+      <Card className="w-full border-0 bg-transparent shadow-none">
         <CardHeader>
           <CardTitle>Recuperar contraseña</CardTitle>
           <CardDescription>Te enviaremos un enlace a tu correo institucional</CardDescription>
@@ -65,6 +66,6 @@ export function ForgotPasswordPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </AuthShell>
   );
 }

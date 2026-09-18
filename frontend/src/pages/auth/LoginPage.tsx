@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
+import { AuthShell } from "@/pages/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,8 +32,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted p-4">
-      <Card className="w-full max-w-sm">
+    <AuthShell>
+      <Card className="w-full border-0 bg-transparent shadow-none">
         <CardHeader>
           <CardTitle>Iniciar sesión</CardTitle>
           <CardDescription>Sistema de Evaluación Docente Adaptable</CardDescription>
@@ -76,6 +77,6 @@ export function LoginPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </AuthShell>
   );
 }
