@@ -19,6 +19,12 @@
 
 ---
 
+## Documentación completa del proyecto (18-sep-2026)
+
+No corresponde a un SCRUM-XX específico (es un agregado a EP0 pedido directamente por el usuario, fuera del backlog original). Se consolidó `docs/documentacion-proyecto.md`: mismo nivel de detalle que `documentacion.pdf` (equipo, stack, backlog, sprints, rúbrica) enlazando al resto de `docs/` para no duplicar, más 4 secciones nuevas que no existían — Recursos Materiales, Recursos Tecnológicos, Recursos Humanos y Recursos Financieros (presupuesto con costos, tratado como ejercicio de planeación académica — nadie cobra realmente) y Planeación de Recursos (qué se necesita y cuándo, por sprint). Commit `2853d8e`.
+
+---
+
 ## Infraestructura de despliegue
 
 **Adelantado antes de tiempo (17-sep-2026)** respecto al plan original (era SCRUM-71, Sprint 7) porque el equipo necesitaba ver los avances sin depender de correr el proyecto en la máquina de alguien.
