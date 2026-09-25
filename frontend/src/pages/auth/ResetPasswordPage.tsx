@@ -41,13 +41,13 @@ export function ResetPasswordPage() {
   if (!token) {
     return (
       <AuthShell>
-        <Card className="w-full border-0 bg-transparent shadow-none">
+        <Card className="w-full border-0 bg-transparent text-sidebar-foreground shadow-none">
           <CardHeader>
-            <CardTitle>Enlace inválido</CardTitle>
-            <CardDescription>Falta el token de recuperación en la URL.</CardDescription>
+            <CardTitle className="text-2xl uppercase tracking-wide">Enlace inválido</CardTitle>
+            <CardDescription className="text-sidebar-muted">Falta el token de recuperación en la URL.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/forgot-password" className="text-sm text-muted-foreground hover:underline">
+            <Link to="/forgot-password" className="text-sm text-sidebar-muted hover:text-sidebar-foreground hover:underline">
               Solicitar un nuevo enlace
             </Link>
           </CardContent>
@@ -58,10 +58,10 @@ export function ResetPasswordPage() {
 
   return (
     <AuthShell>
-      <Card className="w-full border-0 bg-transparent shadow-none">
+      <Card className="w-full border-0 bg-transparent text-sidebar-foreground shadow-none">
         <CardHeader>
-          <CardTitle>Nueva contraseña</CardTitle>
-          <CardDescription>Elige una contraseña de al menos 8 caracteres</CardDescription>
+          <CardTitle className="text-2xl uppercase tracking-wide">Nueva contraseña</CardTitle>
+          <CardDescription className="text-sidebar-muted">Elige una contraseña de al menos 8 caracteres</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -96,7 +96,7 @@ export function ResetPasswordPage() {
                 {error}
               </p>
             )}
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-brand text-brand-foreground hover:opacity-90">
               {isSubmitting ? "Guardando..." : "Guardar nueva contraseña"}
             </Button>
           </form>

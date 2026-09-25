@@ -33,10 +33,10 @@ export function LoginPage() {
 
   return (
     <AuthShell>
-      <Card className="w-full border-0 bg-transparent shadow-none">
+      <Card className="w-full border-0 bg-transparent text-sidebar-foreground shadow-none">
         <CardHeader>
-          <CardTitle>Iniciar sesión</CardTitle>
-          <CardDescription>Sistema de Evaluación Docente Adaptable</CardDescription>
+          <CardTitle className="text-2xl uppercase tracking-wide">Iniciar sesión</CardTitle>
+          <CardDescription className="text-sidebar-muted">Sistema de Evaluación Docente Adaptable</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -68,10 +68,10 @@ export function LoginPage() {
                 {error}
               </p>
             )}
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-brand text-brand-foreground hover:opacity-90">
               {isSubmitting ? "Entrando..." : "Entrar"}
             </Button>
-            <Link to="/forgot-password" className="text-center text-sm text-muted-foreground hover:underline">
+            <Link to="/forgot-password" className="text-center text-sm text-sidebar-muted hover:text-sidebar-foreground hover:underline">
               ¿Olvidaste tu contraseña?
             </Link>
           </form>

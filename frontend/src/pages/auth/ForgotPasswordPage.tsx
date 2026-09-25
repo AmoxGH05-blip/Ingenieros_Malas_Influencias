@@ -32,10 +32,10 @@ export function ForgotPasswordPage() {
 
   return (
     <AuthShell>
-      <Card className="w-full border-0 bg-transparent shadow-none">
+      <Card className="w-full border-0 bg-transparent text-sidebar-foreground shadow-none">
         <CardHeader>
-          <CardTitle>Recuperar contraseña</CardTitle>
-          <CardDescription>Te enviaremos un enlace a tu correo institucional</CardDescription>
+          <CardTitle className="text-2xl uppercase tracking-wide">Recuperar contraseña</CardTitle>
+          <CardDescription className="text-sidebar-muted">Te enviaremos un enlace a tu correo institucional</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -51,16 +51,16 @@ export function ForgotPasswordPage() {
                 onChange={(event) => setCorreo(event.target.value)}
               />
             </div>
-            {mensaje && <p className="text-sm text-foreground">{mensaje}</p>}
+            {mensaje && <p className="text-sm text-sidebar-foreground">{mensaje}</p>}
             {error && (
               <p role="alert" className="text-sm text-destructive">
                 {error}
               </p>
             )}
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-brand text-brand-foreground hover:opacity-90">
               {isSubmitting ? "Enviando..." : "Enviar enlace de recuperación"}
             </Button>
-            <Link to="/login" className="text-center text-sm text-muted-foreground hover:underline">
+            <Link to="/login" className="text-center text-sm text-sidebar-muted hover:text-sidebar-foreground hover:underline">
               Volver a iniciar sesión
             </Link>
           </form>

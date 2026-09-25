@@ -49,6 +49,30 @@ No corresponde a un SCRUM-XX específico (agregado pedido directamente por el us
 - **Cómo se hizo:** a partir de los 2 PNG originales (500×500) provistos por el usuario se recortaron con Pillow variantes solo-ícono (emblema sin el texto "DYGSIS") para los espacios reducidos, y se generó un favicon de 256×256. Los mismos 4 archivos se copiaron a `frontend/src/assets/branding/` para que los componentes de React los importen directamente (Vite los resuelve como URL). Verificado con `npm run build` (sin errores de tipos) y visualmente en el navegador: login (desktop y mobile), sidebar expandido/colapsado y favicon.
   - Commit: (ver historial de `main` en GitHub, commit de branding del 18-sep-2026).
 
+## Rediseño del Login + paleta "Se Busca" (25-sep-2026)
+
+No corresponde a un SCRUM-XX específico (pedido directamente por el usuario). Se rediseñó por completo el login y se reemplazó la paleta de colores de TODA la aplicación (no solo el login) por una estética inspirada en los carteles de "se busca" de One Piece.
+
+- **Qué se hizo:**
+  - Nueva paleta en `frontend/src/index.css`: pergamino/crema cálido de fondo, tinta casi negra para texto, oro/bronce antiguo como acento de marca — reemplaza el tema claro/verde que se había subido unos días antes. Como el resto de la app ya usaba tokens semánticos (`bg-sidebar`, `bg-brand`, etc.), el cambio de paleta cascadeó automáticamente a todo el dashboard sin tocar cada componente.
+  - `AuthShell.tsx` reescrito: ya no divide toda la pantalla en 2 columnas — ahora es una tarjeta centrada (estilo referencia "EMBARK") con un panel cuadrado (collage de carteles de fondo + logo blanco grande) y un panel de formulario oscuro tipo "tinta".
+  - `LoginPage.tsx`, `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx` restyleados para el panel oscuro (texto claro, botón dorado).
+  - Nuevo asset `frontend/src/assets/branding/dygsis-login-bg.jpg` (+ copia en `recursos/branding/`), el collage de carteles provisto por el usuario.
+- **Cómo se hizo:** paleta definida en variables CSS (formato OKLCH, mismo patrón que ya existía) extrayendo tonos del cartel de referencia (pergamino ~`#c9bb9e`, tinta casi negra). Verificado con `npm run build` (limpio) y en el navegador: login desktop/mobile, dashboard completo con la nueva paleta (sidebar, tarjetas, botones), sin colores verdes residuales (auditoría con grep).
+
+## Migración de base de datos: Azure SQL Server → Supabase (PostgreSQL) (25-sep-2026)
+
+No corresponde a un SCRUM-XX específico. La suscripción de Azure superó los $15 USD/mes; se migró a Supabase (PostgreSQL), que tiene un plan gratuito permanente.
+
+- **Qué se hizo:**
+  - `backend/src/config/data-source.ts` y las 17 entidades en `backend/src/entities/` migradas de tipos SQL Server a PostgreSQL (`nvarchar→varchar`, `bit→boolean`, `datetime2→timestamptz`, `int→integer`). Driver `mssql` reemplazado por `pg` en `package.json`.
+  - `database/postgres_schema.sql` (nuevo): esquema completo equivalente en PostgreSQL + datos semilla (roles, catálogos, cuestionario de 15 preguntas, cuenta Coordinador, cuenta Estudiante demo `DEMO0001`/`Demo2026!`). Reemplaza a `database/evaluacion_docente_schema.sql` + `database/migrations/002-003` (marcados como "SUPERADO", se conservan como referencia histórica de SQL Server).
+  - `backend/.env.example` y `render.yaml` actualizados con las variables de conexión de Postgres (`DB_SSL` en vez de `DB_ENCRYPT`, puerto 5432).
+  - `docs/despliegue.md` y `docs/documentacion-proyecto.md` actualizados (stack tecnológico, costo de infraestructura ahora en $0 en vez de ~$300 MXN/mes estimados de Azure).
+- **Cómo se hizo:** `npm run build` y `npm test` (16/16) pasan limpio contra el nuevo esquema de tipos. El schema se aplicó a un proyecto nuevo de Supabase vía un script Node one-off con el driver `pg` (conexión por el *Session pooler*, ya que el host de conexión directa de Supabase solo resuelve por IPv6). Verificado end-to-end: backend conectado a Supabase (`Conectado a la base de datos (postgres)`), login real desde el frontend con la cuenta demo contra el backend local apuntando a Supabase — funcionó correctamente.
+  - **Pendiente (usuario):** actualizar las variables de entorno en el dashboard de Render (host/usuario/password del *Session pooler* de Supabase) para que producción quede en Supabase, y cancelar la suscripción de Azure una vez confirmado que todo funciona en producción (servidor confirmado como propio, no compartido con otro equipo).
+  - **Nota:** los datos que existían en Azure (docentes, materias, grupos, evaluaciones de prueba capturados en sesiones anteriores) no se migraron — es un proyecto escolar sin datos reales que preservar, así que se optó por recrear el esquema limpio en Supabase con datos semilla nuevos en vez de exportar/importar el contenido de Azure.
+
 ## Equipo (roles fijos)
 
 | Integrante | Nombre en Jira | Área |

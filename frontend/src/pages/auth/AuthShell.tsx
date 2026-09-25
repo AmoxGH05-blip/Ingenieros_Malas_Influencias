@@ -1,38 +1,39 @@
 import * as React from "react";
 import logoBlanco from "@/assets/branding/dygsis-logo-blanco.png";
-import iconoNegro from "@/assets/branding/dygsis-icono-negro.png";
+import loginBg from "@/assets/branding/dygsis-login-bg.jpg";
 
 /**
- * Marco común de las pantallas de autenticación: panel de marca a la izquierda
- * (solo en pantallas grandes) y el formulario centrado a la derecha.
+ * Marco común de las pantallas de autenticación: una tarjeta centrada estilo
+ * "cartel de se busca" sobre un fondo de página con el mismo collage,
+ * desenfocado para que no compita con el panel cuadrado nítido.
  */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
-      <aside className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
-        <div className="relative">
-          <img src={logoBlanco} alt="DYGSIS" className="h-28 w-auto" />
-        </div>
-        <div className="relative max-w-md space-y-4">
-          <h2 className="text-4xl font-semibold leading-tight tracking-tight">
-            Tu opinión mejora la enseñanza.
-          </h2>
-          <p className="text-sidebar-muted">
-            Sistema de Evaluación Docente Adaptable: evalúa a tus docentes de forma anónima y sigue tu avance en un solo lugar.
-          </p>
-        </div>
-        <p className="relative text-xs text-sidebar-muted">© 2026 Ingenieros Malas Influencias</p>
-      </aside>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-sidebar p-4 sm:p-6">
+      <div
+        className="absolute inset-0 scale-110 bg-cover bg-center blur-md"
+        style={{ backgroundImage: `url(${loginBg})` }}
+        aria-hidden
+      />
+      <div className="absolute inset-0 bg-sidebar/70" aria-hidden />
 
-      <main className="flex items-center justify-center bg-background p-6">
-        <div className="w-full max-w-sm">
-          <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <img src={iconoNegro} alt="" className="size-9 object-contain" />
-            <span className="font-semibold tracking-tight">DYGSIS</span>
+      <div className="relative grid w-full max-w-4xl overflow-hidden rounded-2xl shadow-2xl lg:grid-cols-2">
+        <div
+          className="relative hidden aspect-square items-center justify-center bg-cover bg-center lg:flex"
+          style={{ backgroundImage: `url(${loginBg})` }}
+        >
+          <div className="absolute inset-0 bg-sidebar/55" aria-hidden />
+          <img src={logoBlanco} alt="DYGSIS" className="relative w-2/3 max-w-xs drop-shadow-lg" />
+        </div>
+
+        <div className="flex flex-col justify-center bg-sidebar p-8 text-sidebar-foreground sm:p-10">
+          <div className="mb-6 lg:hidden">
+            <img src={logoBlanco} alt="DYGSIS" className="h-12 w-auto" />
           </div>
           {children}
+          <p className="mt-8 text-center text-xs text-sidebar-muted">© 2026 Ingenieros Malas Influencias</p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

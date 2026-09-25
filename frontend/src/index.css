@@ -5,35 +5,36 @@
 }
 
 :root {
-  /* Tema claro único, basado en la referencia visual del dashboard corporativo */
-  --background: oklch(0.968 0.004 120);
-  --foreground: oklch(0.25 0.012 175);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.012 175);
-  --primary: oklch(0.34 0.014 175);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.95 0.004 120);
-  --secondary-foreground: oklch(0.3 0.012 175);
-  --muted: oklch(0.95 0.004 120);
-  --muted-foreground: oklch(0.55 0.01 170);
-  --destructive: oklch(0.63 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.92 0.004 120);
-  --input: oklch(0.9 0.005 120);
-  --ring: oklch(0.68 0.14 140);
+  /* Tema "Se Busca" — inspirado en los carteles de recompensa de One Piece:
+     pergamino envejecido + tinta casi negra + acento oro antiguo. */
+  --background: oklch(0.93 0.025 85);
+  --foreground: oklch(0.22 0.02 60);
+  --card: oklch(0.97 0.015 85);
+  --card-foreground: oklch(0.22 0.02 60);
+  --primary: oklch(0.28 0.02 60);
+  --primary-foreground: oklch(0.97 0.01 85);
+  --secondary: oklch(0.89 0.025 82);
+  --secondary-foreground: oklch(0.28 0.02 60);
+  --muted: oklch(0.89 0.02 82);
+  --muted-foreground: oklch(0.45 0.02 65);
+  --destructive: oklch(0.58 0.2 27);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.8 0.03 80);
+  --input: oklch(0.85 0.03 80);
+  --ring: oklch(0.7 0.13 75);
   --radius: 0.75rem;
 
-  /* Acento de marca (amarillo) y estados */
-  --brand: oklch(0.87 0.165 90);
-  --brand-foreground: oklch(0.27 0.03 90);
-  --success: oklch(0.52 0.14 145);
-  --warning: oklch(0.6 0.17 45);
+  /* Acento de marca (oro/bronce "recompensa") y estados */
+  --brand: oklch(0.72 0.14 75);
+  --brand-foreground: oklch(0.2 0.03 60);
+  --success: oklch(0.5 0.13 140);
+  --warning: oklch(0.62 0.16 50);
 
-  /* Sidebar verde-pizarra */
-  --sidebar: oklch(0.34 0.012 175);
-  --sidebar-foreground: oklch(0.97 0.004 120);
-  --sidebar-muted: oklch(0.78 0.01 170);
-  --sidebar-accent: oklch(0.41 0.014 175);
+  /* Sidebar / panel oscuro tinta */
+  --sidebar: oklch(0.19 0.02 50);
+  --sidebar-foreground: oklch(0.95 0.02 85);
+  --sidebar-muted: oklch(0.65 0.02 70);
+  --sidebar-accent: oklch(0.26 0.02 50);
   --sidebar-border: oklch(1 0 0 / 12%);
 }
 
