@@ -6,7 +6,7 @@ const PORT = process.env.PORT ?? 3000;
 
 AppDataSource.initialize()
   .then(() => {
-    console.log("Conectado a la base de datos (Central-Data)");
+    console.log(`Conectado a la base de datos (${process.env.DB_NAME})`);
     app.listen(PORT, () => {
       console.log(`API escuchando en http://localhost:${PORT}`);
     });

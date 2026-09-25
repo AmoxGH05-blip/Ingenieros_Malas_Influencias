@@ -5,18 +5,18 @@ export class PasswordResetToken {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "UsuarioId", type: "int" })
+  @Column({ name: "UsuarioId", type: "integer" })
   usuarioId!: number;
 
-  @Column({ name: "TokenHash", type: "nvarchar", length: 256 })
+  @Column({ name: "TokenHash", type: "varchar", length: 256 })
   tokenHash!: string;
 
-  @Column({ name: "FechaCreacion", type: "datetime2" })
+  @Column({ name: "FechaCreacion", type: "timestamptz" })
   fechaCreacion!: Date;
 
-  @Column({ name: "FechaExpiracion", type: "datetime2" })
+  @Column({ name: "FechaExpiracion", type: "timestamptz" })
   fechaExpiracion!: Date;
 
-  @Column({ name: "Usado", type: "bit", default: false })
+  @Column({ name: "Usado", type: "boolean", default: false })
   usado!: boolean;
 }

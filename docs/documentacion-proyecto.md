@@ -29,7 +29,7 @@ Roles del sistema: **Administrador, Coordinador, Docente, Estudiante**.
 |---|---|
 | Frontend | React + TypeScript + Tailwind CSS v4 + shadcn/ui, Vite |
 | Backend | Node.js + Express + TypeScript, arquitectura por capas |
-| Base de datos | SQL Server (Azure SQL, servidor compartido) + TypeORM |
+| Base de datos | PostgreSQL (Supabase, proyecto propio, plan Free) + TypeORM |
 | Autenticación | JWT + bcrypt, sesiones persistentes en tabla |
 | Correo | Nodemailer (Gmail SMTP) |
 | Reportes | Puppeteer / pdfmake (planeado, Sprint 6) |
@@ -110,7 +110,7 @@ Hardware, software y plataformas de apoyo. La mayoría del stack elegido es **gr
 
 | Recurso | Proveedor | Uso | Costo mensual | Costo del proyecto (4 meses) |
 |---|---|---|---|---|
-| Base de datos SQL Server | Azure SQL (servidor compartido con otro equipo) | Almacenamiento de toda la información | ~$300 MXN *(estimado — costo real depende del plan contratado por quien administra el servidor; no verificado con una factura real)* | **$1,200.00** |
+| Base de datos PostgreSQL | Supabase (proyecto propio, plan Free) | Almacenamiento de toda la información | $0 | $0 |
 | Hosting backend | Render (plan Free) | API en producción | $0 | $0 |
 | Hosting frontend | Vercel (plan Free/Hobby) | Frontend en producción | $0 | $0 |
 | Control de versiones | GitHub | Repositorio, historial, backup | $0 | $0 |
@@ -118,7 +118,7 @@ Hardware, software y plataformas de apoyo. La mayoría del stack elegido es **gr
 | Correo saliente | Gmail SMTP (cuenta existente) | Recuperación de contraseña, notificaciones | $0 | $0 |
 | Entorno de desarrollo | Node.js, TypeScript, VS Code, npm (open source) | Desarrollo del sistema | $0 | $0 |
 | Dominio propio | — (no contratado; se usa `*.vercel.app` / `*.onrender.com`) | — | $0 | $0 *(opcional a futuro: ~$250 MXN/año)* |
-| **Total Recursos Tecnológicos** | | | | **$1,200.00 MXN** |
+| **Total Recursos Tecnológicos** | | | | **$0.00 MXN** |
 
 ### 7.3 Recursos Humanos (base del cálculo financiero)
 
@@ -142,10 +142,10 @@ Presupuesto disponible/estimado para cubrir los gastos del proyecto, integrando 
 |---|---|
 | Recursos Humanos (§7.3) | $91,120.00 |
 | Recursos Materiales (§7.1) | $9,566.68 |
-| Recursos Tecnológicos (§7.2) | $1,200.00 |
-| **Subtotal** | **$101,886.68** |
-| Contingencia (10% — imprevistos, retrabajo, extensión de sprint) | $10,188.67 |
-| **Presupuesto total estimado del proyecto** | **$112,075.35 MXN** |
+| Recursos Tecnológicos (§7.2) | $0.00 |
+| **Subtotal** | **$100,686.68** |
+| Contingencia (10% — imprevistos, retrabajo, extensión de sprint) | $10,068.67 |
+| **Presupuesto total estimado del proyecto** | **$110,755.35 MXN** |
 
 > De nuevo: esto es un presupuesto **hipotético** para fines de documentación — el equipo no maneja realmente este dinero. Sirve para dimensionar el proyecto como si fuera un desarrollo profesional real, que es justo lo que pide esta sección.
 

@@ -5,10 +5,10 @@ export class OpcionRespuesta {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "PreguntaId", type: "int" })
+  @Column({ name: "PreguntaId", type: "integer" })
   preguntaId!: number;
 
-  @Column({ name: "Texto", type: "nvarchar", length: 200 })
+  @Column({ name: "Texto", type: "varchar", length: 200 })
   texto!: string;
 
   @Column({ name: "Valor", type: "decimal", precision: 5, scale: 2 })

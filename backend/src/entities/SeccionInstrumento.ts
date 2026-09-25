@@ -5,10 +5,10 @@ export class SeccionInstrumento {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "InstrumentoId", type: "int" })
+  @Column({ name: "InstrumentoId", type: "integer" })
   instrumentoId!: number;
 
-  @Column({ name: "Nombre", type: "nvarchar", length: 150 })
+  @Column({ name: "Nombre", type: "varchar", length: 150 })
   nombre!: string;
 
   @Column({ name: "Orden", type: "smallint", default: 1 })

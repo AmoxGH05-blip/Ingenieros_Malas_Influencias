@@ -5,21 +5,21 @@ export class Sesion {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "UsuarioId", type: "int" })
+  @Column({ name: "UsuarioId", type: "integer" })
   usuarioId!: number;
 
-  @Column({ name: "Jti", type: "nvarchar", length: 64 })
+  @Column({ name: "Jti", type: "varchar", length: 64 })
   jti!: string;
 
-  @Column({ name: "FechaInicio", type: "datetime2" })
+  @Column({ name: "FechaInicio", type: "timestamptz" })
   fechaInicio!: Date;
 
-  @Column({ name: "FechaExpiracion", type: "datetime2" })
+  @Column({ name: "FechaExpiracion", type: "timestamptz" })
   fechaExpiracion!: Date;
 
-  @Column({ name: "FechaCierre", type: "datetime2", nullable: true })
+  @Column({ name: "FechaCierre", type: "timestamptz", nullable: true })
   fechaCierre!: Date | null;
 
-  @Column({ name: "Activa", type: "bit", default: true })
+  @Column({ name: "Activa", type: "boolean", default: true })
   activa!: boolean;
 }

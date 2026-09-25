@@ -5,15 +5,15 @@ export class Usuario {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "CorreoElectronico", type: "nvarchar", length: 150 })
+  @Column({ name: "CorreoElectronico", type: "varchar", length: 150 })
   correoElectronico!: string;
 
-  @Column({ name: "ContrasenaHash", type: "nvarchar", length: 256 })
+  @Column({ name: "ContrasenaHash", type: "varchar", length: 256 })
   contrasenaHash!: string;
 
-  @Column({ name: "Activo", type: "bit", default: true })
+  @Column({ name: "Activo", type: "boolean", default: true })
   activo!: boolean;
 
-  @Column({ name: "FechaCreacion", type: "datetime2" })
+  @Column({ name: "FechaCreacion", type: "timestamptz" })
   fechaCreacion!: Date;
 }

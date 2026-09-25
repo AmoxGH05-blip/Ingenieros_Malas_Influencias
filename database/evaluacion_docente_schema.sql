@@ -1,4 +1,10 @@
 /* =====================================================================
+   SUPERADO (18-sep-2026): la base de datos se movio de Azure SQL Server a
+   Supabase (PostgreSQL) por costo. El esquema vigente esta en
+   database/postgres_schema.sql - este archivo se conserva solo como
+   referencia historica del modelo original en SQL Server.
+   =====================================================================
+
    Sistema de Informacion de Evaluacion Docente Institucional Adaptable
    Modelo fisico - Microsoft SQL Server (Azure SQL, base compartida "Central-Data")
    Equipo: Ingenieros Malas Influencias

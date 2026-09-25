@@ -1,4 +1,9 @@
 /* =====================================================================
+   SUPERADO (18-sep-2026): incorporado a database/postgres_schema.sql tras
+   la migracion de Azure SQL Server a Supabase (PostgreSQL). Se conserva
+   solo como referencia historica.
+   =====================================================================
+
    Sistema de Informacion de Evaluacion Docente Institucional Adaptable
    Migracion 003: cuestionario oficial de evaluacion docente (borrador)
    Jira: SCRUM-32

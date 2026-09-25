@@ -5,21 +5,21 @@ export class PeriodoEvaluacion {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "PeriodoAcademicoId", type: "int" })
+  @Column({ name: "PeriodoAcademicoId", type: "integer" })
   periodoAcademicoId!: number;
 
-  @Column({ name: "InstrumentoId", type: "int" })
+  @Column({ name: "InstrumentoId", type: "integer" })
   instrumentoId!: number;
 
-  @Column({ name: "Nombre", type: "nvarchar", length: 150 })
+  @Column({ name: "Nombre", type: "varchar", length: 150 })
   nombre!: string;
 
-  @Column({ name: "FechaInicio", type: "datetime2" })
+  @Column({ name: "FechaInicio", type: "timestamptz" })
   fechaInicio!: Date;
 
-  @Column({ name: "FechaFin", type: "datetime2" })
+  @Column({ name: "FechaFin", type: "timestamptz" })
   fechaFin!: Date;
 
-  @Column({ name: "Activo", type: "bit", default: true })
+  @Column({ name: "Activo", type: "boolean", default: true })
   activo!: boolean;
 }

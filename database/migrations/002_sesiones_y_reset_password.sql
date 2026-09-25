@@ -1,4 +1,9 @@
 /* =====================================================================
+   SUPERADO (18-sep-2026): incorporado a database/postgres_schema.sql tras
+   la migracion de Azure SQL Server a Supabase (PostgreSQL). Se conserva
+   solo como referencia historica.
+   =====================================================================
+
    Sistema de Informacion de Evaluacion Docente Institucional Adaptable
    Migracion 002: sesiones y recuperacion de contrasena
    Jira: SCRUM-26 (sesiones) / SCRUM-27 (recuperacion)

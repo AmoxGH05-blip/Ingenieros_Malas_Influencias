@@ -5,6 +5,6 @@ export class TipoPregunta {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "Nombre", type: "nvarchar", length: 50 })
+  @Column({ name: "Nombre", type: "varchar", length: 50 })
   nombre!: string;
 }

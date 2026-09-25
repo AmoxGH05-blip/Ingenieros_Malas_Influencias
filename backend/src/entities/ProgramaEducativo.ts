@@ -5,12 +5,12 @@ export class ProgramaEducativo {
   @PrimaryGeneratedColumn({ name: "Id" })
   id!: number;
 
-  @Column({ name: "FacultadId", type: "int" })
+  @Column({ name: "FacultadId", type: "integer" })
   facultadId!: number;
 
-  @Column({ name: "Nombre", type: "nvarchar", length: 150 })
+  @Column({ name: "Nombre", type: "varchar", length: 150 })
   nombre!: string;
 
-  @Column({ name: "NivelEducativo", type: "nvarchar", length: 50 })
+  @Column({ name: "NivelEducativo", type: "varchar", length: 50 })
   nivelEducativo!: string;
 }

@@ -21,16 +21,13 @@ import {
 } from "../entities";
 
 export const AppDataSource = new DataSource({
-  type: "mssql",
+  type: "postgres",
   host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT ?? 1433),
+  port: Number(process.env.DB_PORT ?? 5432),
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  options: {
-    encrypt: (process.env.DB_ENCRYPT ?? "true") === "true",
-    trustServerCertificate: false,
-  },
+  ssl: (process.env.DB_SSL ?? "true") === "true" ? { rejectUnauthorized: false } : false,
   synchronize: false,
   logging: false,
   entities: [

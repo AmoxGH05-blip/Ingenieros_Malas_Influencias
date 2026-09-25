@@ -25,9 +25,9 @@ Cada cuenta (Render, Vercel) hay que crearla ustedes mismos — inicien sesión 
 
 | Variable | Valor |
 |---|---|
-| `DB_HOST` | `muwigara01.database.windows.net` |
-| `DB_NAME` | `Central-Data` |
-| `DB_USER` | `Master` |
+| `DB_HOST` | host del *Session pooler* de Supabase, ej. `aws-0-us-east-2.pooler.supabase.com` (Project → Connect → Session pooler) |
+| `DB_NAME` | `postgres` |
+| `DB_USER` | `postgres.<project-ref>` (incluye el ref del proyecto, lo da el pooler) |
 | `DB_PASSWORD` | *(pídesela a Amoxhua si no la tienes)* |
 | `JWT_SECRET` | *(genera una nueva — ver abajo)* |
 | `SMTP_USER` | `pokego.cuentasecundaria1@gmail.com` |
@@ -35,7 +35,9 @@ Cada cuenta (Render, Vercel) hay que crearla ustedes mismos — inicien sesión 
 | `SMTP_FROM` | `pokego.cuentasecundaria1@gmail.com` |
 | `FRONTEND_URL` | déjalo vacío por ahora, lo llenas en el paso 3 de abajo |
 
-   El resto de las variables (`DB_PORT`, `DB_ENCRYPT`, `SESSION_DURATION_HOURS`, `SMTP_HOST/PORT/SECURE`) ya vienen con su valor correcto en `render.yaml`, no hay que tocarlas.
+   El resto de las variables (`DB_PORT`, `DB_SSL`, `SESSION_DURATION_HOURS`, `SMTP_HOST/PORT/SECURE`) ya vienen con su valor correcto en `render.yaml`, no hay que tocarlas.
+
+   > **Migración a Supabase (18-sep-2026):** la base de datos se movió de Azure SQL Server a [Supabase](https://supabase.com) (PostgreSQL, plan Free) porque la suscripción de Azure superó los $15 USD/mes. El esquema completo (equivalente en PostgreSQL) vive en [`database/postgres_schema.sql`](../database/postgres_schema.sql) — se pega una sola vez en el SQL Editor de un proyecto nuevo de Supabase. Los archivos con el modelo original de SQL Server (`database/evaluacion_docente_schema.sql`, `database/migrations/`) se conservan solo como referencia histórica.
 
    **Genera un `JWT_SECRET` nuevo para producción** (no reuses el de tu `.env` local):
    ```bash
