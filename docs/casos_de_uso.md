@@ -37,6 +37,8 @@ flowchart LR
     E7 -.notifica.-> Estudiante
 ```
 
+**Estado (Prototipo 1, 01-oct-2026):** E1, E2, E3, E4 y E5 implementados y verificados de punta a punta contra la base de datos real (ver `docs/demo-prototipo1.md`). E6 (talleres/laboratorios) y E7 (recordatorios por correo) quedan para Sprint 3/5.
+
 ## 2. Docente
 
 ```mermaid

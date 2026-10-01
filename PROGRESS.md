@@ -180,8 +180,11 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
   - **Qué se hizo (cierre, 01-oct-2026):** único pendiente era reemplazar los datos simulados (`frontend/src/lib/evaluaciones-api.ts`) por las APIs reales de SCRUM-33 — ya hecho, mismas firmas de función, la pantalla no cambió. Se agregó también envío del header `Authorization: Bearer <token>` en `frontend/src/lib/api.ts` (no existía, las llamadas anteriores no requerían sesión).
 - [ ] **SCRUM-36** — Pantalla "Mis evaluaciones" (progreso, pendientes/completadas) (Responsable: Nieto Guerra Emiliano)
   - **Avance (01-oct-2026):** ya conectada a la API real de SCRUM-34, el dashboard muestra avance real. **Sigue sin marcarse completa:** faltan las pantallas de "Historial" y "Perfil" (aparecen como "Pronto"), fuera del alcance de la sesión de hoy.
-- [ ] **SCRUM-37** — Pruebas funcionales del flujo alumno y preparación del Prototipo 1 (Responsable: Mauricio Mondragón)
-- [ ] **SCRUM-38** — Actualizar casos de uso y documentación para la entrega del Prototipo 1 (Responsable: Mauricio Mondragón)
+- [x] **SCRUM-37** — Pruebas funcionales del flujo alumno y preparación del Prototipo 1 (Responsable: Mauricio Mondragón)
+  - **Qué se hizo:** 10 pruebas automatizadas nuevas (`backend/src/services/EvaluacionService.test.ts`, 26/26 en el backend) + verificación manual end-to-end completa contra Supabase real (login, cuestionario real de 15 preguntas, envío, avance actualizado, bloqueo de duplicado confirmado a nivel de API y de base de datos).
+  - **Cómo se hizo:** documentado en `docs/pruebas-flujo-alumno.md` (qué cubre cada prueba) y `docs/demo-prototipo1.md` (guion de demo, ~8 min).
+- [x] **SCRUM-38** — Actualizar casos de uso y documentación para la entrega del Prototipo 1 (Responsable: Mauricio Mondragón)
+  - **Qué se hizo:** `docs/casos_de_uso.md` — sección Estudiante marcada con el estado real de implementación (E1-E5 implementados y verificados, E6/E7 pendientes para Sprint 3/5). Nuevo `docs/demo-prototipo1.md` como guion de demo del Prototipo 1, mismo formato que `docs/demo-sprint1.md`.
 
 ---
 
