@@ -5,4 +5,7 @@ export const EstudianteRepository = AppDataSource.getRepository(Estudiante).exte
   findByMatricula(matricula: string) {
     return this.findOneBy({ matricula });
   },
+  findByUsuarioId(usuarioId: number) {
+    return this.findOneBy({ usuarioId });
+  },
 });
