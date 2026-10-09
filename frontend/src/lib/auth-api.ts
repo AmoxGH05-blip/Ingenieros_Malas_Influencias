@@ -1,6 +1,6 @@
 import { apiFetch } from "@/lib/api";
 
-export type TipoCuenta = "Estudiante" | "Docente";
+export type TipoCuenta = "Estudiante" | "Docente" | "Coordinador" | "Administrador";
 
 export interface Usuario {
   id: number;

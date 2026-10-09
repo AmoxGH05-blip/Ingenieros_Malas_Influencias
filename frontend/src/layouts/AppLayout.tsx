@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { ArrowLeftRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Sidebar } from "@/layouts/Sidebar";
 import { Topbar } from "@/layouts/Topbar";
-import { NAV_BY_ROLE } from "@/layouts/nav-config";
+import { NAV_BY_ROLE, ROLE_HOME, ROL_PRIORIDAD, rolActivo, type NavGroup } from "@/layouts/nav-config";
 import { EvaluacionesProvider } from "@/pages/estudiante/EvaluacionesProvider";
 import { useAsignaciones } from "@/pages/estudiante/useAsignaciones";
 
@@ -19,13 +20,22 @@ function readCollapsed(): boolean {
 
 /** Shell de las rutas protegidas: Sidebar + Topbar + contenido. Lee los pendientes del alumno para los contadores. */
 function Shell({ rol }: { rol: string }) {
-  const { logout } = useAuth();
+  const { logout, usuario } = useAuth();
   const { asignaciones } = useAsignaciones();
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const pendientes = asignaciones?.filter((a) => !a.completada).length ?? 0;
   const badges: Record<string, number> = rol === "Estudiante" ? { "/estudiante/evaluaciones": pendientes } : {};
+
+  // Cuentas con varios roles (ej. Administrador + Estudiante) ven enlaces para cambiar de vista.
+  const otrasVistas = ROL_PRIORIDAD.filter((r) => r !== rol && usuario?.roles.includes(r) && NAV_BY_ROLE[r]);
+  const grupos: NavGroup[] = [
+    ...(NAV_BY_ROLE[rol] ?? []),
+    ...(otrasVistas.length
+      ? [{ label: "Cambiar de vista", items: otrasVistas.map((r) => ({ label: `Vista ${r.toLowerCase()}`, to: ROLE_HOME[r], icon: ArrowLeftRight })) }]
+      : []),
+  ];
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
@@ -41,7 +51,7 @@ function Shell({ rol }: { rol: string }) {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar
-        groups={NAV_BY_ROLE[rol] ?? []}
+        groups={grupos}
         badges={badges}
         collapsed={collapsed}
         mobileOpen={mobileOpen}
@@ -61,7 +71,8 @@ function Shell({ rol }: { rol: string }) {
 
 export function AppLayout() {
   const { usuario } = useAuth();
-  const rol = usuario?.roles.find((r) => NAV_BY_ROLE[r]) ?? "";
+  const { pathname } = useLocation();
+  const rol = rolActivo(usuario?.roles ?? [], pathname);
   return (
     <EvaluacionesProvider enabled={rol === "Estudiante"}>
       <Shell rol={rol} />

@@ -110,6 +110,42 @@ describe("AuthService.login", () => {
   });
 });
 
+describe("AuthService.login por correo (Coordinador/Administrador)", () => {
+  it("inicia sesion con correo y toma el tipo de cuenta del rol de mayor prioridad", async () => {
+    const usuario = await usuarioDePrueba();
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(usuario as never);
+    vi.mocked(UsuarioRepository.findById).mockResolvedValue(usuario as never);
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValue(["Estudiante", "Administrador"]);
+
+    const resultado = await AuthService.login(usuario.correoElectronico, PASSWORD_PLANA);
+
+    expect(resultado.usuario.tipoCuenta).toBe("Administrador");
+    expect(resultado.usuario.roles).toEqual(["Estudiante", "Administrador"]);
+    expect(EstudianteRepository.findByMatricula).not.toHaveBeenCalled();
+  });
+
+  it("rechaza un correo que no existe", async () => {
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(null);
+    await expect(AuthService.login("nadie@prueba.local", PASSWORD_PLANA)).rejects.toThrow(CredencialesInvalidasError);
+  });
+
+  it("rechaza contrasena incorrecta con correo valido", async () => {
+    const usuario = await usuarioDePrueba();
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(usuario as never);
+    vi.mocked(UsuarioRepository.findById).mockResolvedValue(usuario as never);
+    await expect(AuthService.login(usuario.correoElectronico, "mala-clave")).rejects.toThrow(CredencialesInvalidasError);
+  });
+
+  it("rechaza una cuenta sin ningun rol asignado", async () => {
+    const usuario = await usuarioDePrueba();
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(usuario as never);
+    vi.mocked(UsuarioRepository.findById).mockResolvedValue(usuario as never);
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValue([]);
+    await expect(AuthService.login(usuario.correoElectronico, PASSWORD_PLANA)).rejects.toThrow(CredencialesInvalidasError);
+    expect(SesionRepository.save).not.toHaveBeenCalled();
+  });
+});
+
 describe("AuthService.solicitarRecuperacion", () => {
   it("no envia correo ni revela nada cuando el correo no esta registrado", async () => {
     vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(null);

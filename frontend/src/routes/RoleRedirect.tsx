@@ -1,15 +1,9 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-
-const ROLE_HOME: Record<string, string> = {
-  Estudiante: "/estudiante",
-  Docente: "/docente",
-  Coordinador: "/coordinador",
-  Administrador: "/administrador",
-};
+import { ROLE_HOME, ROL_PRIORIDAD } from "@/layouts/nav-config";
 
 export function RoleRedirect() {
   const { usuario } = useAuth();
-  const destino = usuario?.roles.map((rol) => ROLE_HOME[rol]).find(Boolean) ?? "/login";
-  return <Navigate to={destino} replace />;
+  const rol = ROL_PRIORIDAD.find((r) => usuario?.roles.includes(r));
+  return <Navigate to={rol ? ROLE_HOME[rol] : "/login"} replace />;
 }

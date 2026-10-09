@@ -1,9 +1,11 @@
 import jwt from "jsonwebtoken";
 
+export type TipoCuenta = "Estudiante" | "Docente" | "Coordinador" | "Administrador";
+
 export interface AppJwtPayload {
   sub: number;
   correo: string;
-  tipoCuenta: "Estudiante" | "Docente";
+  tipoCuenta: TipoCuenta;
   roles: string[];
   jti: string;
 }

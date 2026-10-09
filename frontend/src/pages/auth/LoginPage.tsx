@@ -41,7 +41,7 @@ export function LoginPage() {
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="numeroCuenta">Número de cuenta</Label>
+              <Label htmlFor="numeroCuenta">Número de cuenta o correo</Label>
               <Input
                 id="numeroCuenta"
                 name="numeroCuenta"

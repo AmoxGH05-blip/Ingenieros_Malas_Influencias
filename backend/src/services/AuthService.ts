@@ -6,7 +6,7 @@ import { UsuarioRepository } from "../repositories/UsuarioRepository";
 import { UsuarioRolRepository } from "../repositories/UsuarioRolRepository";
 import { SesionRepository } from "../repositories/SesionRepository";
 import { PasswordResetTokenRepository } from "../repositories/PasswordResetTokenRepository";
-import { signToken, getSessionDurationHours } from "../utils/jwt";
+import { signToken, getSessionDurationHours, type TipoCuenta } from "../utils/jwt";
 import { generarTokenRecuperacion, hashearToken } from "../utils/resetToken";
 import { EmailService } from "./EmailService";
 
@@ -18,22 +18,30 @@ interface LoginResult {
   usuario: {
     id: number;
     correo: string;
-    tipoCuenta: "Estudiante" | "Docente";
+    tipoCuenta: TipoCuenta;
     roles: string[];
   };
 }
 
 const RESET_TOKEN_DURATION_MINUTOS = 30;
 
+const PRIORIDAD_ROLES: TipoCuenta[] = ["Administrador", "Coordinador", "Docente", "Estudiante"];
+
+/** Con "@" se busca por correo (Coordinador/Administrador no tienen matricula); si no, por matricula o numero de empleado. */
 async function resolverUsuarioIdPorNumeroCuenta(
-  numeroCuenta: string
-): Promise<{ usuarioId: number; tipoCuenta: "Estudiante" | "Docente" } | null> {
-  const estudiante = await EstudianteRepository.findByMatricula(numeroCuenta);
+  identificador: string
+): Promise<{ usuarioId: number; tipoCuenta: TipoCuenta | null } | null> {
+  if (identificador.includes("@")) {
+    const usuario = await UsuarioRepository.findOneBy({ correoElectronico: identificador.trim() });
+    return usuario ? { usuarioId: usuario.id, tipoCuenta: null } : null;
+  }
+
+  const estudiante = await EstudianteRepository.findByMatricula(identificador);
   if (estudiante) {
     return { usuarioId: estudiante.usuarioId, tipoCuenta: "Estudiante" };
   }
 
-  const docente = await DocenteRepository.findByNumeroEmpleado(numeroCuenta);
+  const docente = await DocenteRepository.findByNumeroEmpleado(identificador);
   if (docente) {
     return { usuarioId: docente.usuarioId, tipoCuenta: "Docente" };
   }
@@ -59,12 +67,16 @@ export const AuthService = {
     }
 
     const roles = await UsuarioRolRepository.findRoleNamesByUsuarioId(usuario.id);
+    const tipoCuenta = cuenta.tipoCuenta ?? PRIORIDAD_ROLES.find((rol) => roles.includes(rol));
+    if (!tipoCuenta) {
+      throw new CredencialesInvalidasError("Credenciales invalidas");
+    }
     const jti = crypto.randomUUID();
 
     const token = signToken({
       sub: usuario.id,
       correo: usuario.correoElectronico,
-      tipoCuenta: cuenta.tipoCuenta,
+      tipoCuenta,
       roles,
       jti,
     });
@@ -88,7 +100,7 @@ export const AuthService = {
       usuario: {
         id: usuario.id,
         correo: usuario.correoElectronico,
-        tipoCuenta: cuenta.tipoCuenta,
+        tipoCuenta,
         roles,
       },
     };

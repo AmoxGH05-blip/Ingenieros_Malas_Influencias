@@ -74,3 +74,11 @@ FROM "P_EvaluacionDocente_Estudiante" e
 JOIN "P_EvaluacionDocente_Usuario" u ON u."Id" = e."UsuarioId"
 CROSS JOIN "P_EvaluacionDocente_Grupo" g
 WHERE u."CorreoElectronico" = 'demo@dygsis.local';
+
+-- La cuenta demo tambien es Administrador (acceso doble Estudiante + Administrador) para
+-- probar el panel de usuarios (SCRUM-43) sin perder la vista de alumno.
+INSERT INTO "P_EvaluacionDocente_UsuarioRol" ("UsuarioId", "RolId")
+SELECT u."Id", r."Id"
+FROM "P_EvaluacionDocente_Usuario" u, "P_EvaluacionDocente_Rol" r
+WHERE u."CorreoElectronico" = 'demo@dygsis.local' AND r."Nombre" = 'Administrador'
+ON CONFLICT DO NOTHING;
