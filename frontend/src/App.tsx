@@ -40,7 +40,7 @@ function App() {
               <Route path="/docente" element={<DocenteDashboardPage />} />
             </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["Coordinador"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={["Coordinador", "Administrador"]} />}>
               <Route path="/coordinador" element={<CoordinadorDashboardPage />} />
             </Route>
 
