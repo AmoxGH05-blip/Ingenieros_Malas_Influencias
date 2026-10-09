@@ -215,6 +215,31 @@ describe("RecordatorioService.ejecutar", () => {
     });
   });
 
+  it("si liberar la reserva tambien falla, sigue con los demas alumnos", async () => {
+    prepararDatos(enDias(3));
+    vi.mocked(EmailService.enviarRecordatorioEvaluacion).mockImplementation(async (destinatario) => {
+      if (destinatario === "ana@x.mx") throw new Error("SMTP caido");
+    });
+    vi.mocked(EnvioRecordatorioRepository.liberar).mockRejectedValue(new Error("BD caida"));
+
+    const resultado = await RecordatorioService.ejecutar({ ahora: AHORA });
+
+    expect(resultado.periodos[0]).toMatchObject({ enviados: 1, fallidos: [{ correo: "ana@x.mx", error: "SMTP caido" }] });
+  });
+
+  it("si reservar falla por la BD, reporta el error y sigue con los demas alumnos", async () => {
+    prepararDatos(enDias(3));
+    vi.mocked(EnvioRecordatorioRepository.reservar).mockImplementation(async (_periodo, usuarioId) => {
+      if (usuarioId === 101) throw new Error("BD caida");
+      return true;
+    });
+
+    const resultado = await RecordatorioService.ejecutar({ ahora: AHORA });
+
+    expect(vi.mocked(EmailService.enviarRecordatorioEvaluacion).mock.calls.map((c) => c[0])).toEqual(["carla@x.mx"]);
+    expect(resultado.periodos[0]).toMatchObject({ enviados: 1, fallidos: [{ correo: "ana@x.mx", error: "BD caida" }] });
+  });
+
   it("en modo simulacion lista destinatarios sin enviar ni reservar", async () => {
     prepararDatos(enDias(3));
 

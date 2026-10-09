@@ -8,6 +8,7 @@ import { UsuarioRepository } from "../repositories/UsuarioRepository";
 import { EvaluacionRepository } from "../repositories/EvaluacionRepository";
 import { EnvioRecordatorioRepository } from "../repositories/EnvioRecordatorioRepository";
 import { EmailService } from "./EmailService";
+import { In } from "typeorm";
 
 const DIA_MS = 24 * 60 * 60 * 1000;
 /** Avisos a mandar: faltan 7, 3 o 1 dias para el cierre. */
@@ -77,11 +78,13 @@ function mensajeDeError(error: unknown): string {
  * abrir el dashboard, asi que quien nunca entro no tiene fila y igual debe recibir el aviso.
  */
 async function calcularPendientes(periodo: PeriodoActivo): Promise<Pendientes> {
-  const grupos = (await GrupoRepository.find()).filter((g) => g.periodoAcademicoId === periodo.periodoAcademicoId);
+  const grupos = (await GrupoRepository.find({ where: { periodoAcademicoId: periodo.periodoAcademicoId } })).filter(
+    (g) => g.periodoAcademicoId === periodo.periodoAcademicoId
+  );
   const grupoPorId = new Map(grupos.map((g) => [g.id, g]));
 
   const [inscripciones, completadas, materias, docentes] = await Promise.all([
-    InscripcionRepository.find(),
+    InscripcionRepository.find({ where: { grupoId: In(grupos.map((g) => g.id)) } }),
     EvaluacionRepository.find({ where: { periodoEvaluacionId: periodo.id, completada: true } }),
     MateriaRepository.findByIds(grupos.map((g) => g.materiaId)),
     DocenteRepository.findByIds(grupos.map((g) => g.docenteId)),
@@ -113,7 +116,15 @@ async function enviarAviso(
   resultado: ResultadoPeriodo
 ): Promise<void> {
   // Se reserva antes de enviar: la clave unica evita que dos corridas simultaneas manden el mismo correo.
-  const reservado = await EnvioRecordatorioRepository.reservar(periodo.id, usuario.id, umbral);
+  let reservado: boolean;
+  try {
+    reservado = await EnvioRecordatorioRepository.reservar(periodo.id, usuario.id, umbral);
+  } catch (error) {
+    const mensaje = mensajeDeError(error);
+    console.error(`No se pudo reservar el aviso de ${usuario.correoElectronico}: ${mensaje}`);
+    resultado.fallidos.push({ correo: usuario.correoElectronico, error: mensaje });
+    return;
+  }
   if (!reservado) {
     resultado.omitidosYaEnviado += 1;
     return;
@@ -127,8 +138,10 @@ async function enviarAviso(
     });
     resultado.enviados += 1;
   } catch (error) {
-    // Sin reserva, la siguiente corrida lo reintenta.
-    await EnvioRecordatorioRepository.liberar(periodo.id, usuario.id, umbral);
+    // Sin reserva, la siguiente corrida lo reintenta. Si liberar tambien falla, se registra y se sigue.
+    await EnvioRecordatorioRepository.liberar(periodo.id, usuario.id, umbral).catch((errorLiberar: unknown) =>
+      console.error(`No se pudo liberar el aviso de ${usuario.correoElectronico}: ${mensajeDeError(errorLiberar)}`)
+    );
     const mensaje = mensajeDeError(error);
     console.error(`Recordatorio no enviado a ${usuario.correoElectronico}: ${mensaje}`);
     resultado.fallidos.push({ correo: usuario.correoElectronico, error: mensaje });
@@ -151,7 +164,8 @@ async function procesarPeriodo(periodo: PeriodoActivo, dias: number, umbral: num
   const [pendientes, estudiantes, usuarios, yaAvisados] = await Promise.all([
     calcularPendientes(periodo),
     EstudianteRepository.find(),
-    UsuarioRepository.find(),
+    // Sin ContrasenaHash: solo lo necesario para escribir al alumno.
+    UsuarioRepository.find({ select: { id: true, correoElectronico: true, activo: true } }),
     EnvioRecordatorioRepository.find({ where: { periodoEvaluacionId: periodo.id, diasAntes: umbral } }),
   ]);
   const avisados = new Set(yaAvisados.map((envio) => envio.usuarioId));

@@ -37,8 +37,21 @@ jobs:
         run: curl -fsS --max-time 120 --retry 5 --retry-delay 15 --retry-all-errors "$BACKEND_URL/api/health"
 
       - name: Ejecutar recordatorios
+        shell: bash
         run: |
-          curl -fsS --max-time 180 --retry 3 --retry-delay 20 --retry-all-errors \
-            -X POST -H "x-cron-secret: $CRON_SECRET" \
-            "$BACKEND_URL/api/admin/recordatorios/ejecutar?simular=$SIMULAR" | tee resultado.json
-          echo
+          set -euo pipefail
+          # Sin reintentos del POST: si la primera llamada sigue viva en el servidor, repetirla solo crea
+          # corridas concurrentes. Los avisos que fallen se reintentan en la corrida de manana.
+          curl -fsS --max-time 300 -o resultado.json             -X POST -H "x-cron-secret: $CRON_SECRET"             "$BACKEND_URL/api/admin/recordatorios/ejecutar?simular=$SIMULAR"
+          # Solo conteos: el JSON trae correos de alumnos y los logs de Actions pueden ser publicos.
+          jq '{simulacion, periodos: [.periodos[] | {nombre, diasRestantes, umbral, enviados, omitidosYaEnviado, omitidosSinPendientes, porEnviar: (.destinatarios | length), fallidos: (.fallidos | length)}]}' resultado.json
+
+      - name: Fallar si algun correo no salio
+        shell: bash
+        run: |
+          set -euo pipefail
+          fallidos=$(jq '[.periodos[].fallidos | length] | add // 0' resultado.json)
+          if [ "$fallidos" -gt 0 ]; then
+            echo "::error::$fallidos correo(s) no se pudieron enviar. Revisa SMTP_USER/SMTP_PASSWORD en Render y los logs del backend."
+            exit 1
+          fi
