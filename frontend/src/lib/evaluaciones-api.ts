@@ -43,6 +43,19 @@ export interface Progreso {
   pendientes: number;
 }
 
+export interface Perfil {
+  nombreCompleto: string;
+  matricula: string;
+  correo: string;
+  programaEducativo: string;
+  nivelEducativo: string;
+  facultad: string;
+}
+
+export function getPerfil(): Promise<Perfil> {
+  return apiFetch<Perfil>("/estudiante/perfil");
+}
+
 /** Respuestas del alumno: id de pregunta → valor elegido de la escala. */
 export type Respuestas = Record<number, number>;
 

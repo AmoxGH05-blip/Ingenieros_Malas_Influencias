@@ -10,6 +10,9 @@ import { PreguntaRepository } from "../repositories/PreguntaRepository";
 import { OpcionRespuestaRepository } from "../repositories/OpcionRespuestaRepository";
 import { EvaluacionRepository } from "../repositories/EvaluacionRepository";
 import { RespuestaEvaluacionRepository } from "../repositories/RespuestaEvaluacionRepository";
+import { UsuarioRepository } from "../repositories/UsuarioRepository";
+import { ProgramaEducativoRepository } from "../repositories/ProgramaEducativoRepository";
+import { FacultadRepository } from "../repositories/FacultadRepository";
 import type { Docente, Grupo, Materia } from "../entities";
 
 export class EstudianteNoEncontradoError extends Error {}
@@ -30,6 +33,15 @@ export interface InstrumentoDTO {
   nombre: string;
   escala: { texto: string; valor: number }[];
   secciones: { id: number; nombre: string; preguntas: { id: number; texto: string }[] }[];
+}
+
+export interface PerfilDTO {
+  nombreCompleto: string;
+  matricula: string;
+  correo: string;
+  programaEducativo: string;
+  nivelEducativo: string;
+  facultad: string;
 }
 
 function nombreDocente(d: Docente): string {
@@ -104,6 +116,26 @@ async function construirAsignaciones(estudianteId: number): Promise<AsignacionDT
 }
 
 export const EvaluacionService = {
+  async obtenerPerfil(usuarioId: number): Promise<PerfilDTO> {
+    const estudiante = await EstudianteRepository.findByUsuarioId(usuarioId);
+    if (!estudiante) {
+      throw new EstudianteNoEncontradoError("La cuenta no tiene un perfil de estudiante");
+    }
+    const usuario = await UsuarioRepository.findById(usuarioId);
+    const programa = await ProgramaEducativoRepository.findById(estudiante.programaEducativoId);
+    const facultad = programa ? await FacultadRepository.findById(programa.facultadId) : null;
+
+    const apellidos = [estudiante.apellidoPaterno, estudiante.apellidoMaterno].filter(Boolean).join(" ");
+    return {
+      nombreCompleto: `${estudiante.nombre} ${apellidos}`,
+      matricula: estudiante.matricula,
+      correo: usuario?.correoElectronico ?? "",
+      programaEducativo: programa?.nombre ?? "",
+      nivelEducativo: programa?.nivelEducativo ?? "",
+      facultad: facultad?.nombre ?? "",
+    };
+  },
+
   async listarAsignaciones(usuarioId: number): Promise<AsignacionDTO[]> {
     const estudianteId = await resolverEstudianteId(usuarioId);
     return construirAsignaciones(estudianteId);

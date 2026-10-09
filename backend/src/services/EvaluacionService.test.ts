@@ -30,6 +30,15 @@ vi.mock("../repositories/PreguntaRepository", () => ({
 vi.mock("../repositories/OpcionRespuestaRepository", () => ({
   OpcionRespuestaRepository: { findByPreguntaIds: vi.fn() },
 }));
+vi.mock("../repositories/UsuarioRepository", () => ({
+  UsuarioRepository: { findById: vi.fn() },
+}));
+vi.mock("../repositories/ProgramaEducativoRepository", () => ({
+  ProgramaEducativoRepository: { findById: vi.fn() },
+}));
+vi.mock("../repositories/FacultadRepository", () => ({
+  FacultadRepository: { findById: vi.fn() },
+}));
 vi.mock("../repositories/EvaluacionRepository", () => ({
   EvaluacionRepository: {
     findByEstudianteAndPeriodo: vi.fn(),
@@ -62,6 +71,9 @@ import { InstrumentoEvaluacionRepository } from "../repositories/InstrumentoEval
 import { SeccionInstrumentoRepository } from "../repositories/SeccionInstrumentoRepository";
 import { PreguntaRepository } from "../repositories/PreguntaRepository";
 import { OpcionRespuestaRepository } from "../repositories/OpcionRespuestaRepository";
+import { UsuarioRepository } from "../repositories/UsuarioRepository";
+import { ProgramaEducativoRepository } from "../repositories/ProgramaEducativoRepository";
+import { FacultadRepository } from "../repositories/FacultadRepository";
 import { EvaluacionRepository } from "../repositories/EvaluacionRepository";
 import { RespuestaEvaluacionRepository } from "../repositories/RespuestaEvaluacionRepository";
 
@@ -123,6 +135,36 @@ describe("EvaluacionService.listarAsignaciones", () => {
     expect(resultado[0]).toEqual(
       expect.objectContaining({ id: 55, completada: true, fechaEvaluacion: "2026-09-15" })
     );
+  });
+});
+
+describe("EvaluacionService.obtenerPerfil", () => {
+  it("rechaza cuando la cuenta no tiene perfil de estudiante", async () => {
+    vi.mocked(EstudianteRepository.findByUsuarioId).mockResolvedValue(null);
+    await expect(EvaluacionService.obtenerPerfil(1)).rejects.toThrow(EstudianteNoEncontradoError);
+  });
+
+  it("arma el perfil con programa educativo y facultad", async () => {
+    vi.mocked(EstudianteRepository.findByUsuarioId).mockResolvedValue({
+      id: 10, usuarioId: 1, programaEducativoId: 3, matricula: "DEMO0001",
+      nombre: "Estudiante", apellidoPaterno: "Demo", apellidoMaterno: null,
+    } as never);
+    vi.mocked(UsuarioRepository.findById).mockResolvedValue({ correoElectronico: "demo@dygsis.local" } as never);
+    vi.mocked(ProgramaEducativoRepository.findById).mockResolvedValue({
+      nombre: "Ingenieria en Sistemas", nivelEducativo: "Licenciatura", facultadId: 2,
+    } as never);
+    vi.mocked(FacultadRepository.findById).mockResolvedValue({ nombre: "Facultad de Ingenieria" } as never);
+
+    const perfil = await EvaluacionService.obtenerPerfil(1);
+
+    expect(perfil).toEqual({
+      nombreCompleto: "Estudiante Demo",
+      matricula: "DEMO0001",
+      correo: "demo@dygsis.local",
+      programaEducativo: "Ingenieria en Sistemas",
+      nivelEducativo: "Licenciatura",
+      facultad: "Facultad de Ingenieria",
+    });
   });
 });
 

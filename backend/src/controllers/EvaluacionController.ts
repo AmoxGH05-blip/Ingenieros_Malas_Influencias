@@ -32,6 +32,17 @@ export const EvaluacionController = {
     return res.json(asignacion);
   },
 
+  async perfil(req: Request, res: Response) {
+    try {
+      return res.json(await EvaluacionService.obtenerPerfil(req.usuarioId!));
+    } catch (error) {
+      if (error instanceof EstudianteNoEncontradoError) {
+        return res.status(403).json({ error: "Esta cuenta no tiene un perfil de estudiante" });
+      }
+      throw error;
+    }
+  },
+
   async progreso(req: Request, res: Response) {
     const resumen = await EvaluacionService.progreso(req.usuarioId!);
     return res.json(resumen);

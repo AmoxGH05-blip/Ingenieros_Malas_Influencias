@@ -26,8 +26,8 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
     {
       label: "Consulta",
       items: [
-        { label: "Historial", to: "/estudiante/historial", icon: History, soon: true },
-        { label: "Perfil", to: "/estudiante/perfil", icon: User, soon: true },
+        { label: "Historial", to: "/estudiante/historial", icon: History },
+        { label: "Perfil", to: "/estudiante/perfil", icon: User },
       ],
     },
   ],
@@ -43,6 +43,8 @@ const CRUMB_LABELS: Record<string, string> = {
   administrador: "Administrador",
   evaluaciones: "Evaluaciones",
   evaluar: "Cuestionario",
+  historial: "Historial",
+  perfil: "Perfil",
 };
 
 /** Migas de pan a partir de la ruta; los segmentos numéricos (ids) se omiten. La última es el título de la página. */

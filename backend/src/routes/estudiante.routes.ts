@@ -11,4 +11,5 @@ estudianteRouter.get("/asignaciones", asyncHandler(EvaluacionController.listarAs
 estudianteRouter.get("/asignaciones/:id", asyncHandler(EvaluacionController.obtenerAsignacion));
 estudianteRouter.post("/asignaciones/:id/respuestas", asyncHandler(EvaluacionController.registrarRespuesta));
 estudianteRouter.get("/progreso", asyncHandler(EvaluacionController.progreso));
+estudianteRouter.get("/perfil", asyncHandler(EvaluacionController.perfil));
 estudianteRouter.get("/instrumento", asyncHandler(EvaluacionController.obtenerInstrumento));

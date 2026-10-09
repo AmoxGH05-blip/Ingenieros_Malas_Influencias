@@ -11,6 +11,8 @@ import { DocenteDashboardPage } from "@/pages/dashboards/DocenteDashboardPage";
 import { CoordinadorDashboardPage } from "@/pages/dashboards/CoordinadorDashboardPage";
 import { EvaluacionesPage } from "@/pages/estudiante/EvaluacionesPage";
 import { CuestionarioPage } from "@/pages/estudiante/CuestionarioPage";
+import { HistorialPage } from "@/pages/estudiante/HistorialPage";
+import { PerfilPage } from "@/pages/estudiante/PerfilPage";
 import { AdministradorDashboardPage } from "@/pages/dashboards/AdministradorDashboardPage";
 
 function App() {
@@ -29,6 +31,8 @@ function App() {
               <Route path="/estudiante" element={<EstudianteDashboardPage />} />
               <Route path="/estudiante/evaluaciones" element={<EvaluacionesPage />} />
               <Route path="/estudiante/evaluar/:asignacionId" element={<CuestionarioPage />} />
+              <Route path="/estudiante/historial" element={<HistorialPage />} />
+              <Route path="/estudiante/perfil" element={<PerfilPage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["Docente"]} />}>
