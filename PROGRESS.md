@@ -193,7 +193,10 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
 
 ## SPRINT 3 — Coordinación académica y notificaciones (28 sep – 9 oct)
 
-- [ ] **SCRUM-39** — API de coordinación: concluidos / parciales / no iniciados + filtros (carrera, grupo, ciclo) (Responsable: Juan Antonio)
+- [x] **SCRUM-39** — API de coordinación: concluidos / parciales / no iniciados + filtros (carrera, grupo, ciclo) (Responsable: Juan Antonio)
+  - **Qué se hizo (09-oct-2026), con plan aprobado:** `GET /api/coordinacion/filtros` (ciclos, carreras, grupos para los selectores) y `GET /api/coordinacion/avance?periodoId=&programaEducativoId=&grupoId=` → resumen (alumnos, concluidos, parciales, no iniciados, % de participación) + desglose por grupo. Solo Coordinador/Administrador (`403` para otros, `401` sin token, `400` con filtros no numéricos). Sin periodo indicado usa el activo.
+  - **Cómo se hizo:** el cálculo parte de `Inscripcion` (quién *debe* evaluar) y cruza con `Evaluacion`, no al revés, porque las filas de `Evaluacion` se crean cuando el alumno abre su dashboard — quien nunca entró habría quedado fuera de "no iniciados". Concluido = todas sus evaluaciones completas; parcial = al menos una completa y una pendiente; no iniciado = ninguna. En el desglose por grupo cada alumno se clasifica por su avance dentro del alcance filtrado. `CoordinacionService` + controlador + rutas; 8 pruebas con mocks (52/52 en backend).
+  - **Datos demo:** `database/seed_demo_coordinacion.sql` crea DEMO0002 (5/5), DEMO0003 (2/5), DEMO0004 (1/5) y DEMO0005 (0/5, sin filas de Evaluación) con contraseña `Demo2026!`; `database/cleanup_demo_coordinacion.sql` los borra. **Verificado** contra Supabase con el coordinador real: 1 concluido, 3 parciales, 1 no iniciado, 80% de participación; filtros por grupo/carrera correctos.
 - [ ] **SCRUM-40** — Servicio de correos automáticos (7 / 3 / 1 días antes del cierre) (Responsable: Juan Antonio)
 - [ ] **SCRUM-41** — Vistas/consultas agregadas de participación por grupo, carrera y ciclo (Responsable: Amoxhua Ochoa)
 - [ ] **SCRUM-42** — Dashboard de coordinación en tiempo real (Responsable: Nieto Guerra Emiliano)
