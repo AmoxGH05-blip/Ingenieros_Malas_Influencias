@@ -4,6 +4,7 @@ import { authRouter } from "./auth.routes";
 import { estudianteRouter } from "./estudiante.routes";
 import { adminRouter } from "./admin.routes";
 import { coordinacionRouter } from "./coordinacion.routes";
+import { recordatoriosRouter } from "./recordatorios.routes";
 
 export const apiRouter = Router();
 
@@ -14,5 +15,7 @@ apiRouter.get("/health", (_req, res) => {
 apiRouter.use("/roles", rolesRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/estudiante", estudianteRouter);
+// Antes de /admin: este router acepta tambien el secreto del cron, que adminRouter rechazaria.
+apiRouter.use("/admin/recordatorios", recordatoriosRouter);
 apiRouter.use("/admin", adminRouter);
 apiRouter.use("/coordinacion", coordinacionRouter);

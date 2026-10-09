@@ -1,0 +1,44 @@
+name: Recordatorios de evaluacion (SCRUM-40)
+
+# Todos los dias a las 15:00 UTC (09:00 hora de Ciudad de Mexico) llama al backend para que mande
+# los avisos de 7 / 3 / 1 dias antes del cierre. Al tocar la API y la base de datos cada dia, tambien
+# despierta a Render y evita que Supabase (plan gratuito) se pause por inactividad.
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+    inputs:
+      simular:
+        description: "Solo simular: lista a quien le tocaria, sin enviar correos"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  recordatorios:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BACKEND_URL: ${{ vars.BACKEND_URL || 'https://dygsis-backend.onrender.com' }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      # En ejecucion programada no existe el input: se envia de verdad. A mano, el valor por defecto simula.
+      SIMULAR: ${{ github.event_name == 'workflow_dispatch' && inputs.simular || 'false' }}
+    steps:
+      - name: Comprobar configuracion
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::Falta el secret CRON_SECRET en Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+
+      - name: Despertar el backend (Render gratuito se duerme)
+        run: curl -fsS --max-time 120 --retry 5 --retry-delay 15 --retry-all-errors "$BACKEND_URL/api/health"
+
+      - name: Ejecutar recordatorios
+        run: |
+          curl -fsS --max-time 180 --retry 3 --retry-delay 20 --retry-all-errors \
+            -X POST -H "x-cron-secret: $CRON_SECRET" \
+            "$BACKEND_URL/api/admin/recordatorios/ejecutar?simular=$SIMULAR" | tee resultado.json
+          echo

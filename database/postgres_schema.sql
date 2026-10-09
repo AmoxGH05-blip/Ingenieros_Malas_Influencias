@@ -550,3 +550,23 @@ LEFT JOIN "P_EvaluacionDocente_Evaluacion" ev
       AND ev."PeriodoEvaluacionId" = pev."Id"
       AND ev."Completada" = true
 GROUP BY pev."Id", pev."Nombre";
+
+-- ---------------------------------------------------------------------
+-- 12. Recordatorios enviados (migracion 005, SCRUM-40)
+-- ---------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS "P_EvaluacionDocente_EnvioRecordatorio" (
+    "Id"                    INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
+    "PeriodoEvaluacionId"   INTEGER         NOT NULL,
+    "UsuarioId"             INTEGER         NOT NULL,
+    "DiasAntes"             SMALLINT        NOT NULL,
+    "FechaEnvio"            TIMESTAMPTZ     NOT NULL DEFAULT now(),
+    CONSTRAINT "pk_P_EvaluacionDocente_EnvioRecordatorio" PRIMARY KEY ("Id"),
+    CONSTRAINT "fk_P_EvaluacionDocente_EnvioRecordatorio_PeriodoEvaluacion" FOREIGN KEY ("PeriodoEvaluacionId")
+        REFERENCES "P_EvaluacionDocente_PeriodoEvaluacion" ("Id"),
+    CONSTRAINT "fk_P_EvaluacionDocente_EnvioRecordatorio_Usuario" FOREIGN KEY ("UsuarioId")
+        REFERENCES "P_EvaluacionDocente_Usuario" ("Id"),
+    CONSTRAINT "uq_P_EvaluacionDocente_EnvioRecordatorio_Periodo_Usuario_Dias" UNIQUE ("PeriodoEvaluacionId", "UsuarioId", "DiasAntes"),
+    CONSTRAINT "ck_P_EvaluacionDocente_EnvioRecordatorio_DiasAntes" CHECK ("DiasAntes" IN (1, 3, 7))
+);
+CREATE INDEX IF NOT EXISTS "ix_P_EvaluacionDocente_EnvioRecordatorio_UsuarioId" ON "P_EvaluacionDocente_EnvioRecordatorio" ("UsuarioId");
