@@ -24,12 +24,13 @@ services:
         sync: false
       - key: SESSION_DURATION_HOURS
         value: "8"
+      # Brevo por el puerto 2525: Render gratuito bloquea los puertos SMTP 25, 465 y 587 (Gmail no sirve).
       - key: SMTP_HOST
-        value: smtp.gmail.com
+        value: smtp-relay.brevo.com
       - key: SMTP_PORT
-        value: "465"
+        value: "2525"
       - key: SMTP_SECURE
-        value: "true"
+        value: "false"
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASSWORD

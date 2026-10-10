@@ -10,6 +10,10 @@ function getTransporter(): MailTransporter {
       host: process.env.SMTP_HOST ?? "smtp.gmail.com",
       port: Number(process.env.SMTP_PORT ?? 465),
       secure: (process.env.SMTP_SECURE ?? "true") === "true",
+      // Si el puerto esta bloqueado (Render gratuito bloquea 25/465/587), fallar rapido y no colgar la peticion.
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
