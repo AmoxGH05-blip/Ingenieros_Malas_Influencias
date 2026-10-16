@@ -18,4 +18,3 @@ export { OpcionRespuesta } from "./OpcionRespuesta";
 export { PeriodoEvaluacion } from "./PeriodoEvaluacion";
 export { Evaluacion } from "./Evaluacion";
 export { RespuestaEvaluacion } from "./RespuestaEvaluacion";
-export { EnvioRecordatorio } from "./EnvioRecordatorio";

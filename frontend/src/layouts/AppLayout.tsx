@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { ArrowLeftRight } from "lucide-react";
+import { NotificacionesVentana } from "@/components/NotificacionesVentana";
 import { useAuth } from "@/context/AuthContext";
+import { NotificacionesProvider } from "@/context/NotificacionesContext";
 import { Sidebar } from "@/layouts/Sidebar";
 import { Topbar } from "@/layouts/Topbar";
 import { NAV_BY_ROLE, ROLE_HOME, ROL_PRIORIDAD, rolActivo, type NavGroup } from "@/layouts/nav-config";
@@ -60,7 +62,7 @@ function Shell({ rol }: { rol: string }) {
         onLogout={logout}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onOpenMobileMenu={() => setMobileOpen(true)} hasNotifications={pendientes > 0} />
+        <Topbar onOpenMobileMenu={() => setMobileOpen(true)} />
         <main className="flex-1 p-4 sm:p-6">
           <Outlet />
         </main>
@@ -75,7 +77,10 @@ export function AppLayout() {
   const rol = rolActivo(usuario?.roles ?? [], pathname);
   return (
     <EvaluacionesProvider enabled={rol === "Estudiante"}>
-      <Shell rol={rol} />
+      <NotificacionesProvider>
+        <Shell rol={rol} />
+        <NotificacionesVentana />
+      </NotificacionesProvider>
     </EvaluacionesProvider>
   );
 }

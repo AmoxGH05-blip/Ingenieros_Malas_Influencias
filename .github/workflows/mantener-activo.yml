@@ -1,0 +1,29 @@
+name: Mantener activo (Supabase)
+
+# Todos los dias consulta el backend y, a traves de el, la base de datos. Supabase (plan gratuito) pausa
+# el proyecto tras 7 dias sin actividad; este ping lo evita. Render gratuito si se duerme a los 15 minutos
+# sin trafico (el primer acceso del dia tarda ~1 min en despertar), un ping diario no cambia eso.
+# No usa secretos: /api/health/db es publico y solo ejecuta SELECT 1.
+# Ojo: GitHub desactiva los workflows programados de un repo publico tras 60 dias sin actividad en el repo.
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BACKEND_URL: ${{ vars.BACKEND_URL || 'https://dygsis-backend.onrender.com' }}
+    steps:
+      - name: Consultar backend y base de datos
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Render puede tardar ~1 min en despertar: reintentos con espera. Es un GET, repetirlo es inocuo.
+          curl -fsS --max-time 60 --retry 5 --retry-delay 20 --retry-all-errors "$BACKEND_URL/api/health/db"
+          echo

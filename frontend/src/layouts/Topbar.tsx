@@ -1,27 +1,30 @@
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, CircleHelp, LogOut, Menu, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useNotificaciones } from "@/context/NotificacionesContext";
+import { ESTILO_SEVERIDAD } from "@/components/NotificacionesVentana";
 import { breadcrumbsFor } from "@/layouts/nav-config";
 
 interface TopbarProps {
   onOpenMobileMenu: () => void;
-  /** Hay evaluaciones pendientes: enciende el punto rojo de la campana. */
-  hasNotifications: boolean;
 }
 
 const ICON_BUTTON = "flex size-10 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-secondary";
 
 /** Barra superior: título de la página, búsqueda, ayuda, notificaciones y menú del perfil. */
-export function Topbar({ onOpenMobileMenu, hasNotifications }: TopbarProps) {
+export function Topbar({ onOpenMobileMenu }: TopbarProps) {
   const { usuario, logout } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [avisosOpen, setAvisosOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const avisosRef = useRef<HTMLDivElement>(null);
+  const { notificaciones, error: errorAvisos } = useNotificaciones();
 
   const crumbs = breadcrumbsFor(pathname);
   const titulo = crumbs[crumbs.length - 1];
@@ -42,6 +45,21 @@ export function Topbar({ onOpenMobileMenu, hasNotifications }: TopbarProps) {
       document.removeEventListener("keydown", onKey);
     };
   }, [menuOpen]);
+
+  // Igual que el menú del perfil: se cierra al hacer clic fuera o con Escape.
+  useEffect(() => {
+    if (!avisosOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (!avisosRef.current?.contains(e.target as Node)) setAvisosOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setAvisosOpen(false);
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [avisosOpen]);
 
   // La búsqueda rápida filtra el listado de docentes (solo existe para el rol Estudiante por ahora).
   function handleSearch(event: React.FormEvent) {
@@ -86,10 +104,42 @@ export function Topbar({ onOpenMobileMenu, hasNotifications }: TopbarProps) {
         <button type="button" aria-label="Ayuda" title="Ayuda (próximamente)" className={`${ICON_BUTTON} hidden sm:flex`}>
           <CircleHelp className="size-5" />
         </button>
-        <button type="button" aria-label="Notificaciones" title="Notificaciones (próximamente)" className={`${ICON_BUTTON} relative`}>
-          <Bell className="size-5" />
-          {hasNotifications && <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-destructive ring-2 ring-card" aria-hidden />}
-        </button>
+        <div ref={avisosRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setAvisosOpen((open) => !open)}
+            aria-label={notificaciones.length ? `Notificaciones (${notificaciones.length})` : "Notificaciones"}
+            aria-haspopup="true"
+            aria-expanded={avisosOpen}
+            className={`${ICON_BUTTON} relative`}
+          >
+            <Bell className="size-5" />
+            {notificaciones.length > 0 && <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-destructive ring-2 ring-card" aria-hidden />}
+          </button>
+          {avisosOpen && (
+            <div aria-label="Avisos" className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-2 shadow-lg">
+              {errorAvisos && <p role="alert" className="px-3 py-2 text-sm text-destructive">No se pudieron cargar los avisos.</p>}
+              {!errorAvisos && notificaciones.length === 0 && <p className="px-3 py-2 text-sm text-muted-foreground">No tienes avisos nuevos.</p>}
+              {notificaciones.map((aviso) => {
+                const { icono: Icono, color } = ESTILO_SEVERIDAD[aviso.severidad];
+                return (
+                  <Link
+                    key={aviso.id}
+                    to={aviso.enlace}
+                    onClick={() => setAvisosOpen(false)}
+                    className="flex gap-3 rounded-lg px-3 py-2 hover:bg-secondary"
+                  >
+                    <Icono className={`mt-0.5 size-5 shrink-0 ${color}`} aria-hidden />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold leading-snug">{aviso.titulo}</span>
+                      <span className="block text-xs text-muted-foreground">{aviso.mensaje}</span>
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <div ref={menuRef} className="relative ml-1">
           <button

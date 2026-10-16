@@ -4,6 +4,7 @@ import { ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useNotificaciones } from "@/context/NotificacionesContext";
 import { useAsignaciones } from "@/pages/estudiante/useAsignaciones";
 import {
   enviarEvaluacion,
@@ -20,6 +21,7 @@ export function CuestionarioPage() {
   const navigate = useNavigate();
   const id = Number(asignacionId);
   const { refresh } = useAsignaciones();
+  const { refresh: refrescarAvisos } = useNotificaciones();
 
   const [asignacion, setAsignacion] = useState<Asignacion | null | undefined>(undefined); // undefined = cargando
   const [instrumento, setInstrumento] = useState<Instrumento | null>(null);
@@ -65,7 +67,8 @@ export function CuestionarioPage() {
     setEnviando(true);
     try {
       await enviarEvaluacion(asignacion.id, respuestas);
-      await refresh();
+      // Tras enviar, el aviso de pendientes y el contador del menu deben bajar juntos.
+      await Promise.all([refresh(), refrescarAvisos()]);
       navigate("/estudiante", { replace: true, state: { evaluado: asignacion.docente } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo enviar la evaluación.");
