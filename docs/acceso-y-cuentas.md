@@ -49,7 +49,7 @@ Los números de cuenta son predecibles y las contraseñas temporales las elige u
 
 Se cuenta por la IP real del cliente: en Render hay un Cloudflare delante, así que se lee `CF-Connecting-IP` (Cloudflare la reescribe en cada petición y el cliente no puede falsearla); sin ese encabezado, como en local, se usa la IP de la conexión. Los inicios de sesión correctos no cuentan. Los contadores viven en memoria y Render gratuito reinicia el servicio al dormirlo, así que el límite se reinicia con él; frena la fuerza bruta continua, no es un bloqueo permanente.
 
-## Alta de usuarios (panel del Administrador)
+## Alta de usuarios (resumen; el detalle de la jerarquía está en `docs/altas-y-grupos.md`)
 
 En **Usuarios → Nuevo usuario**:
 
@@ -59,7 +59,7 @@ En **Usuarios → Nuevo usuario**:
 | Docente | Número de empleado (= número de cuenta), nombre, apellidos, facultad, correo, contraseña temporal. |
 | Coordinador / Administrador | Número de cuenta, correo, contraseña temporal. |
 
-Toda cuenta creada así nace con cambio obligatorio. Las altas jerárquicas (el Administrador crea coordinadores, el Coordinador crea alumnos, docentes y grupos) llegan con SCRUM-79.
+Toda cuenta creada así nace con cambio obligatorio. Con SCRUM-79 el alta pasó a la pantalla de dos pasos (buscar el número de cuenta; nueva o existente) y a la jerarquía: el Administrador crea coordinadores y el Coordinador crea alumnos, docentes y grupos. La tabla de campos de abajo describe los datos que pide cada rol.
 
 ## Cuentas demo
 
