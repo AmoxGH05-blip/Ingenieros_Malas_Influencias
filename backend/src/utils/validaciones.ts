@@ -39,7 +39,8 @@ function aEntero(valor: unknown): number | null {
 export function entero(valor: unknown, campo: string): number {
   const numero = aEntero(valor);
   if (numero === null || numero <= 0 || numero > ENTERO_MAXIMO) {
-    throw new DatosInvalidosError(`${campo} es requerido`);
+    const falta = valor === undefined || valor === null || valor === "";
+    throw new DatosInvalidosError(falta ? `${campo} es requerido` : `${campo} no es valido`);
   }
   return numero;
 }

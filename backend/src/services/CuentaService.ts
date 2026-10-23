@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
-import type { EntityManager } from "typeorm";
+import { In, type EntityManager } from "typeorm";
 import { AppDataSource } from "../config/data-source";
-import { Docente, Estudiante, Usuario, UsuarioRol } from "../entities";
+import { Docente, Estudiante, Rol, Usuario, UsuarioRol } from "../entities";
 import { UsuarioRepository } from "../repositories/UsuarioRepository";
 import { UsuarioRolRepository } from "../repositories/UsuarioRolRepository";
 import { RolRepository } from "../repositories/RolRepository";
@@ -151,6 +151,14 @@ function guardarPerfil(manager: EntityManager, rol: RolAsignable, usuarioId: num
   return manager.save(Docente, manager.create(Docente, { ...comunes, facultadId: datos.facultadId!, numeroEmpleado: numeroCuenta }));
 }
 
+/** Roles de una cuenta leidos con la conexion de la transaccion en curso (otra consulta del pool podria agotarlo). */
+async function rolesEnTransaccion(manager: EntityManager, usuarioId: number): Promise<string[]> {
+  const asignaciones = await manager.findBy(UsuarioRol, { usuarioId });
+  if (asignaciones.length === 0) return [];
+  const roles = await manager.findBy(Rol, { id: In(asignaciones.map((a) => a.rolId)) });
+  return roles.map((r) => r.nombre);
+}
+
 /** Dos altas simultaneas con el mismo numero de cuenta o correo: gana una y la otra recibe un 409, no un 500. */
 function comoDuplicado(error: unknown): never {
   if (esViolacionDeUnicidad(error)) {
@@ -232,7 +240,7 @@ async function agregarRol(actor: Actor, existente: Usuario, rolNombre: RolAsigna
     // Se bloquea la cuenta y se vuelven a comprobar sus roles con datos frescos: otro Administrador pudo
     // cambiarlos hace un instante, y el Coordinador no debe terminar tocando una cuenta que ya no puede gestionar.
     await manager.findOne(Usuario, { where: { id: existente.id }, lock: { mode: "pessimistic_write" } });
-    const rolesFrescos = await UsuarioRolRepository.findRoleNamesByUsuarioId(existente.id);
+    const rolesFrescos = await rolesEnTransaccion(manager, existente.id);
     if (!puedeGestionar(actor.roles, rolesFrescos)) throw new PermisoDenegadoError("Esa cuenta no la puedes gestionar");
     if (rolesFrescos.includes(rolNombre)) throw new ConflictoError(`La cuenta ya tiene el rol ${rolNombre}`);
 

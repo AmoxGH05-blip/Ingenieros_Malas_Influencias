@@ -1,4 +1,4 @@
-import type { EntityManager } from "typeorm";
+import { In, type EntityManager } from "typeorm";
 import { AppDataSource } from "../config/data-source";
 import { Grupo, Inscripcion } from "../entities";
 import { GrupoRepository } from "../repositories/GrupoRepository";
@@ -118,8 +118,9 @@ export const GrupoService = {
     exigirGestor(actor);
     const filtro = periodoAcademicoId === undefined || periodoAcademicoId === "" ? null : entero(periodoAcademicoId, "periodoAcademicoId");
 
-    const [todos, inscripciones] = await Promise.all([GrupoRepository.find(), InscripcionRepository.find()]);
-    const grupos = todos.filter((g) => filtro === null || g.periodoAcademicoId === filtro);
+    // El filtro de periodo se aplica en la consulta y solo se cuentan las inscripciones de esos grupos.
+    const grupos = await GrupoRepository.find({ where: filtro === null ? {} : { periodoAcademicoId: filtro } });
+    const inscripciones = grupos.length === 0 ? [] : await InscripcionRepository.find({ where: { grupoId: In(grupos.map((g) => g.id)) } });
     const dtos = await armarDTOs(grupos, inscripciones);
     return dtos.sort((a, b) => a.materia.localeCompare(b.materia, "es") || a.seccion.localeCompare(b.seccion, "es"));
   },
@@ -191,7 +192,9 @@ export const GrupoService = {
    * altas simultaneas no se pasen del cupo (cupo 0 = sin limite).
    */
   async inscribirEnTransaccion(manager: EntityManager, estudianteId: number, grupoIds: number[]): Promise<void> {
-    for (const grupoId of grupoIds) {
+    // Siempre en el mismo orden (de menor a mayor): dos altas simultaneas con los mismos grupos en distinto orden
+    // se bloquearian mutuamente (deadlock) si cada una los tomara en el orden que le llego.
+    for (const grupoId of [...new Set(grupoIds)].sort((a, b) => a - b)) {
       const grupo = await manager.findOne(Grupo, { where: { id: grupoId }, lock: { mode: "pessimistic_write" } });
       if (!grupo) throw new DatosInvalidosError("Alguno de los grupos no existe");
       if ((await manager.countBy(Inscripcion, { estudianteId, grupoId })) > 0) {

@@ -215,6 +215,12 @@ describe("AuthService.solicitarRecuperacion", () => {
     expect(PasswordResetTokenRepository.save).not.toHaveBeenCalled();
   });
 
+  it("busca el correo sin importar mayusculas ni espacios, porque los correos se guardan en minusculas", async () => {
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(null);
+    await AuthService.solicitarRecuperacion("  Ana@Prueba.LOCAL ", "http://localhost:5173");
+    expect(UsuarioRepository.findOneBy).toHaveBeenCalledWith({ correoElectronico: "ana@prueba.local" });
+  });
+
   it("genera un token de un solo uso y envia el correo cuando el usuario existe", async () => {
     const usuario = await usuarioDePrueba();
     vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(usuario as never);

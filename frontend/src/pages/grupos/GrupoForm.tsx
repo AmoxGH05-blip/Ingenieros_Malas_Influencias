@@ -138,7 +138,16 @@ export function GrupoForm({ catalogos, onCatalogosCambiaron, onCreado, onCancela
       </div>
 
       {materiaNueva && (
-        <fieldset className="space-y-4 rounded-lg border border-border bg-secondary/40 p-4">
+        <fieldset
+          className="space-y-4 rounded-lg border border-border bg-secondary/40 p-4"
+          // Enter dentro de estos campos guarda la materia; sin esto enviaria el formulario del grupo.
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") {
+              e.preventDefault();
+              void handleGuardarMateria();
+            }
+          }}
+        >
           <legend className="px-1 text-sm font-semibold">Nueva materia</legend>
           <div className="grid gap-4 sm:grid-cols-2">
             <Campo id="materiaPrograma" label="Programa educativo">

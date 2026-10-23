@@ -123,7 +123,8 @@ export const AuthService = {
   },
 
   async solicitarRecuperacion(correo: string, urlBaseFrontend: string): Promise<void> {
-    const usuario = await UsuarioRepository.findOneBy({ correoElectronico: correo });
+    // Los correos se guardan en minusculas (SCRUM-79): quien escribe "Ana@X.com" debe encontrarse igual.
+    const usuario = await UsuarioRepository.findOneBy({ correoElectronico: correo.trim().toLowerCase() });
     if (!usuario || !usuario.activo) {
       // Respuesta silenciosa: no se revela si el correo existe o no.
       return;

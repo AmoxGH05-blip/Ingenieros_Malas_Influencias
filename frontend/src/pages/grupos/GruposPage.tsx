@@ -17,6 +17,7 @@ export function GruposPage() {
   const [catalogos, setCatalogos] = useState<Catalogos | null>(null);
   const [periodoId, setPeriodoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorCatalogos, setErrorCatalogos] = useState<string | null>(null);
   const [formAbierto, setFormAbierto] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
 
@@ -36,7 +37,7 @@ export function GruposPage() {
   }, []);
 
   useEffect(() => {
-    void cargarCatalogos().catch(() => setError("No se pudieron cargar los catálogos."));
+    void cargarCatalogos().catch(() => setErrorCatalogos("No se pudieron cargar los catálogos."));
     void cargarGrupos();
   }, [cargarCatalogos, cargarGrupos]);
 
@@ -84,9 +85,9 @@ export function GruposPage() {
         </Card>
       )}
 
-      {error && (
+      {(error ?? errorCatalogos) && (
         <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
+          {error ?? errorCatalogos}
         </p>
       )}
 

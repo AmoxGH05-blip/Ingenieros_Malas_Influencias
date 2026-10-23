@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 const manager = {
   findOne: vi.fn(),
+  findBy: vi.fn(),
   create: vi.fn((_entidad: unknown, datos: object) => ({ ...datos })),
   save: vi.fn((_entidad: unknown, datos: object) => Promise.resolve({ id: 500, ...datos })),
 };
@@ -60,6 +61,7 @@ const ALUMNO = {
   programaEducativoId: 3,
 };
 
+let rolesFrescos: string[] | null = null;
 const guardados = () => manager.save.mock.calls.map((c) => (c[0] as { name: string }).name);
 
 beforeEach(() => {
@@ -73,6 +75,13 @@ beforeEach(() => {
   vi.mocked(DocenteRepository.findByUsuarioId).mockResolvedValue(null);
   vi.mocked(GrupoService.validarGrupoIds).mockImplementation((async (ids: unknown) => (Array.isArray(ids) ? ids : [])) as never);
   vi.mocked(GrupoService.inscribirEnTransaccion).mockResolvedValue(undefined);
+  // Los roles "frescos" que se leen con la conexion de la transaccion: por defecto, los mismos que ya se habian leido.
+  rolesFrescos = null;
+  manager.findBy.mockImplementation(async (entidad: { name: string }, where: { usuarioId?: number; id?: unknown }) => {
+    const nombres = rolesFrescos ?? (await UsuarioRolRepository.findRoleNamesByUsuarioId(where.usuarioId ?? 0));
+    if (entidad.name === "UsuarioRol") return nombres.map((_n, i) => ({ usuarioId: where.usuarioId, rolId: i + 1 }));
+    return nombres.map((nombre, i) => ({ id: i + 1, nombre }));
+  });
 });
 
 describe("CuentaService.rolesAsignables", () => {
@@ -219,6 +228,14 @@ describe("CuentaService.crear: cuenta existente (agregar un rol)", () => {
     const resultado = await CuentaService.crear(ADMIN, { rol: "Docente", numeroCuenta: "A2026001" });
     expect(resultado.roles).toEqual(["Coordinador", "Docente"]);
     expect(guardados()).toEqual(["UsuarioRol"]);
+  });
+
+  it("los roles de la comprobacion final se leen con la conexion de la transaccion, no con otra del pool", async () => {
+    rolesFrescos = ["Estudiante"]; // lo que devuelve la lectura de la transaccion, sin pasar por el repositorio
+    await CuentaService.crear(COORD, docente);
+    expect(manager.findBy).toHaveBeenCalled();
+    // Una sola lectura fuera de la transaccion (la previa), ninguna mas por el repositorio dentro de ella.
+    expect(UsuarioRolRepository.findRoleNamesByUsuarioId).toHaveBeenCalledTimes(1);
   });
 
   it("rechaza agregar un rol que la cuenta ya tiene", async () => {
@@ -376,7 +393,8 @@ describe("CuentaService: reglas de seguridad adicionales", () => {
   it("carrera critica: si mientras tanto un Administrador le dio otro rol a la cuenta, el Coordinador ya no puede tocarla", async () => {
     vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue({ id: 77, numeroCuenta: "A2026001", correoElectronico: "v@x.mx", activo: true } as never);
     // La primera lectura (antes de abrir la transaccion) dice alumno; la segunda, ya con la cuenta bloqueada, dice Administrador.
-    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValueOnce(["Estudiante"]).mockResolvedValueOnce(["Estudiante", "Administrador"]);
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValue(["Estudiante"]);
+    rolesFrescos = ["Estudiante", "Administrador"];
 
     await expect(
       CuentaService.crear(COORD, { rol: "Docente", numeroCuenta: "A2026001", nombre: "A", apellidoPaterno: "B", facultadId: 2 })
@@ -387,7 +405,8 @@ describe("CuentaService: reglas de seguridad adicionales", () => {
 
   it("carrera critica: si mientras tanto alguien ya le agrego ese mismo rol, es un conflicto", async () => {
     vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue({ id: 77, numeroCuenta: "A2026001", correoElectronico: "v@x.mx", activo: true } as never);
-    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValueOnce(["Estudiante"]).mockResolvedValueOnce(["Estudiante", "Docente"]);
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValue(["Estudiante"]);
+    rolesFrescos = ["Estudiante", "Docente"];
 
     await expect(
       CuentaService.crear(COORD, { rol: "Docente", numeroCuenta: "A2026001", nombre: "A", apellidoPaterno: "B", facultadId: 2 })

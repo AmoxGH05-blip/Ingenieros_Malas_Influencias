@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +21,17 @@ export function GrupoDetallePage() {
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
+  const ultimaPeticion = useRef(0);
+
   const cargar = useCallback(async () => {
+    const mia = ++ultimaPeticion.current;
     try {
-      setGrupo(await getGrupo(grupoId));
+      const datos = await getGrupo(grupoId);
+      if (mia !== ultimaPeticion.current) return; // llego una respuesta mas nueva (otro grupo u otra recarga)
+      setGrupo(datos);
       setError(null);
     } catch (err) {
+      if (mia !== ultimaPeticion.current) return;
       setError(err instanceof ApiError && err.status === 404 ? "Ese grupo no existe." : "No se pudo cargar el grupo.");
     }
   }, [grupoId]);
@@ -46,6 +52,8 @@ export function GrupoDetallePage() {
       await cargar();
     } catch (err) {
       setErrorInscripcion(err instanceof ApiError ? err.message : "No se pudo inscribir al alumno");
+      // Si fue por grupo lleno o alumno ya inscrito, los datos en pantalla estaban desactualizados.
+      await cargar();
     } finally {
       setEnviando(false);
     }

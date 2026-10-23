@@ -27,6 +27,13 @@ describe("entero (ids)", () => {
   });
 });
 
+describe("mensajes de entero", () => {
+  it("distingue lo que falta de lo que esta mal escrito", () => {
+    expect(() => entero(undefined, "grupoId")).toThrow("grupoId es requerido");
+    expect(() => entero("abc", "grupoId")).toThrow("grupoId no es valido");
+  });
+});
+
 describe("enteroEnRango", () => {
   it("usa el valor por defecto cuando no se manda", () => {
     expect(enteroEnRango(undefined, "cupo", 0, 500, 0)).toBe(0);

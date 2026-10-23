@@ -139,10 +139,22 @@ describe("GrupoService.listar", () => {
     ]);
   });
 
-  it("filtra por periodo academico cuando se indica", async () => {
-    vi.mocked(GrupoRepository.find).mockResolvedValue([GRUPO, { ...GRUPO, id: 11, periodoAcademicoId: 2 }] as never);
+  it("filtra por periodo academico en la consulta y cuenta solo las inscripciones de esos grupos", async () => {
+    const todos = [GRUPO, { ...GRUPO, id: 11, periodoAcademicoId: 2 }];
+    vi.mocked(GrupoRepository.find).mockImplementation((async (opciones?: { where?: { periodoAcademicoId?: number } }) =>
+      todos.filter((g) => !opciones?.where?.periodoAcademicoId || g.periodoAcademicoId === opciones.where.periodoAcademicoId)) as never);
+
     const lista = await GrupoService.listar(COORD, 2);
+
     expect(lista.map((g) => g.id)).toEqual([11]);
+    expect(GrupoRepository.find).toHaveBeenCalledWith({ where: { periodoAcademicoId: 2 } });
+    expect(InscripcionRepository.find).toHaveBeenCalledTimes(1);
+  });
+
+  it("sin grupos no consulta inscripciones", async () => {
+    vi.mocked(GrupoRepository.find).mockResolvedValue([]);
+    expect(await GrupoService.listar(COORD)).toEqual([]);
+    expect(InscripcionRepository.find).not.toHaveBeenCalled();
   });
 
   it("rechaza un filtro de periodo que no es un entero positivo", async () => {
@@ -258,6 +270,12 @@ describe("GrupoService.validarGrupoIds / inscribirEnTransaccion (alta de alumnos
       await expect(GrupoService.validarGrupoIds(valor)).rejects.toThrow(DatosInvalidosError);
     }
   );
+
+  it("inscribirEnTransaccion bloquea los grupos siempre de menor a mayor, venga el orden como venga (evita deadlocks)", async () => {
+    manager.findOne.mockImplementation(async (_e: unknown, opciones: { where: { id: number } }) => ({ ...GRUPO, id: opciones.where.id }));
+    await GrupoService.inscribirEnTransaccion(manager as never, 5, [12, 10, 11, 10]);
+    expect(manager.findOne.mock.calls.map((c) => (c[1] as { where: { id: number } }).where.id)).toEqual([10, 11, 12]);
+  });
 
   it("rechaza si algun grupo no existe", async () => {
     vi.mocked(GrupoRepository.findByIds).mockResolvedValue([GRUPO] as never);
