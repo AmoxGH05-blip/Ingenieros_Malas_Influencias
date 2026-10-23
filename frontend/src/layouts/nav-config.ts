@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardCheck, History, LayoutDashboard, User, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, ClipboardCheck, History, Layers, LayoutDashboard, User, Users, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -54,6 +54,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
       items: [
         { label: "Dashboard", to: "/coordinador", icon: LayoutDashboard },
         { label: "Alumnos y docentes", to: "/coordinador/usuarios", icon: Users },
+        { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
       ],
     },
   ],
@@ -63,6 +64,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
       items: [
         { label: "Dashboard", to: "/administrador", icon: LayoutDashboard },
         { label: "Usuarios", to: "/administrador/usuarios", icon: Users },
+        { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
         { label: "Avance de evaluaciones", to: "/coordinador", icon: BarChart3 },
       ],
     },
@@ -79,6 +81,7 @@ const CRUMB_LABELS: Record<string, string> = {
   historial: "Historial",
   perfil: "Perfil",
   usuarios: "Usuarios",
+  grupos: "Grupos",
 };
 
 /** Migas de pan a partir de la ruta; los segmentos numéricos (ids) se omiten. La última es el título de la página. */

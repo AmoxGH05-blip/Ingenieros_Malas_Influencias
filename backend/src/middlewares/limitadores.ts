@@ -8,6 +8,7 @@ export interface OpcionesLimitadores {
   intentosLoginPorCuenta?: number;
   intentosCambioPassword?: number;
   intentosRecuperacion?: number;
+  intentosGestion?: number;
 }
 
 const QUINCE_MINUTOS_MS = 15 * 60 * 1000;
@@ -49,6 +50,12 @@ export function crearLimitadores(opciones: OpcionesLimitadores = {}) {
       ...base,
       limit: opciones.intentosCambioPassword ?? 10,
       skipSuccessfulRequests: true,
+      keyGenerator: (req) => (req.usuarioId ? `usuario:${req.usuarioId}` : ipDe(req)),
+    }),
+    /** Altas, grupos y catalogos: tope de peticiones por usuario, cuenten o no como exitosas (cada alta cuesta un bcrypt). */
+    gestion: rateLimit({
+      ...base,
+      limit: opciones.intentosGestion ?? 200,
       keyGenerator: (req) => (req.usuarioId ? `usuario:${req.usuarioId}` : ipDe(req)),
     }),
     /** Recuperacion por correo (se retira con SCRUM-80): por IP, cuente o no el intento. */

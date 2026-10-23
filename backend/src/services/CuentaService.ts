@@ -9,21 +9,14 @@ import { EstudianteRepository } from "../repositories/EstudianteRepository";
 import { DocenteRepository } from "../repositories/DocenteRepository";
 import { ProgramaEducativoRepository } from "../repositories/ProgramaEducativoRepository";
 import { FacultadRepository } from "../repositories/FacultadRepository";
-import { esViolacionDeUnicidad } from "../utils/errores";
+import { ConflictoError, DatosInvalidosError, PermisoDenegadoError, esViolacionDeUnicidad } from "../utils/errores";
 import { MENSAJE_POLITICA_PASSWORD, passwordValida } from "../utils/password";
-
-export class DatosInvalidosError extends Error {}
-export class UsuarioDuplicadoError extends Error {}
-export class PermisoDenegadoError extends Error {}
+import type { Actor } from "../utils/permisos";
+import { entero, numeroCuentaValido, texto } from "../utils/validaciones";
+import { GrupoService } from "./GrupoService";
 
 export const ROLES_ASIGNABLES = ["Estudiante", "Docente", "Coordinador", "Administrador"] as const;
 export type RolAsignable = (typeof ROLES_ASIGNABLES)[number];
-
-/** Quien hace la operacion: sale del token, nunca del cuerpo de la peticion. */
-export interface Actor {
-  usuarioId: number;
-  roles: string[];
-}
 
 export interface AltaCuentaInput {
   rol?: unknown;
@@ -37,6 +30,8 @@ export interface AltaCuentaInput {
   apellidoMaterno?: unknown;
   programaEducativoId?: unknown;
   facultadId?: unknown;
+  /** Solo para alumnos: grupos en los que se inscribe al darlo de alta. */
+  grupoIds?: unknown;
 }
 
 export interface CuentaListadaDTO {
@@ -56,6 +51,7 @@ export interface CuentaCreadaDTO {
   roles: string[];
   /** true: cuenta nueva; false: se agrego un rol a una cuenta que ya existia. */
   creada: boolean;
+  gruposInscritos: number;
 }
 
 interface PerfilPersona {
@@ -81,38 +77,9 @@ export type BusquedaCuentaDTO =
     };
 
 const CORREO_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const NUMERO_CUENTA_REGEX = /^[A-Z0-9]{1,20}$/;
 const DOMINIO_INSTITUCIONAL_ALUMNOS = "my.uvm.edu.mx";
 const BCRYPT_ROUNDS = 10;
 const ROLES_DEL_COORDINADOR: RolAsignable[] = ["Estudiante", "Docente"];
-
-function texto(valor: unknown, campo: string, max: number, requerido = true): string | null {
-  if (valor === undefined || valor === null || valor === "") {
-    if (requerido) throw new DatosInvalidosError(`${campo} es requerido`);
-    return null;
-  }
-  if (typeof valor !== "string" || valor.trim().length === 0 || valor.trim().length > max) {
-    throw new DatosInvalidosError(`${campo} invalido (maximo ${max} caracteres)`);
-  }
-  return valor.trim();
-}
-
-/** Letras y numeros sin espacios, en mayusculas: es lo que se teclea para iniciar sesion. */
-function numeroCuentaValido(valor: unknown): string {
-  const numero = texto(valor, "numeroCuenta", 20)!.toUpperCase();
-  if (!NUMERO_CUENTA_REGEX.test(numero)) {
-    throw new DatosInvalidosError("numeroCuenta solo puede tener letras y numeros, sin espacios (maximo 20)");
-  }
-  return numero;
-}
-
-function entero(valor: unknown, campo: string): number {
-  const numero = Number(valor);
-  if (!Number.isInteger(numero) || numero <= 0) {
-    throw new DatosInvalidosError(`${campo} es requerido`);
-  }
-  return numero;
-}
 
 /** Roles que este actor puede dar de alta o asignar. El Administrador, todos; el Coordinador, solo alumnos y docentes. */
 function rolesAsignablesPara(rolesActor: string[]): RolAsignable[] {
@@ -121,10 +88,15 @@ function rolesAsignablesPara(rolesActor: string[]): RolAsignable[] {
   return [];
 }
 
-/** El Coordinador solo gestiona cuentas de alumnos y docentes; las de coordinadores y administradores son del Administrador. */
+/**
+ * El Coordinador solo gestiona cuentas de alumnos y docentes; las de coordinadores y administradores son del
+ * Administrador. Una cuenta sin ningun rol tampoco es del Coordinador: no hay nada que diga que sea un alumno o un docente.
+ */
 function puedeGestionar(rolesActor: string[], rolesCuenta: string[]): boolean {
   if (rolesActor.includes("Administrador")) return true;
-  if (rolesActor.includes("Coordinador")) return rolesCuenta.every((rol) => (ROLES_DEL_COORDINADOR as string[]).includes(rol));
+  if (rolesActor.includes("Coordinador")) {
+    return rolesCuenta.length > 0 && rolesCuenta.every((rol) => (ROLES_DEL_COORDINADOR as string[]).includes(rol));
+  }
   return false;
 }
 
@@ -162,7 +134,16 @@ async function leerDatosPerfil(input: AltaCuentaInput, rol: RolAsignable): Promi
   return datos;
 }
 
-function conPerfil(manager: EntityManager, rol: RolAsignable, usuarioId: number, numeroCuenta: string, datos: DatosPerfil) {
+/** Los grupos solo aplican a alumnos: pedirlos para otro rol es un error, no algo que se ignore en silencio. */
+async function gruposDelAlta(rol: RolAsignable, valor: unknown): Promise<number[]> {
+  if (rol === "Estudiante") return GrupoService.validarGrupoIds(valor);
+  if (valor !== undefined && valor !== null && !(Array.isArray(valor) && valor.length === 0)) {
+    throw new DatosInvalidosError("Solo los alumnos se inscriben a grupos");
+  }
+  return [];
+}
+
+function guardarPerfil(manager: EntityManager, rol: RolAsignable, usuarioId: number, numeroCuenta: string, datos: DatosPerfil) {
   const comunes = { usuarioId, nombre: datos.nombre, apellidoPaterno: datos.apellidoPaterno, apellidoMaterno: datos.apellidoMaterno };
   if (rol === "Estudiante") {
     return manager.save(Estudiante, manager.create(Estudiante, { ...comunes, programaEducativoId: datos.programaEducativoId!, matricula: numeroCuenta }));
@@ -173,7 +154,7 @@ function conPerfil(manager: EntityManager, rol: RolAsignable, usuarioId: number,
 /** Dos altas simultaneas con el mismo numero de cuenta o correo: gana una y la otra recibe un 409, no un 500. */
 function comoDuplicado(error: unknown): never {
   if (esViolacionDeUnicidad(error)) {
-    throw new UsuarioDuplicadoError("Ya existe una cuenta con ese numero de cuenta o ese correo");
+    throw new ConflictoError("Ya existe una cuenta con ese numero de cuenta o ese correo");
   }
   throw error;
 }
@@ -187,17 +168,19 @@ async function perfilDe(usuarioId: number) {
 }
 
 async function crearCuentaNueva(actor: Actor, rolNombre: RolAsignable, numeroCuenta: string, input: AltaCuentaInput): Promise<CuentaCreadaDTO> {
-  // Los alumnos no necesitan correo: se les asigna el institucional a<cuenta>@my.uvm.edu.mx.
-  const correo =
+  // Los alumnos no necesitan correo: se les asigna el institucional a<cuenta>@my.uvm.edu.mx. Siempre en minusculas.
+  const correo = (
     rolNombre === "Estudiante"
-      ? (texto(input.correo, "correo", 150, false) ?? `a${numeroCuenta.toLowerCase()}@${DOMINIO_INSTITUCIONAL_ALUMNOS}`)
-      : texto(input.correo, "correo", 150)!;
+      ? (texto(input.correo, "correo", 150, false) ?? `a${numeroCuenta}@${DOMINIO_INSTITUCIONAL_ALUMNOS}`)
+      : texto(input.correo, "correo", 150)!
+  ).toLowerCase();
   if (!CORREO_REGEX.test(correo)) throw new DatosInvalidosError("correo invalido");
   if (!passwordValida(input.password)) throw new DatosInvalidosError(MENSAJE_POLITICA_PASSWORD);
   const perfil = await leerDatosPerfil(input, rolNombre);
+  const grupoIds = await gruposDelAlta(rolNombre, input.grupoIds);
 
   if (await UsuarioRepository.findOneBy({ correoElectronico: correo })) {
-    throw new UsuarioDuplicadoError("Ya existe un usuario con ese correo");
+    throw new ConflictoError("Ya existe un usuario con ese correo");
   }
   const rol = await RolRepository.findOneBy({ nombre: rolNombre });
   if (!rol) throw new DatosInvalidosError("rol no configurado en la base de datos");
@@ -218,11 +201,14 @@ async function crearCuentaNueva(actor: Actor, rolNombre: RolAsignable, numeroCue
       })
     );
     await manager.save(UsuarioRol, manager.create(UsuarioRol, { usuarioId: usuario.id, rolId: rol.id }));
-    if (perfil) await conPerfil(manager, rolNombre, usuario.id, numeroCuenta, perfil);
+    if (perfil) {
+      const guardado = await guardarPerfil(manager, rolNombre, usuario.id, numeroCuenta, perfil);
+      if (rolNombre === "Estudiante") await GrupoService.inscribirEnTransaccion(manager, guardado.id, grupoIds);
+    }
     return usuario.id;
   }).catch(comoDuplicado);
 
-  return { id: usuarioId, numeroCuenta, correo, rol: rolNombre, roles: [rolNombre], creada: true };
+  return { id: usuarioId, numeroCuenta, correo, rol: rolNombre, roles: [rolNombre], creada: true, gruposInscritos: grupoIds.length };
 }
 
 async function agregarRol(actor: Actor, existente: Usuario, rolNombre: RolAsignable, input: AltaCuentaInput): Promise<CuentaCreadaDTO> {
@@ -232,18 +218,30 @@ async function agregarRol(actor: Actor, existente: Usuario, rolNombre: RolAsigna
   }
   if (!existente.activo) throw new DatosInvalidosError("La cuenta esta inactiva");
   if (rolesActuales.includes(rolNombre)) {
-    throw new UsuarioDuplicadoError(`La cuenta ya tiene el rol ${rolNombre}`);
+    throw new ConflictoError(`La cuenta ya tiene el rol ${rolNombre}`);
   }
 
   const perfiles = await perfilDe(existente.id);
   const yaTienePerfil = rolNombre === "Estudiante" ? perfiles.estudiante : rolNombre === "Docente" ? perfiles.docente : true;
   const perfil = yaTienePerfil ? null : await leerDatosPerfil(input, rolNombre);
+  const grupoIds = await gruposDelAlta(rolNombre, input.grupoIds);
   const rol = await RolRepository.findOneBy({ nombre: rolNombre });
   if (!rol) throw new DatosInvalidosError("rol no configurado en la base de datos");
 
   await AppDataSource.transaction(async (manager) => {
+    // Se bloquea la cuenta y se vuelven a comprobar sus roles con datos frescos: otro Administrador pudo
+    // cambiarlos hace un instante, y el Coordinador no debe terminar tocando una cuenta que ya no puede gestionar.
+    await manager.findOne(Usuario, { where: { id: existente.id }, lock: { mode: "pessimistic_write" } });
+    const rolesFrescos = await UsuarioRolRepository.findRoleNamesByUsuarioId(existente.id);
+    if (!puedeGestionar(actor.roles, rolesFrescos)) throw new PermisoDenegadoError("Esa cuenta no la puedes gestionar");
+    if (rolesFrescos.includes(rolNombre)) throw new ConflictoError(`La cuenta ya tiene el rol ${rolNombre}`);
+
     await manager.save(UsuarioRol, manager.create(UsuarioRol, { usuarioId: existente.id, rolId: rol.id }));
-    if (perfil) await conPerfil(manager, rolNombre, existente.id, existente.numeroCuenta, perfil);
+    const guardado = perfil ? await guardarPerfil(manager, rolNombre, existente.id, existente.numeroCuenta, perfil) : null;
+    if (rolNombre === "Estudiante") {
+      const estudianteId = guardado?.id ?? perfiles.estudiante?.id;
+      if (estudianteId !== undefined) await GrupoService.inscribirEnTransaccion(manager, estudianteId, grupoIds);
+    }
   }).catch(comoDuplicado);
 
   return {
@@ -253,19 +251,12 @@ async function agregarRol(actor: Actor, existente: Usuario, rolNombre: RolAsigna
     rol: rolNombre,
     roles: [...rolesActuales, rolNombre],
     creada: false,
+    gruposInscritos: grupoIds.length,
   };
 }
 
 export const CuentaService = {
   rolesAsignables: rolesAsignablesPara,
-
-  async obtenerCatalogos() {
-    const [programas, facultades] = await Promise.all([ProgramaEducativoRepository.find(), FacultadRepository.find()]);
-    return {
-      programasEducativos: programas.map((p) => ({ id: p.id, nombre: p.nombre, nivelEducativo: p.nivelEducativo })),
-      facultades: facultades.map((f) => ({ id: f.id, nombre: f.nombre })),
-    };
-  },
 
   async listar(actor: Actor): Promise<CuentaListadaDTO[]> {
     exigirAlgunPermiso(actor);
@@ -277,6 +268,8 @@ export const CuentaService = {
       DocenteRepository.find(),
     ]);
     const nombreRol = new Map(roles.map((r) => [r.id, r.nombre]));
+    const rolesPorUsuario = new Map<number, string[]>();
+    for (const a of asignaciones) rolesPorUsuario.set(a.usuarioId, [...(rolesPorUsuario.get(a.usuarioId) ?? []), nombreRol.get(a.rolId) ?? "?"]);
     const estudiantePorUsuario = new Map(estudiantes.map((e) => [e.usuarioId, e]));
     const docentePorUsuario = new Map(docentes.map((d) => [d.usuarioId, d]));
 
@@ -286,7 +279,7 @@ export const CuentaService = {
         numeroCuenta: u.numeroCuenta,
         correo: u.correoElectronico,
         activo: u.activo,
-        roles: asignaciones.filter((a) => a.usuarioId === u.id).map((a) => nombreRol.get(a.rolId) ?? "?"),
+        roles: rolesPorUsuario.get(u.id) ?? [],
         nombre: nombreCompleto(estudiantePorUsuario.get(u.id) ?? docentePorUsuario.get(u.id) ?? null),
       }))
       .filter((cuenta) => puedeGestionar(actor.roles, cuenta.roles));

@@ -15,6 +15,9 @@ export interface CuentaListada {
 export interface Catalogos {
   programasEducativos: { id: number; nombre: string; nivelEducativo: string }[];
   facultades: { id: number; nombre: string }[];
+  periodosAcademicos: { id: number; nombre: string; activo: boolean }[];
+  materias: { id: number; clave: string; nombre: string; creditos: number; programaEducativoId: number }[];
+  docentes: { id: number; numeroEmpleado: string; nombre: string }[];
 }
 
 export interface PerfilPersona {
@@ -51,6 +54,8 @@ export interface AltaCuenta {
   apellidoMaterno?: string;
   programaEducativoId?: number;
   facultadId?: number;
+  /** Solo para alumnos: grupos en los que se inscribe al darlo de alta. */
+  grupoIds?: number[];
 }
 
 export interface CuentaCreada {
@@ -61,6 +66,7 @@ export interface CuentaCreada {
   roles: string[];
   /** true: cuenta nueva; false: se agregó un rol a una cuenta que ya existía. */
   creada: boolean;
+  gruposInscritos: number;
 }
 
 export function getCuentas(): Promise<CuentaListada[]> {

@@ -46,10 +46,11 @@ export function CuentasPage() {
 
   async function handleCreada(resultado: CuentaCreada) {
     setFormAbierto(false);
+    const grupos = resultado.gruposInscritos > 0 ? ` Quedó inscrito en ${resultado.gruposInscritos} ${resultado.gruposInscritos === 1 ? "grupo" : "grupos"}.` : "";
     setAviso(
-      resultado.creada
+      (resultado.creada
         ? `Se creó la cuenta ${resultado.numeroCuenta}. Deberá cambiar su contraseña en su primer inicio de sesión.`
-        : `Se agregó el rol ${resultado.rol} a la cuenta ${resultado.numeroCuenta}.`
+        : `Se agregó el rol ${resultado.rol} a la cuenta ${resultado.numeroCuenta}.`) + grupos
     );
     await cargar();
   }

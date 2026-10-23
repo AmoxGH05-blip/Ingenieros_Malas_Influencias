@@ -28,6 +28,15 @@ async function levantar(opciones = {}) {
     limitadores.cambioPassword,
     (req, res) => res.status(req.body?.password === "buena" ? 200 : 400).json({})
   );
+  app.post(
+    "/gestion",
+    (req, _res, next) => {
+      req.usuarioId = Number(req.header("x-usuario"));
+      next();
+    },
+    limitadores.gestion,
+    (_req, res) => res.json({})
+  );
   app.post("/recuperar", limitadores.recuperacion, (_req, res) => res.json({}));
   await new Promise<void>((listo) => {
     servidor = app.listen(0, listo);
@@ -102,6 +111,13 @@ describe("limitadores de intentos", () => {
     const { post } = await levantar({ intentosLoginPorCuenta: 2 });
     for (let i = 0; i < 2; i++) await post("/login", { numeroCuenta: "A1", password: "mala" }, { "cf-connecting-ip": `basura-${i}` });
     expect(await post("/login", { numeroCuenta: "A1", password: "mala" }, { "cf-connecting-ip": "otra-basura" })).toBe(429);
+  });
+
+  it("gestion (altas, grupos, catalogos): limita las peticiones por usuario, salgan bien o mal", async () => {
+    const { post } = await levantar({ intentosGestion: 3 });
+    for (let i = 0; i < 3; i++) expect(await post("/gestion", { password: "buena" }, { "x-usuario": "7" })).toBe(200);
+    expect(await post("/gestion", { password: "buena" }, { "x-usuario": "7" })).toBe(429);
+    expect(await post("/gestion", { password: "buena" }, { "x-usuario": "8" })).toBe(200);
   });
 
   it("recuperacion por correo: limita por IP", async () => {

@@ -73,7 +73,11 @@ async function construirAsignaciones(estudianteId: number): Promise<AsignacionDT
   const inscripciones = await InscripcionRepository.findByEstudianteId(estudianteId);
   if (inscripciones.length === 0) return [];
 
-  const grupos = await GrupoRepository.findByIds(inscripciones.map((i) => i.grupoId));
+  // Solo los grupos del ciclo del periodo activo: los de ciclos anteriores o futuros no son evaluaciones pendientes.
+  const grupos = (await GrupoRepository.findByIds(inscripciones.map((i) => i.grupoId))).filter(
+    (g: Grupo) => g.periodoAcademicoId === periodo.periodoAcademicoId
+  );
+  if (grupos.length === 0) return [];
   const materias = await MateriaRepository.findByIds(grupos.map((g: Grupo) => g.materiaId));
   const docentes = await DocenteRepository.findByIds(grupos.map((g: Grupo) => g.docenteId));
   const materiaPorId = new Map(materias.map((m: Materia) => [m.id, m]));

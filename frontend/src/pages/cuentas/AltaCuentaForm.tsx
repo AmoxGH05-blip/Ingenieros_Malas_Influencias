@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   type CuentaCreada,
   type RolAsignable,
 } from "@/lib/cuentas-api";
+import { estaLleno, getGrupos, type Grupo } from "@/lib/grupos-api";
 
 interface AltaCuentaFormProps {
   catalogos: Catalogos;
@@ -46,6 +47,17 @@ export function AltaCuentaForm({ catalogos, onCreada, onCancelar }: AltaCuentaFo
   const [campos, setCampos] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [grupos, setGrupos] = useState<Grupo[] | null>(null);
+  const [errorGrupos, setErrorGrupos] = useState(false);
+  const [gruposElegidos, setGruposElegidos] = useState<number[]>([]);
+
+  // Los grupos se piden una sola vez, cuando se elige dar de alta a un alumno.
+  useEffect(() => {
+    if (rol !== "Estudiante" || grupos !== null) return;
+    getGrupos()
+      .then(setGrupos)
+      .catch(() => setErrorGrupos(true));
+  }, [rol, grupos]);
 
   const valor = (k: string) => campos[k] ?? "";
   const cambiar = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -56,6 +68,12 @@ export function AltaCuentaForm({ catalogos, onCreada, onCancelar }: AltaCuentaFo
   const asignables: RolAsignable[] = existente?.rolesAsignables ?? (busqueda?.existe === false ? busqueda.rolesAsignables : []);
   const tienePerfil = { estudiante: existente?.perfiles.estudiante ?? false, docente: existente?.perfiles.docente ?? false };
   const necesitaPerfil = (rol === "Estudiante" && !tienePerfil.estudiante) || (rol === "Docente" && !tienePerfil.docente);
+
+  // Se ofrecen los grupos de los periodos activos (o todos, si ninguno lo esta).
+  const periodosActivos = new Set(catalogos.periodosAcademicos.filter((p) => p.activo).map((p) => p.id));
+  const gruposVisibles = (grupos ?? []).filter((g) => periodosActivos.size === 0 || periodosActivos.has(g.periodoAcademicoId));
+  const alternarGrupo = (id: number) =>
+    setGruposElegidos((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   async function handleBuscar(event: React.FormEvent) {
     event.preventDefault();
@@ -85,6 +103,7 @@ export function AltaCuentaForm({ catalogos, onCreada, onCancelar }: AltaCuentaFo
       rol,
       numeroCuenta: busqueda.numeroCuenta,
       ...(esNueva && { password: valor("password"), correo: valor("correo") || undefined }),
+      ...(rol === "Estudiante" && gruposElegidos.length > 0 && { grupoIds: gruposElegidos }),
       ...(necesitaPerfil && {
         nombre: valor("nombre"),
         apellidoPaterno: valor("apellidoPaterno"),
@@ -230,6 +249,48 @@ export function AltaCuentaForm({ catalogos, onCreada, onCancelar }: AltaCuentaFo
                   ))}
                 </select>
               </Campo>
+            )}
+
+            {rol === "Estudiante" && (
+              <fieldset className="space-y-2 sm:col-span-2">
+                <legend className="text-sm font-medium">Grupos en los que se inscribe (opcional)</legend>
+                {grupos === null && !errorGrupos && <p className="text-xs text-muted-foreground">Cargando grupos…</p>}
+                {errorGrupos && (
+                  <p role="alert" className="text-xs text-destructive">
+                    No se pudieron cargar los grupos. Puedes inscribir al alumno después, desde el grupo.
+                  </p>
+                )}
+                {grupos !== null && gruposVisibles.length === 0 && (
+                  <p className="text-xs text-muted-foreground">Aún no hay grupos. Créalos en "Grupos"; luego puedes inscribir al alumno desde el grupo.</p>
+                )}
+                <ul className="grid gap-1.5 sm:grid-cols-2">
+                  {gruposVisibles.map((g) => {
+                    const lleno = estaLleno(g);
+                    return (
+                      <li key={g.id}>
+                        <label className={`flex items-start gap-2 rounded-md border border-border px-3 py-2 text-sm ${lleno ? "opacity-50" : "cursor-pointer hover:bg-secondary"}`}>
+                          <input
+                            type="checkbox"
+                            className="mt-0.5"
+                            disabled={lleno}
+                            checked={gruposElegidos.includes(g.id)}
+                            onChange={() => alternarGrupo(g.id)}
+                          />
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium">
+                              {g.materia} · {g.seccion}
+                            </span>
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {g.docente} · {g.cupoMaximo > 0 ? `${g.inscritos}/${g.cupoMaximo}` : `${g.inscritos} inscritos`}
+                              {lleno ? " · lleno" : ""}
+                            </span>
+                          </span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </fieldset>
             )}
 
             {esNueva && (

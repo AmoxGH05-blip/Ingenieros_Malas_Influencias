@@ -2,12 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import bcrypt from "bcryptjs";
 
 const manager = {
+  findOne: vi.fn(),
   create: vi.fn((_entidad: unknown, datos: object) => ({ ...datos })),
   save: vi.fn((_entidad: unknown, datos: object) => Promise.resolve({ id: 500, ...datos })),
 };
 
 vi.mock("../config/data-source", () => ({
   AppDataSource: { transaction: vi.fn((cb: (m: typeof manager) => unknown) => cb(manager)) },
+}));
+vi.mock("./GrupoService", () => ({
+  GrupoService: { validarGrupoIds: vi.fn(), inscribirEnTransaccion: vi.fn() },
 }));
 vi.mock("../repositories/UsuarioRepository", () => ({
   UsuarioRepository: { find: vi.fn(), findOneBy: vi.fn() },
@@ -31,7 +35,9 @@ vi.mock("../repositories/FacultadRepository", () => ({
   FacultadRepository: { find: vi.fn(), findById: vi.fn() },
 }));
 
-import { CuentaService, DatosInvalidosError, PermisoDenegadoError, UsuarioDuplicadoError } from "./CuentaService";
+import { CuentaService } from "./CuentaService";
+import { GrupoService } from "./GrupoService";
+import { ConflictoError as UsuarioDuplicadoError, DatosInvalidosError, PermisoDenegadoError } from "../utils/errores";
 import { AppDataSource } from "../config/data-source";
 import { UsuarioRepository } from "../repositories/UsuarioRepository";
 import { UsuarioRolRepository } from "../repositories/UsuarioRolRepository";
@@ -65,6 +71,8 @@ beforeEach(() => {
   vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValue([]);
   vi.mocked(EstudianteRepository.findByUsuarioId).mockResolvedValue(null);
   vi.mocked(DocenteRepository.findByUsuarioId).mockResolvedValue(null);
+  vi.mocked(GrupoService.validarGrupoIds).mockImplementation((async (ids: unknown) => (Array.isArray(ids) ? ids : [])) as never);
+  vi.mocked(GrupoService.inscribirEnTransaccion).mockResolvedValue(undefined);
 });
 
 describe("CuentaService.rolesAsignables", () => {
@@ -84,7 +92,7 @@ describe("CuentaService.crear: cuenta nueva", () => {
     const resultado = await CuentaService.crear(ADMIN, ALUMNO);
 
     expect(resultado).toEqual({
-      id: 500, numeroCuenta: "A2026001", correo: "nuevo@dygsis.local", rol: "Estudiante", roles: ["Estudiante"], creada: true,
+      id: 500, numeroCuenta: "A2026001", correo: "nuevo@dygsis.local", rol: "Estudiante", roles: ["Estudiante"], creada: true, gruposInscritos: 0,
     });
     expect(guardados()).toEqual(["Usuario", "UsuarioRol", "Estudiante"]);
     const usuario = manager.create.mock.calls[0][1] as { contrasenaHash: string; numeroCuenta: string; debeCambiarPassword: boolean; creadoPorUsuarioId: number };
@@ -195,7 +203,7 @@ describe("CuentaService.crear: cuenta existente (agregar un rol)", () => {
   it("agrega el rol y su perfil sin tocar el usuario ni su contrasena", async () => {
     const resultado = await CuentaService.crear(COORD, { ...docente, password: "NoDebeUsarse123" });
 
-    expect(resultado).toEqual({ id: 77, numeroCuenta: "A2026001", correo: "viejo@dygsis.local", rol: "Docente", roles: ["Estudiante", "Docente"], creada: false });
+    expect(resultado).toEqual({ id: 77, numeroCuenta: "A2026001", correo: "viejo@dygsis.local", rol: "Docente", roles: ["Estudiante", "Docente"], creada: false, gruposInscritos: 0 });
     expect(guardados()).toEqual(["UsuarioRol", "Docente"]);
     expect((manager.create.mock.calls[0][1] as { usuarioId: number }).usuarioId).toBe(77);
   });
@@ -297,13 +305,92 @@ describe("CuentaService.listar", () => {
   });
 });
 
-describe("CuentaService.obtenerCatalogos", () => {
-  it("devuelve programas educativos y facultades", async () => {
-    vi.mocked(ProgramaEducativoRepository.find).mockResolvedValue([{ id: 1, nombre: "ISC", nivelEducativo: "Licenciatura" }] as never);
-    vi.mocked(FacultadRepository.find).mockResolvedValue([{ id: 2, nombre: "Ingenieria" }] as never);
-    expect(await CuentaService.obtenerCatalogos()).toEqual({
-      programasEducativos: [{ id: 1, nombre: "ISC", nivelEducativo: "Licenciatura" }],
-      facultades: [{ id: 2, nombre: "Ingenieria" }],
-    });
+describe("CuentaService.crear: alumnos con grupos", () => {
+  it("al dar de alta a un alumno lo inscribe en los grupos indicados, dentro de la misma transaccion", async () => {
+    const resultado = await CuentaService.crear(COORD, { ...ALUMNO, grupoIds: [10, 11] });
+
+    expect(GrupoService.validarGrupoIds).toHaveBeenCalledWith([10, 11]);
+    expect(GrupoService.inscribirEnTransaccion).toHaveBeenCalledWith(manager, 500, [10, 11]);
+    expect(resultado.gruposInscritos).toBe(2);
+  });
+
+  it("si un grupo esta lleno o no existe, el alta completa se cancela (la transaccion lanza el error)", async () => {
+    vi.mocked(GrupoService.inscribirEnTransaccion).mockRejectedValueOnce(new UsuarioDuplicadoError("El grupo 3A esta lleno"));
+    await expect(CuentaService.crear(COORD, { ...ALUMNO, grupoIds: [10] })).rejects.toThrow(/lleno/);
+  });
+
+  it("los grupos se validan antes de abrir la transaccion", async () => {
+    vi.mocked(GrupoService.validarGrupoIds).mockRejectedValueOnce(new DatosInvalidosError("Alguno de los grupos no existe"));
+    await expect(CuentaService.crear(COORD, { ...ALUMNO, grupoIds: [99] })).rejects.toThrow(DatosInvalidosError);
+    expect(manager.save).not.toHaveBeenCalled();
+  });
+
+  it("solo los alumnos se inscriben a grupos: pedirlos para un docente es un error", async () => {
+    await expect(
+      CuentaService.crear(COORD, { rol: "Docente", numeroCuenta: "EMP7", correo: "d@x.mx", password: "ClaveSegura123", nombre: "A", apellidoPaterno: "B", facultadId: 2, grupoIds: [10] })
+    ).rejects.toThrow(DatosInvalidosError);
+    expect(manager.save).not.toHaveBeenCalled();
+  });
+
+  it("una lista de grupos vacia para un docente no estorba", async () => {
+    await expect(
+      CuentaService.crear(COORD, { rol: "Docente", numeroCuenta: "EMP7", correo: "d@x.mx", password: "ClaveSegura123", nombre: "A", apellidoPaterno: "B", facultadId: 2, grupoIds: [] })
+    ).resolves.toMatchObject({ creada: true, gruposInscritos: 0 });
+  });
+
+  it("al agregar el rol de Estudiante a una cuenta existente tambien se pueden indicar grupos", async () => {
+    vi.mocked(UsuarioRepository.findOneBy).mockImplementation(((where: { numeroCuenta?: string }) =>
+      Promise.resolve(where.numeroCuenta === "EMP1" ? { id: 61, numeroCuenta: "EMP1", correoElectronico: "e@x.mx", activo: true } : null)) as never);
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValue(["Docente"]);
+
+    await CuentaService.crear(COORD, { rol: "Estudiante", numeroCuenta: "EMP1", nombre: "A", apellidoPaterno: "B", programaEducativoId: 3, grupoIds: [10] });
+
+    expect(GrupoService.inscribirEnTransaccion).toHaveBeenCalledWith(manager, 500, [10]);
+  });
+});
+
+describe("CuentaService: reglas de seguridad adicionales", () => {
+  it("el correo se guarda siempre en minusculas", async () => {
+    await CuentaService.crear(ADMIN, { ...ALUMNO, correo: "Nuevo.Alumno@DYGSIS.local" });
+    expect((manager.create.mock.calls[0][1] as { correoElectronico: string }).correoElectronico).toBe("nuevo.alumno@dygsis.local");
+  });
+
+  it("ids con formato raro (true, listas, hexadecimal, enormes) se rechazan como datos invalidos y no llegan a la base", async () => {
+    for (const malo of [true, [3], "0x10", "1e3", 2_147_483_648]) {
+      await expect(CuentaService.crear(ADMIN, { ...ALUMNO, programaEducativoId: malo })).rejects.toThrow(DatosInvalidosError);
+    }
+    expect(ProgramaEducativoRepository.findById).not.toHaveBeenCalled();
+  });
+
+  it("una cuenta sin ningun rol no es gestionable por un Coordinador (solo por el Administrador)", async () => {
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue({ id: 8, numeroCuenta: "SINROL", correoElectronico: "s@x.mx", activo: true } as never);
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValue([]);
+
+    expect(await CuentaService.buscar(COORD, "SINROL")).toEqual({ existe: true, gestionable: false, numeroCuenta: "SINROL" });
+    await expect(
+      CuentaService.crear(COORD, { rol: "Docente", numeroCuenta: "SINROL", nombre: "A", apellidoPaterno: "B", facultadId: 2 })
+    ).rejects.toThrow(PermisoDenegadoError);
+    expect((await CuentaService.buscar(ADMIN, "SINROL")) as { gestionable?: boolean }).toMatchObject({ gestionable: true });
+  });
+
+  it("carrera critica: si mientras tanto un Administrador le dio otro rol a la cuenta, el Coordinador ya no puede tocarla", async () => {
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue({ id: 77, numeroCuenta: "A2026001", correoElectronico: "v@x.mx", activo: true } as never);
+    // La primera lectura (antes de abrir la transaccion) dice alumno; la segunda, ya con la cuenta bloqueada, dice Administrador.
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValueOnce(["Estudiante"]).mockResolvedValueOnce(["Estudiante", "Administrador"]);
+
+    await expect(
+      CuentaService.crear(COORD, { rol: "Docente", numeroCuenta: "A2026001", nombre: "A", apellidoPaterno: "B", facultadId: 2 })
+    ).rejects.toThrow(PermisoDenegadoError);
+    expect(manager.findOne).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ lock: { mode: "pessimistic_write" } }));
+    expect(manager.save).not.toHaveBeenCalled();
+  });
+
+  it("carrera critica: si mientras tanto alguien ya le agrego ese mismo rol, es un conflicto", async () => {
+    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue({ id: 77, numeroCuenta: "A2026001", correoElectronico: "v@x.mx", activo: true } as never);
+    vi.mocked(UsuarioRolRepository.findRoleNamesByUsuarioId).mockResolvedValueOnce(["Estudiante"]).mockResolvedValueOnce(["Estudiante", "Docente"]);
+
+    await expect(
+      CuentaService.crear(COORD, { rol: "Docente", numeroCuenta: "A2026001", nombre: "A", apellidoPaterno: "B", facultadId: 2 })
+    ).rejects.toThrow(UsuarioDuplicadoError);
   });
 });

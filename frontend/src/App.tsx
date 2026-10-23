@@ -15,6 +15,8 @@ import { CuestionarioPage } from "@/pages/estudiante/CuestionarioPage";
 import { HistorialPage } from "@/pages/estudiante/HistorialPage";
 import { PerfilPage } from "@/pages/estudiante/PerfilPage";
 import { CuentasPage } from "@/pages/cuentas/CuentasPage";
+import { GruposPage } from "@/pages/grupos/GruposPage";
+import { GrupoDetallePage } from "@/pages/grupos/GrupoDetallePage";
 import { AdministradorDashboardPage } from "@/pages/dashboards/AdministradorDashboardPage";
 
 function App() {
@@ -45,6 +47,8 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={["Coordinador", "Administrador"]} />}>
               <Route path="/coordinador" element={<CoordinadorDashboardPage />} />
               <Route path="/coordinador/usuarios" element={<CuentasPage />} />
+              <Route path="/coordinador/grupos" element={<GruposPage />} />
+              <Route path="/coordinador/grupos/:id" element={<GrupoDetallePage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["Administrador"]} />}>

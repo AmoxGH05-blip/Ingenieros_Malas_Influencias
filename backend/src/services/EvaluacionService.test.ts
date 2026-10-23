@@ -120,6 +120,27 @@ describe("EvaluacionService.listarAsignaciones", () => {
     ]);
   });
 
+  it("ignora los grupos de otros ciclos: no genera evaluaciones pendientes de un ciclo que no es el del periodo activo", async () => {
+    vi.mocked(PeriodoEvaluacionRepository.findActivo).mockResolvedValue(PERIODO as never);
+    vi.mocked(InscripcionRepository.findByEstudianteId).mockResolvedValue([INSCRIPCION, { ...INSCRIPCION, grupoId: 8 }] as never);
+    vi.mocked(GrupoRepository.findByIds).mockResolvedValue([GRUPO, { ...GRUPO, id: 8, periodoAcademicoId: 2, seccion: "1A" }] as never);
+    vi.mocked(MateriaRepository.findByIds).mockResolvedValue([MATERIA] as never);
+    vi.mocked(DocenteRepository.findByIds).mockResolvedValue([DOCENTE] as never);
+    vi.mocked(EvaluacionRepository.findByEstudianteAndPeriodo).mockResolvedValue([]);
+
+    const resultado = await EvaluacionService.listarAsignaciones(1);
+
+    expect(resultado.map((a) => a.grupo)).toEqual(["3A"]);
+    expect(EvaluacionRepository.save).toHaveBeenCalledTimes(1);
+  });
+
+  it("si todos sus grupos son de otro ciclo no hay asignaciones", async () => {
+    vi.mocked(PeriodoEvaluacionRepository.findActivo).mockResolvedValue(PERIODO as never);
+    vi.mocked(InscripcionRepository.findByEstudianteId).mockResolvedValue([INSCRIPCION] as never);
+    vi.mocked(GrupoRepository.findByIds).mockResolvedValue([{ ...GRUPO, periodoAcademicoId: 2 }] as never);
+    expect(await EvaluacionService.listarAsignaciones(1)).toEqual([]);
+  });
+
   it("no crea una fila nueva cuando ya existe una Evaluacion para ese grupo", async () => {
     const evaluacionExistente = { id: 55, periodoEvaluacionId: 5, estudianteId: 10, grupoId: 4, completada: true, fechaRespuesta: new Date("2026-09-15"), anonima: true };
     vi.mocked(PeriodoEvaluacionRepository.findActivo).mockResolvedValue(PERIODO as never);
