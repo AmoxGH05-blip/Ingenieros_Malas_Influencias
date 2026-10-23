@@ -4,7 +4,8 @@ import { apiRouter } from "./routes";
 
 export const app = express();
 
-// Render pone un proxy delante: sin esto req.ip seria siempre el del proxy y los limites de intentos no distinguirian a nadie.
+// Render pone proxies delante (Render y Cloudflare). El limite de intentos usa CF-Connecting-IP (ver limitadores.ts);
+// esto evita ademas que express-rate-limit avise por recibir X-Forwarded-For sin proxy de confianza.
 app.set("trust proxy", 1);
 
 app.use(cors());

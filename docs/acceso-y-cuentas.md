@@ -47,7 +47,7 @@ Los números de cuenta son predecibles y las contraseñas temporales las elige u
 | `POST /api/auth/cambiar-password` | 10 por usuario |
 | `POST /api/auth/forgot-password` y `/reset-password` | 10 por IP (se retiran con SCRUM-80) |
 
-Los inicios de sesión correctos no cuentan. Los contadores viven en memoria y Render gratuito reinicia el servicio al dormirlo, así que el límite se reinicia con él; frena la fuerza bruta continua, no es un bloqueo permanente.
+Se cuenta por la IP real del cliente: en Render hay un Cloudflare delante, así que se lee `CF-Connecting-IP` (Cloudflare la reescribe en cada petición y el cliente no puede falsearla); sin ese encabezado, como en local, se usa la IP de la conexión. Los inicios de sesión correctos no cuentan. Los contadores viven en memoria y Render gratuito reinicia el servicio al dormirlo, así que el límite se reinicia con él; frena la fuerza bruta continua, no es un bloqueo permanente.
 
 ## Alta de usuarios (panel del Administrador)
 

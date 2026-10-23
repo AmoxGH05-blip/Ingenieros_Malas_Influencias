@@ -1,3 +1,4 @@
+import { isIP } from "net";
 import type { Request } from "express";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
@@ -12,8 +13,16 @@ export interface OpcionesLimitadores {
 const QUINCE_MINUTOS_MS = 15 * 60 * 1000;
 const MENSAJE = { error: "Demasiados intentos. Espera unos minutos e intenta de nuevo." };
 
+/**
+ * IP del cliente. En Render, Cloudflare va delante del servidor: req.ip es la IP del borde de Cloudflare, que
+ * cambia entre peticiones, y los contadores se repartirian entre claves distintas sin frenar nada. Cloudflare
+ * entrega la IP real en CF-Connecting-IP y la reescribe en cada peticion, asi que el cliente no puede falsearla.
+ * Si el encabezado no esta (desarrollo local) o no es una IP valida, se usa req.ip.
+ */
 function ipDe(req: Request): string {
-  return ipKeyGenerator(req.ip ?? "desconocida");
+  const cloudflare = req.header("cf-connecting-ip");
+  const ip = cloudflare && isIP(cloudflare) ? cloudflare : (req.ip ?? "desconocida");
+  return ipKeyGenerator(ip);
 }
 
 /**
@@ -27,7 +36,7 @@ export function crearLimitadores(opciones: OpcionesLimitadores = {}) {
 
   return {
     /** Tope general por IP, aunque se pruebe una cuenta distinta en cada intento. */
-    loginPorIp: rateLimit({ ...base, limit: opciones.intentosLoginPorIp ?? 30, skipSuccessfulRequests: true }),
+    loginPorIp: rateLimit({ ...base, limit: opciones.intentosLoginPorIp ?? 30, skipSuccessfulRequests: true, keyGenerator: ipDe }),
     /** Tope por IP y cuenta: frena probar muchas contrasenas contra una sola cuenta sin dejar fuera a los demas. */
     loginPorCuenta: rateLimit({
       ...base,
@@ -43,7 +52,7 @@ export function crearLimitadores(opciones: OpcionesLimitadores = {}) {
       keyGenerator: (req) => (req.usuarioId ? `usuario:${req.usuarioId}` : ipDe(req)),
     }),
     /** Recuperacion por correo (se retira con SCRUM-80): por IP, cuente o no el intento. */
-    recuperacion: rateLimit({ ...base, limit: opciones.intentosRecuperacion ?? 10 }),
+    recuperacion: rateLimit({ ...base, limit: opciones.intentosRecuperacion ?? 10, keyGenerator: ipDe }),
   };
 }
 

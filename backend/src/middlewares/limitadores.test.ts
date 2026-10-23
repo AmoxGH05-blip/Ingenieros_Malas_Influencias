@@ -89,6 +89,21 @@ describe("limitadores de intentos", () => {
     expect(await post("/cambiar", { password: "buena" }, { "x-usuario": "8" })).toBe(200);
   });
 
+  it("detras de Cloudflare cuenta por la IP real del cliente (CF-Connecting-IP), no por la del borde, que cambia entre peticiones", async () => {
+    const { post } = await levantar({ intentosLoginPorCuenta: 3 });
+    const desde = (ip: string) => ({ "cf-connecting-ip": ip });
+    for (let i = 0; i < 3; i++) expect(await post("/login", { numeroCuenta: "A1", password: "mala" }, desde("203.0.113.7"))).toBe(401);
+    expect(await post("/login", { numeroCuenta: "A1", password: "mala" }, desde("203.0.113.7"))).toBe(429);
+    // Otro cliente con la misma cuenta no queda bloqueado por los fallos del primero.
+    expect(await post("/login", { numeroCuenta: "A1", password: "mala" }, desde("203.0.113.8"))).toBe(401);
+  });
+
+  it("si CF-Connecting-IP no es una IP valida, la ignora y usa la del socket", async () => {
+    const { post } = await levantar({ intentosLoginPorCuenta: 2 });
+    for (let i = 0; i < 2; i++) await post("/login", { numeroCuenta: "A1", password: "mala" }, { "cf-connecting-ip": `basura-${i}` });
+    expect(await post("/login", { numeroCuenta: "A1", password: "mala" }, { "cf-connecting-ip": "otra-basura" })).toBe(429);
+  });
+
   it("recuperacion por correo: limita por IP", async () => {
     const { post } = await levantar({ intentosRecuperacion: 2 });
     expect(await post("/recuperar", {})).toBe(200);
