@@ -20,6 +20,10 @@ export class Usuario {
   @Column({ name: "DebeCambiarPassword", type: "boolean", default: false })
   debeCambiarPassword!: boolean;
 
+  /** Quien dio de alta la cuenta (null en las anteriores a la jerarquia de altas y en la cuenta inicial). */
+  @Column({ name: "CreadoPorUsuarioId", type: "integer", nullable: true })
+  creadoPorUsuarioId!: number | null;
+
   @Column({ name: "Activo", type: "boolean", default: true })
   activo!: boolean;
 

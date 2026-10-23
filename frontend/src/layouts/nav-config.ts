@@ -48,7 +48,15 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
     },
   ],
   Docente: [{ label: "General", items: [{ label: "Dashboard", to: "/docente", icon: LayoutDashboard }] }],
-  Coordinador: [{ label: "General", items: [{ label: "Dashboard", to: "/coordinador", icon: LayoutDashboard }] }],
+  Coordinador: [
+    {
+      label: "Coordinación",
+      items: [
+        { label: "Dashboard", to: "/coordinador", icon: LayoutDashboard },
+        { label: "Alumnos y docentes", to: "/coordinador/usuarios", icon: Users },
+      ],
+    },
+  ],
   Administrador: [
     {
       label: "Administración",

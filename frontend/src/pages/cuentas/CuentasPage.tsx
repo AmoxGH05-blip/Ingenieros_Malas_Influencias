@@ -3,29 +3,38 @@ import { CheckCircle2, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NuevoUsuarioForm } from "@/pages/administrador/NuevoUsuarioForm";
-import { getCatalogos, getUsuarios, type Catalogos, type UsuarioListado } from "@/lib/admin-api";
+import { useAuth } from "@/context/AuthContext";
+import { AltaCuentaForm } from "@/pages/cuentas/AltaCuentaForm";
+import { getCatalogos, getCuentas, type Catalogos, type CuentaCreada, type CuentaListada } from "@/lib/cuentas-api";
 import { cn } from "@/lib/utils";
 
-const FILTROS = ["Todos", "Estudiante", "Docente", "Coordinador", "Administrador"] as const;
+const FILTROS_ADMINISTRADOR = ["Todos", "Estudiante", "Docente", "Coordinador", "Administrador"] as const;
+const FILTROS_COORDINADOR = ["Todos", "Estudiante", "Docente"] as const;
 
-/** SCRUM-43: alta y listado de usuarios (solo Administrador). */
-export function UsuariosPage() {
-  const [usuarios, setUsuarios] = useState<UsuarioListado[] | null>(null);
+/**
+ * Cuentas: alta (cuenta nueva o rol más a una existente) y listado. El Administrador ve y gestiona todas;
+ * el Coordinador solo las de alumnos y docentes (SCRUM-43 y SCRUM-79). El servidor aplica los permisos.
+ */
+export function CuentasPage() {
+  const { usuario } = useAuth();
+  const esAdministrador = usuario?.roles.includes("Administrador") ?? false;
+  const filtros = esAdministrador ? FILTROS_ADMINISTRADOR : FILTROS_COORDINADOR;
+
+  const [cuentas, setCuentas] = useState<CuentaListada[] | null>(null);
   const [catalogos, setCatalogos] = useState<Catalogos | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [filtro, setFiltro] = useState<(typeof FILTROS)[number]>("Todos");
+  const [filtro, setFiltro] = useState<string>("Todos");
   const [formAbierto, setFormAbierto] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     try {
-      const [lista, cat] = await Promise.all([getUsuarios(), getCatalogos()]);
-      setUsuarios(lista);
+      const [lista, cat] = await Promise.all([getCuentas(), getCatalogos()]);
+      setCuentas(lista);
       setCatalogos(cat);
       setError(null);
     } catch {
-      setError("No se pudo cargar la lista de usuarios.");
+      setError("No se pudo cargar la lista de cuentas.");
     }
   }, []);
 
@@ -33,11 +42,15 @@ export function UsuariosPage() {
     void cargar();
   }, [cargar]);
 
-  const visibles = (usuarios ?? []).filter((u) => filtro === "Todos" || u.roles.includes(filtro));
+  const visibles = (cuentas ?? []).filter((c) => filtro === "Todos" || c.roles.includes(filtro));
 
-  async function handleCreado(numeroCuenta: string) {
+  async function handleCreada(resultado: CuentaCreada) {
     setFormAbierto(false);
-    setAviso(`Se creó la cuenta ${numeroCuenta}. Deberá cambiar su contraseña en su primer inicio de sesión.`);
+    setAviso(
+      resultado.creada
+        ? `Se creó la cuenta ${resultado.numeroCuenta}. Deberá cambiar su contraseña en su primer inicio de sesión.`
+        : `Se agregó el rol ${resultado.rol} a la cuenta ${resultado.numeroCuenta}.`
+    );
     await cargar();
   }
 
@@ -45,12 +58,16 @@ export function UsuariosPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Usuarios</h1>
-          <p className="text-sm text-muted-foreground">Da de alta cuentas de alumnos, docentes, coordinadores y administradores.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{esAdministrador ? "Usuarios" : "Alumnos y docentes"}</h1>
+          <p className="text-sm text-muted-foreground">
+            {esAdministrador
+              ? "Da de alta coordinadores, administradores, docentes y alumnos."
+              : "Da de alta a los alumnos y docentes con su número de cuenta."}
+          </p>
         </div>
         {!formAbierto && (
           <Button onClick={() => setFormAbierto(true)} className="bg-brand text-brand-foreground hover:opacity-90">
-            <Plus className="size-4" aria-hidden /> Nuevo usuario
+            <Plus className="size-4" aria-hidden /> Dar de alta cuenta
           </Button>
         )}
       </div>
@@ -68,11 +85,13 @@ export function UsuariosPage() {
       {formAbierto && catalogos && (
         <Card>
           <CardHeader>
-            <CardTitle>Nuevo usuario</CardTitle>
-            <CardDescription>La contraseña inicial se guarda cifrada; compártela con la persona por un medio seguro.</CardDescription>
+            <CardTitle>Dar de alta cuenta</CardTitle>
+            <CardDescription>
+              Escribe el número de cuenta y búscalo: si es nuevo se crea, y si ya existe se le agrega un rol. La contraseña temporal se guarda cifrada; compártela con la persona por un medio seguro.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <NuevoUsuarioForm catalogos={catalogos} onCreado={handleCreado} onCancelar={() => setFormAbierto(false)} />
+            <AltaCuentaForm catalogos={catalogos} onCreada={handleCreada} onCancelar={() => setFormAbierto(false)} />
           </CardContent>
         </Card>
       )}
@@ -84,7 +103,7 @@ export function UsuariosPage() {
       )}
 
       <div role="group" aria-label="Filtrar por rol" className="flex w-fit flex-wrap gap-1 rounded-xl bg-secondary p-1">
-        {FILTROS.map((f) => (
+        {filtros.map((f) => (
           <button
             key={f}
             type="button"
@@ -100,38 +119,38 @@ export function UsuariosPage() {
         ))}
       </div>
 
-      {!usuarios && !error && <div aria-busy className="h-48 animate-pulse rounded-xl bg-card" />}
+      {!cuentas && !error && <div aria-busy className="h-48 animate-pulse rounded-xl bg-card" />}
 
-      {usuarios && (
+      {cuentas && (
         <ul className="space-y-3">
-          {visibles.map((u) => (
+          {visibles.map((c) => (
             <li
-              key={u.id}
+              key={c.id}
               className="grid items-center gap-x-6 gap-y-2 rounded-xl border border-border bg-card px-5 py-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)_minmax(0,1.4fr)_100px]"
             >
               <div className="min-w-0">
-                <p className="truncate font-semibold">{u.nombre ?? u.correo}</p>
-                {u.nombre && <p className="truncate text-xs text-muted-foreground">{u.correo}</p>}
+                <p className="truncate font-semibold">{c.nombre ?? c.numeroCuenta}</p>
+                <p className="truncate text-xs text-muted-foreground">{c.correo}</p>
               </div>
               <div className="min-w-0 text-sm">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Número de cuenta</p>
-                <p className="mt-1 truncate">{u.numeroCuenta}</p>
+                <p className="mt-1 truncate">{c.numeroCuenta}</p>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {u.roles.map((rol) => (
+                {c.roles.map((rol) => (
                   <Badge key={rol} variant={rol === "Administrador" ? "warning" : "neutral"}>
                     {rol}
                   </Badge>
                 ))}
               </div>
               <div className="lg:text-right">
-                <Badge variant={u.activo ? "success" : "neutral"}>{u.activo ? "Activo" : "Inactivo"}</Badge>
+                <Badge variant={c.activo ? "success" : "neutral"}>{c.activo ? "Activa" : "Inactiva"}</Badge>
               </div>
             </li>
           ))}
           {visibles.length === 0 && (
             <li className="rounded-xl border border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
-              No hay usuarios con ese rol.
+              No hay cuentas con ese rol.
             </li>
           )}
         </ul>

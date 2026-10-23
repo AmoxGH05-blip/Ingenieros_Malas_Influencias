@@ -83,11 +83,14 @@ CREATE TABLE "P_EvaluacionDocente_Usuario" (
     "CorreoElectronico"     VARCHAR(150)    NOT NULL,  -- dato de contacto, ya no sirve para entrar
     "ContrasenaHash"        VARCHAR(256)    NOT NULL,
     "DebeCambiarPassword"   BOOLEAN         NOT NULL DEFAULT false,  -- la puso otra persona: cambiarla al entrar
+    "CreadoPorUsuarioId"    INTEGER         NULL,      -- quien dio de alta la cuenta (migracion 008)
     "Activo"                BOOLEAN         NOT NULL DEFAULT true,
     "FechaCreacion"         TIMESTAMPTZ     NOT NULL DEFAULT now(),
     CONSTRAINT "pk_P_EvaluacionDocente_Usuario" PRIMARY KEY ("Id"),
     CONSTRAINT "uq_P_EvaluacionDocente_Usuario_Correo" UNIQUE ("CorreoElectronico"),
-    CONSTRAINT "uq_P_EvaluacionDocente_Usuario_NumeroCuenta" UNIQUE ("NumeroCuenta")
+    CONSTRAINT "uq_P_EvaluacionDocente_Usuario_NumeroCuenta" UNIQUE ("NumeroCuenta"),
+    CONSTRAINT "fk_P_EvaluacionDocente_Usuario_CreadoPor" FOREIGN KEY ("CreadoPorUsuarioId")
+        REFERENCES "P_EvaluacionDocente_Usuario" ("Id")
 );
 
 CREATE TABLE "P_EvaluacionDocente_Rol" (

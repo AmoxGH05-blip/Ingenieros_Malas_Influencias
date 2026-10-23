@@ -2,7 +2,8 @@ import { Router } from "express";
 import { rolesRouter } from "./roles.routes";
 import { authRouter } from "./auth.routes";
 import { estudianteRouter } from "./estudiante.routes";
-import { adminRouter } from "./admin.routes";
+import { cuentasRouter } from "./cuentas.routes";
+import { catalogosRouter } from "./catalogos.routes";
 import { coordinacionRouter } from "./coordinacion.routes";
 import { notificacionesRouter } from "./notificaciones.routes";
 import { AppDataSource } from "../config/data-source";
@@ -41,6 +42,7 @@ apiRouter.get("/health/db", async (_req, res) => {
 apiRouter.use("/roles", rolesRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/estudiante", estudianteRouter);
-apiRouter.use("/admin", adminRouter);
+apiRouter.use("/cuentas", cuentasRouter);
+apiRouter.use("/catalogos", catalogosRouter);
 apiRouter.use("/coordinacion", coordinacionRouter);
 apiRouter.use("/notificaciones", notificacionesRouter);
