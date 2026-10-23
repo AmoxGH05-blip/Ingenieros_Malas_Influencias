@@ -16,6 +16,11 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
+  // Contraseña puesta por otra persona: no se usa nada del sistema hasta cambiarla.
+  if (usuario.debeCambiarPassword) {
+    return <Navigate to="/cambiar-password" replace />;
+  }
+
   if (allowedRoles && !allowedRoles.some((rol) => usuario.roles.includes(rol))) {
     return <Navigate to="/" replace />;
   }

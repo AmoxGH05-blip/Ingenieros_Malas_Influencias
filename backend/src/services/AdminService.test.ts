@@ -19,10 +19,10 @@ vi.mock("../repositories/RolRepository", () => ({
   RolRepository: { find: vi.fn(), findOneBy: vi.fn() },
 }));
 vi.mock("../repositories/EstudianteRepository", () => ({
-  EstudianteRepository: { find: vi.fn(), findByMatricula: vi.fn() },
+  EstudianteRepository: { find: vi.fn() },
 }));
 vi.mock("../repositories/DocenteRepository", () => ({
-  DocenteRepository: { find: vi.fn(), findByNumeroEmpleado: vi.fn() },
+  DocenteRepository: { find: vi.fn() },
 }));
 vi.mock("../repositories/ProgramaEducativoRepository", () => ({
   ProgramaEducativoRepository: { find: vi.fn(), findById: vi.fn() },
@@ -42,41 +42,56 @@ import { FacultadRepository } from "../repositories/FacultadRepository";
 
 const ALUMNO = {
   rol: "Estudiante",
+  numeroCuenta: "a2026001",
   correo: "nuevo@dygsis.local",
   password: "ClaveSegura123",
   nombre: "Luisa",
   apellidoPaterno: "Mora",
-  matricula: "A2026001",
   programaEducativoId: 3,
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(null);
-  vi.mocked(EstudianteRepository.findByMatricula).mockResolvedValue(null);
-  vi.mocked(DocenteRepository.findByNumeroEmpleado).mockResolvedValue(null);
   vi.mocked(RolRepository.findOneBy).mockResolvedValue({ id: 4, nombre: "Estudiante" } as never);
   vi.mocked(ProgramaEducativoRepository.findById).mockResolvedValue({ id: 3 } as never);
   vi.mocked(FacultadRepository.findById).mockResolvedValue({ id: 2 } as never);
 });
 
 describe("AdminService.crearUsuario", () => {
-  it("crea un estudiante con su rol y perfil, guardando la contrasena con hash", async () => {
+  it("crea un estudiante con su rol y perfil, el numero de cuenta en mayusculas y la contrasena con hash", async () => {
     const resultado = await AdminService.crearUsuario(ALUMNO);
 
     expect(resultado).toEqual({ id: 500, correo: "nuevo@dygsis.local", rol: "Estudiante", numeroCuenta: "A2026001" });
     const guardados = manager.save.mock.calls.map((c) => (c[0] as { name: string }).name);
     expect(guardados).toEqual(["Usuario", "UsuarioRol", "Estudiante"]);
-    const usuario = manager.create.mock.calls[0][1] as { contrasenaHash: string };
+    const usuario = manager.create.mock.calls[0][1] as { contrasenaHash: string; numeroCuenta: string };
+    expect(usuario.numeroCuenta).toBe("A2026001");
     expect(usuario.contrasenaHash).not.toBe(ALUMNO.password);
     expect(await bcrypt.compare(ALUMNO.password, usuario.contrasenaHash)).toBe(true);
+    const estudiante = manager.create.mock.calls[2][1] as { matricula: string };
+    expect(estudiante.matricula).toBe("A2026001");
   });
 
-  it("crea un coordinador sin perfil de estudiante/docente", async () => {
-    vi.mocked(RolRepository.findOneBy).mockResolvedValue({ id: 2, nombre: "Coordinador" } as never);
-    const resultado = await AdminService.crearUsuario({ rol: "Coordinador", correo: "coord@dygsis.local", password: "ClaveSegura123" });
+  it("la contrasena la puso otra persona: la cuenta nace con cambio obligatorio", async () => {
+    await AdminService.crearUsuario(ALUMNO);
+    const usuario = manager.create.mock.calls[0][1] as { debeCambiarPassword: boolean };
+    expect(usuario.debeCambiarPassword).toBe(true);
+  });
 
-    expect(resultado.numeroCuenta).toBeNull();
+  it("un alumno sin correo recibe el institucional a<cuenta>@my.uvm.edu.mx", async () => {
+    const { correo: _omitido, ...sinCorreo } = ALUMNO;
+    const resultado = await AdminService.crearUsuario({ ...sinCorreo, numeroCuenta: "010181605" });
+    expect(resultado.correo).toBe("a010181605@my.uvm.edu.mx");
+  });
+
+  it("crea un coordinador con numero de cuenta y sin perfil de estudiante/docente", async () => {
+    vi.mocked(RolRepository.findOneBy).mockResolvedValue({ id: 2, nombre: "Coordinador" } as never);
+    const resultado = await AdminService.crearUsuario({
+      rol: "Coordinador", numeroCuenta: "coord2", correo: "coord@dygsis.local", password: "ClaveSegura123",
+    });
+
+    expect(resultado.numeroCuenta).toBe("COORD2");
     const guardados = manager.save.mock.calls.map((c) => (c[0] as { name: string }).name);
     expect(guardados).toEqual(["Usuario", "UsuarioRol"]);
   });
@@ -84,18 +99,25 @@ describe("AdminService.crearUsuario", () => {
   it("crea un docente con numero de empleado y facultad", async () => {
     vi.mocked(RolRepository.findOneBy).mockResolvedValue({ id: 3, nombre: "Docente" } as never);
     const resultado = await AdminService.crearUsuario({
-      rol: "Docente", correo: "doc@dygsis.local", password: "ClaveSegura123",
-      nombre: "Raul", apellidoPaterno: "Diaz", numeroEmpleado: "EMP9", facultadId: 2,
+      rol: "Docente", numeroCuenta: "EMP9", correo: "doc@dygsis.local", password: "ClaveSegura123",
+      nombre: "Raul", apellidoPaterno: "Diaz", facultadId: 2,
     });
     expect(resultado.numeroCuenta).toBe("EMP9");
+    const docente = manager.create.mock.calls[2][1] as { numeroEmpleado: string };
+    expect(docente.numeroEmpleado).toBe("EMP9");
   });
 
   it.each([
     ["rol invalido", { ...ALUMNO, rol: "Root" }],
     ["correo sin formato", { ...ALUMNO, correo: "no-es-correo" }],
     ["password corta", { ...ALUMNO, password: "corta" }],
-    ["estudiante sin matricula", { ...ALUMNO, matricula: "" }],
+    ["password de mas de 72 bytes aunque tenga pocos caracteres", { ...ALUMNO, password: "ñ".repeat(37) }],
+    ["sin numero de cuenta", { ...ALUMNO, numeroCuenta: "" }],
+    ["numero de cuenta con espacios", { ...ALUMNO, numeroCuenta: "A 2026" }],
+    ["numero de cuenta con simbolos", { ...ALUMNO, numeroCuenta: "A-2026" }],
+    ["numero de cuenta de mas de 20 caracteres", { ...ALUMNO, numeroCuenta: "A".repeat(21) }],
     ["estudiante sin programa", { ...ALUMNO, programaEducativoId: undefined }],
+    ["coordinador sin correo", { rol: "Coordinador", numeroCuenta: "COORD3", password: "ClaveSegura123" }],
   ])("rechaza datos invalidos: %s", async (_caso, input) => {
     await expect(AdminService.crearUsuario(input)).rejects.toThrow(DatosInvalidosError);
     expect(manager.save).not.toHaveBeenCalled();
@@ -107,22 +129,39 @@ describe("AdminService.crearUsuario", () => {
   });
 
   it("rechaza un correo duplicado", async () => {
-    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue({ id: 1 } as never);
+    vi.mocked(UsuarioRepository.findOneBy).mockImplementation(((where: { correoElectronico?: string }) =>
+      Promise.resolve(where.correoElectronico ? { id: 1 } : null)) as never);
     await expect(AdminService.crearUsuario(ALUMNO)).rejects.toThrow(UsuarioDuplicadoError);
     expect(manager.save).not.toHaveBeenCalled();
   });
 
-  it("rechaza una matricula que ya existe", async () => {
-    vi.mocked(EstudianteRepository.findByMatricula).mockResolvedValue({ id: 9 } as never);
+  it("rechaza un numero de cuenta que ya existe, sea del rol que sea", async () => {
+    vi.mocked(UsuarioRepository.findOneBy).mockImplementation(((where: { numeroCuenta?: string }) =>
+      Promise.resolve(where.numeroCuenta === "A2026001" ? { id: 9 } : null)) as never);
     await expect(AdminService.crearUsuario(ALUMNO)).rejects.toThrow(UsuarioDuplicadoError);
+    expect(manager.save).not.toHaveBeenCalled();
+  });
+});
+
+describe("AdminService.crearUsuario: altas simultaneas", () => {
+  it("si la base rechaza el duplicado (23505) por una alta simultanea, responde como duplicado y no como error 500", async () => {
+    const { AppDataSource } = await import("../config/data-source");
+    vi.mocked(AppDataSource.transaction).mockRejectedValueOnce({ driverError: { code: "23505" } } as never);
+    await expect(AdminService.crearUsuario(ALUMNO)).rejects.toThrow(UsuarioDuplicadoError);
+  });
+
+  it("otros errores de la base se propagan tal cual", async () => {
+    const { AppDataSource } = await import("../config/data-source");
+    vi.mocked(AppDataSource.transaction).mockRejectedValueOnce(new Error("conexion perdida") as never);
+    await expect(AdminService.crearUsuario(ALUMNO)).rejects.toThrow("conexion perdida");
   });
 });
 
 describe("AdminService.listarUsuarios", () => {
   it("une usuarios con sus roles y numero de cuenta", async () => {
     vi.mocked(UsuarioRepository.find).mockResolvedValue([
-      { id: 1, correoElectronico: "demo@dygsis.local", activo: true },
-      { id: 2, correoElectronico: "coord@dygsis.local", activo: true },
+      { id: 1, numeroCuenta: "DEMO0001", correoElectronico: "demo@dygsis.local", activo: true },
+      { id: 2, numeroCuenta: "COORD0001", correoElectronico: "coord@dygsis.local", activo: true },
     ] as never);
     vi.mocked(UsuarioRolRepository.find).mockResolvedValue([
       { usuarioId: 1, rolId: 4 }, { usuarioId: 1, rolId: 1 }, { usuarioId: 2, rolId: 2 },
@@ -141,6 +180,6 @@ describe("AdminService.listarUsuarios", () => {
       id: 1, correo: "demo@dygsis.local", activo: true,
       roles: ["Estudiante", "Administrador"], numeroCuenta: "DEMO0001", nombre: "Estudiante Demo",
     });
-    expect(lista[1]).toEqual(expect.objectContaining({ roles: ["Coordinador"], numeroCuenta: null, nombre: null }));
+    expect(lista[1]).toEqual(expect.objectContaining({ roles: ["Coordinador"], numeroCuenta: "COORD0001", nombre: null }));
   });
 });

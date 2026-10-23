@@ -8,7 +8,7 @@ import { ROLES_CREABLES, crearUsuario, type Catalogos, type NuevoUsuario, type R
 
 interface NuevoUsuarioFormProps {
   catalogos: Catalogos;
-  onCreado: (correo: string) => void | Promise<void>;
+  onCreado: (numeroCuenta: string) => void | Promise<void>;
   onCancelar: () => void;
 }
 
@@ -44,19 +44,20 @@ export function NuevoUsuarioForm({ catalogos, onCreado, onCancelar }: NuevoUsuar
     setEnviando(true);
     const datos: NuevoUsuario = {
       rol,
-      correo: valor("correo"),
+      numeroCuenta: valor("numeroCuenta"),
+      correo: valor("correo") || undefined,
       password: valor("password"),
       ...(conPerfil && {
         nombre: valor("nombre"),
         apellidoPaterno: valor("apellidoPaterno"),
         apellidoMaterno: valor("apellidoMaterno") || undefined,
       }),
-      ...(esAlumno && { matricula: valor("matricula"), programaEducativoId: Number(valor("programaEducativoId")) }),
-      ...(esDocente && { numeroEmpleado: valor("numeroEmpleado"), facultadId: Number(valor("facultadId")) }),
+      ...(esAlumno && { programaEducativoId: Number(valor("programaEducativoId")) }),
+      ...(esDocente && { facultadId: Number(valor("facultadId")) }),
     };
     try {
       const creado = await crearUsuario(datos);
-      await onCreado(creado.correo);
+      await onCreado(creado.numeroCuenta);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "No se pudo crear el usuario");
       setEnviando(false);
@@ -83,8 +84,28 @@ export function NuevoUsuarioForm({ catalogos, onCreado, onCancelar }: NuevoUsuar
             ))}
           </select>
         </Campo>
-        <Campo id="correo" label="Correo">
-          <Input id="correo" type="email" required maxLength={150} value={valor("correo")} onChange={cambiar("correo")} />
+        <Campo id="numeroCuenta" label={esAlumno ? "Matrícula (número de cuenta)" : esDocente ? "Número de empleado (número de cuenta)" : "Número de cuenta"}>
+          <Input
+            id="numeroCuenta"
+            required
+            maxLength={20}
+            pattern="[A-Za-z0-9]+"
+            title="Solo letras y números, sin espacios"
+            autoComplete="off"
+            value={valor("numeroCuenta")}
+            onChange={cambiar("numeroCuenta")}
+          />
+        </Campo>
+        <Campo id="correo" label={esAlumno ? "Correo (opcional)" : "Correo"}>
+          <Input
+            id="correo"
+            type="email"
+            required={!esAlumno}
+            maxLength={150}
+            placeholder={esAlumno ? "Vacío: a<matrícula>@my.uvm.edu.mx" : undefined}
+            value={valor("correo")}
+            onChange={cambiar("correo")}
+          />
         </Campo>
 
         {conPerfil && (
@@ -103,9 +124,6 @@ export function NuevoUsuarioForm({ catalogos, onCreado, onCancelar }: NuevoUsuar
 
         {esAlumno && (
           <>
-            <Campo id="matricula" label="Matrícula">
-              <Input id="matricula" required maxLength={20} value={valor("matricula")} onChange={cambiar("matricula")} />
-            </Campo>
             <Campo id="programaEducativoId" label="Programa educativo">
               <select id="programaEducativoId" required className={SELECT_CLASS} value={valor("programaEducativoId")} onChange={cambiar("programaEducativoId")}>
                 <option value="">Selecciona…</option>
@@ -121,9 +139,6 @@ export function NuevoUsuarioForm({ catalogos, onCreado, onCancelar }: NuevoUsuar
 
         {esDocente && (
           <>
-            <Campo id="numeroEmpleado" label="Número de empleado">
-              <Input id="numeroEmpleado" required maxLength={20} value={valor("numeroEmpleado")} onChange={cambiar("numeroEmpleado")} />
-            </Campo>
             <Campo id="facultadId" label="Facultad">
               <select id="facultadId" required className={SELECT_CLASS} value={valor("facultadId")} onChange={cambiar("facultadId")}>
                 <option value="">Selecciona…</option>
@@ -137,7 +152,7 @@ export function NuevoUsuarioForm({ catalogos, onCreado, onCancelar }: NuevoUsuar
           </>
         )}
 
-        <Campo id="password" label="Contraseña inicial (mín. 8 caracteres)">
+        <Campo id="password" label="Contraseña temporal (mín. 8 caracteres)">
           <Input id="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" value={valor("password")} onChange={cambiar("password")} />
         </Campo>
       </div>

@@ -18,12 +18,12 @@ WHERE pa."Nombre" = '2026-2027 Semestre 1'
   AND i."Nombre" = 'Evaluacion Docente 2026 (borrador estandar)';
 
 -- 5 docentes (usuarios propios, sin login funcional todavia -- solo para el catalogo)
-INSERT INTO "P_EvaluacionDocente_Usuario" ("CorreoElectronico", "ContrasenaHash") VALUES
-    ('docente1@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
-    ('docente2@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
-    ('docente3@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
-    ('docente4@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
-    ('docente5@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW');
+INSERT INTO "P_EvaluacionDocente_Usuario" ("NumeroCuenta", "CorreoElectronico", "ContrasenaHash") VALUES
+    ('EMP0001', 'docente1@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
+    ('EMP0002', 'docente2@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
+    ('EMP0003', 'docente3@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
+    ('EMP0004', 'docente4@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
+    ('EMP0005', 'docente5@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW');
 
 INSERT INTO "P_EvaluacionDocente_UsuarioRol" ("UsuarioId", "RolId")
 SELECT u."Id", r."Id"

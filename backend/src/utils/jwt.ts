@@ -4,10 +4,13 @@ export type TipoCuenta = "Estudiante" | "Docente" | "Coordinador" | "Administrad
 
 export interface AppJwtPayload {
   sub: number;
+  numeroCuenta: string;
   correo: string;
   tipoCuenta: TipoCuenta;
   roles: string[];
   jti: string;
+  /** Mientras sea true, la API solo deja usar la ruta para cambiar la contrasena. */
+  debeCambiarPassword: boolean;
 }
 
 function getSecret(): string {

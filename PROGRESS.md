@@ -278,6 +278,20 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
 
 ---
 
+## Tareas nuevas tras la revisión con la coordinadora (16-oct-2026)
+
+- [x] **SCRUM-78** — Login por número de cuenta para todos los roles + cuenta inicial de Administrador (Responsable: Amoxhua Ochoa)
+  - **Qué se hizo, con plan aprobado:** todos los roles entran con número de cuenta; el correo ya no sirve para iniciar sesión. Las cuentas con contraseña puesta por otra persona (altas del panel y la cuenta inicial) nacen con **cambio obligatorio**: pantalla `/cambiar-password`, y la API responde 403 a todo lo demás hasta que se cambie. Script `npm run admin:inicial` para crear la primera cuenta de Administrador (`ADMIN0001`) con la contraseña tomada de una variable de entorno. Las cuentas demo no tienen cambio obligatorio. Detalle en `docs/acceso-y-cuentas.md`.
+  - **Cómo se hizo:** migración `007_numero_cuenta_login.sql` (`Usuario.NumeroCuenta` único y obligatorio, rellenado con matrícula o número de empleado; el coordinador demo quedó como `COORD0001`; `Usuario.DebeCambiarPassword`). `AuthService.login` busca solo por número de cuenta (sin distinguir mayúsculas), rechaza identificadores con caracteres raros sin consultar la base y compara contra un hash señuelo cuando la cuenta no existe. `cambiarPassword` valida, marca como cerradas las sesiones anteriores y devuelve una sesión nueva (los tokens ya emitidos siguen valiendo hasta 8 h: riesgo aceptado y documentado). `requireAuth` bloquea con 403 `CAMBIO_PASSWORD_REQUERIDO` mientras el token traiga la marca. El alta de usuarios pide número de cuenta para todos los roles (se guarda también como matrícula o número de empleado), y a los alumnos sin correo se les asigna `a<cuenta>@my.uvm.edu.mx`.
+  - **Revisión de seguridad:** límite de intentos fallidos (5 por IP y cuenta y 30 por IP en el login, 10 por usuario al cambiar la contraseña; `429` al pasarse), política de contraseña medida en bytes (bcrypt solo usa 72), recuperación por correo con la misma política, altas simultáneas que responden 409 en vez de 500, y los errores ya no vuelcan el hash de la contraseña a los logs. Riesgos aceptados y la lista de pendientes antes de la entrega (desactivar las cuentas demo) en `docs/acceso-y-cuentas.md`.
+  - **De paso se corrigió** un resto de SQL Server en `SesionRepository` (`SYSDATETIME()` y `Activa = 1`) que habría roto el cambio de contraseña en producción.
+  - **Verificado:** 120/120 pruebas en backend; 26 comprobaciones de punta a punta contra Supabase con cuentas temporales borradas al terminar; en el navegador, login, cambio obligatorio (no se puede saltar), errores, menú con número de cuenta y formulario de alta por rol. Migración 007 aplicada en Supabase.
+  - **Cambia cómo entra el coordinador de pruebas:** `coordinacion@dygsis.local` pasa a `COORD0001` (misma contraseña demo).
+- [ ] **SCRUM-79** — Altas jerárquicas: Administrador crea coordinadores; Coordinador crea alumnos, docentes y grupos (Responsable: Amoxhua Ochoa)
+- [ ] **SCRUM-80** — Cambio de contraseña con aprobación del coordinador o administrador (Responsable: Amoxhua Ochoa)
+
+---
+
 ## Tareas sueltas / de prueba (no forman parte del plan de sprints)
 
 - [ ] **SCRUM-1** — "Tarea 1" (sin responsable, parece de prueba — confirmar si se elimina de Jira)

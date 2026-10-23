@@ -79,12 +79,15 @@ CREATE TABLE "P_EvaluacionDocente_PeriodoAcademico" (
 
 CREATE TABLE "P_EvaluacionDocente_Usuario" (
     "Id"                    INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
-    "CorreoElectronico"     VARCHAR(150)    NOT NULL,
+    "NumeroCuenta"          VARCHAR(20)     NOT NULL,  -- con esto se inicia sesion; en MAYUSCULAS (migracion 007)
+    "CorreoElectronico"     VARCHAR(150)    NOT NULL,  -- dato de contacto, ya no sirve para entrar
     "ContrasenaHash"        VARCHAR(256)    NOT NULL,
+    "DebeCambiarPassword"   BOOLEAN         NOT NULL DEFAULT false,  -- la puso otra persona: cambiarla al entrar
     "Activo"                BOOLEAN         NOT NULL DEFAULT true,
     "FechaCreacion"         TIMESTAMPTZ     NOT NULL DEFAULT now(),
     CONSTRAINT "pk_P_EvaluacionDocente_Usuario" PRIMARY KEY ("Id"),
-    CONSTRAINT "uq_P_EvaluacionDocente_Usuario_Correo" UNIQUE ("CorreoElectronico")
+    CONSTRAINT "uq_P_EvaluacionDocente_Usuario_Correo" UNIQUE ("CorreoElectronico"),
+    CONSTRAINT "uq_P_EvaluacionDocente_Usuario_NumeroCuenta" UNIQUE ("NumeroCuenta")
 );
 
 CREATE TABLE "P_EvaluacionDocente_Rol" (
@@ -376,12 +379,12 @@ INSERT INTO "P_EvaluacionDocente_TipoPregunta" ("Nombre") VALUES
 /* ---------------------------------------------------------------------
    9. Cuestionario oficial de evaluacion docente (antes migracion 003)
    Borrador estandar de 15 preguntas, escala oficial 0/2.5/5/7.5/10.
-   Crea tambien la cuenta de prueba Coordinador (coordinacion@dygsis.local
-   / Demo2026!) para que el equipo pueda probar ese rol.
+   Crea tambien la cuenta de prueba Coordinador (numero de cuenta COORD0001,
+   contrasena Demo2026!) para que el equipo pueda probar ese rol.
    --------------------------------------------------------------------- */
 
-INSERT INTO "P_EvaluacionDocente_Usuario" ("CorreoElectronico", "ContrasenaHash")
-VALUES ('coordinacion@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'); -- Demo2026!
+INSERT INTO "P_EvaluacionDocente_Usuario" ("NumeroCuenta", "CorreoElectronico", "ContrasenaHash")
+VALUES ('COORD0001', 'coordinacion@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'); -- Demo2026!
 
 INSERT INTO "P_EvaluacionDocente_UsuarioRol" ("UsuarioId", "RolId")
 SELECT u."Id", r."Id"
@@ -453,8 +456,8 @@ WHERE p."SeccionInstrumentoId" IN (
    el despliegue de inmediato, igual que se tenia en Azure.
    --------------------------------------------------------------------- */
 
-INSERT INTO "P_EvaluacionDocente_Usuario" ("CorreoElectronico", "ContrasenaHash")
-VALUES ('demo@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'); -- Demo2026!
+INSERT INTO "P_EvaluacionDocente_Usuario" ("NumeroCuenta", "CorreoElectronico", "ContrasenaHash")
+VALUES ('DEMO0001', 'demo@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'); -- Demo2026!
 
 INSERT INTO "P_EvaluacionDocente_UsuarioRol" ("UsuarioId", "RolId")
 SELECT u."Id", r."Id"

@@ -29,7 +29,9 @@ export function Topbar({ onOpenMobileMenu }: TopbarProps) {
   const crumbs = breadcrumbsFor(pathname);
   const titulo = crumbs[crumbs.length - 1];
   const rol = usuario?.roles[0] ?? "";
-  const inicial = (usuario?.correo ?? "?").charAt(0).toUpperCase();
+  // Las sesiones abiertas antes de SCRUM-78 no traen numeroCuenta: se muestra el correo hasta que vuelvan a entrar.
+  const identificador = usuario?.numeroCuenta ?? usuario?.correo ?? "?";
+  const inicial = identificador.charAt(0).toUpperCase();
 
   // Cierra el menú del perfil al hacer clic fuera o presionar Escape.
   useEffect(() => {
@@ -153,7 +155,7 @@ export function Topbar({ onOpenMobileMenu }: TopbarProps) {
               {inicial}
             </span>
             <span className="hidden min-w-0 text-left leading-tight md:block">
-              <span className="block max-w-[170px] truncate text-sm font-semibold">{usuario?.correo}</span>
+              <span className="block max-w-[170px] truncate text-sm font-semibold">{identificador}</span>
               <span className="block text-xs text-muted-foreground">{rol}</span>
             </span>
             <ChevronDown className="hidden size-4 text-muted-foreground md:block" aria-hidden />

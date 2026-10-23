@@ -14,12 +14,19 @@ npm run test:coverage # con reporte de cobertura
 
 No requieren conexión a la base de datos ni al SMTP real — la capa de repositorios y `EmailService` se mockean con Vitest (`vi.mock`), así que corren rápido y de forma determinista en cualquier máquina, incluida CI si se configura más adelante.
 
-## Qué cubren (16 pruebas, 3 archivos)
+## Qué cubren
+
+Los archivos de abajo se ampliaron con SCRUM-78 (login por número de cuenta): ver también `docs/acceso-y-cuentas.md`. El conteo total de pruebas del backend está en `PROGRESS.md`.
 
 ### `src/services/AuthService.test.ts`
 
 - **Login correcto:** genera el JWT, y registra la fila de `Sesion` correspondiente.
-- **Número de cuenta inexistente:** rechazado, sin llegar a consultar `Usuario`.
+- **Número de cuenta inexistente:** rechazado con el mismo error genérico.
+- **Identificador con formato inválido** (un correo, espacios, símbolos, más de 20 caracteres): rechazado sin consultar la base. El correo ya no sirve para entrar (SCRUM-78).
+- **Mayúsculas y espacios:** se ignoran; el número se busca en mayúsculas.
+- **Tipo de cuenta:** sale del rol de mayor prioridad (Administrador, Coordinador, Docente, Estudiante).
+- **Cambio obligatorio:** la marca `debeCambiarPassword` llega en la respuesta y dentro del token.
+- **Cambiar contraseña:** actual incorrecta, nueva demasiado corta o larga o igual a la actual, cuenta inexistente o inactiva; en el caso válido guarda el hash nuevo, quita la marca, cierra las sesiones anteriores y entrega un token sin restricción.
 - **Contraseña incorrecta:** rechazada con el mismo error genérico (no revela si la cuenta existe).
 - **Usuario inactivo:** rechazado aunque la contraseña sea correcta.
 - **Recuperación — correo no registrado:** no envía correo ni crea token (respuesta silenciosa).

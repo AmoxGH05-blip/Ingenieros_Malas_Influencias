@@ -10,7 +10,7 @@ export interface UsuarioListado {
   correo: string;
   activo: boolean;
   roles: string[];
-  numeroCuenta: string | null;
+  numeroCuenta: string;
   nombre: string | null;
 }
 
@@ -21,13 +21,14 @@ export interface Catalogos {
 
 export interface NuevoUsuario {
   rol: RolCreable;
-  correo: string;
+  /** Matrícula (alumnos), número de empleado (docentes) o el que se asigne al coordinador o administrador. */
+  numeroCuenta: string;
+  /** Opcional solo para alumnos: sin correo se les asigna a<cuenta>@my.uvm.edu.mx. */
+  correo?: string;
   password: string;
   nombre?: string;
   apellidoPaterno?: string;
   apellidoMaterno?: string;
-  matricula?: string;
-  numeroEmpleado?: string;
   programaEducativoId?: number;
   facultadId?: number;
 }
@@ -40,6 +41,6 @@ export function getCatalogos(): Promise<Catalogos> {
   return apiFetch<Catalogos>("/admin/catalogos");
 }
 
-export function crearUsuario(datos: NuevoUsuario): Promise<{ id: number; correo: string; rol: RolCreable; numeroCuenta: string | null }> {
+export function crearUsuario(datos: NuevoUsuario): Promise<{ id: number; correo: string; rol: RolCreable; numeroCuenta: string }> {
   return apiFetch("/admin/usuarios", { method: "POST", body: JSON.stringify(datos) });
 }

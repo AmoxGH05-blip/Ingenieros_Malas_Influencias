@@ -11,11 +11,11 @@
    Contrasena de todos: Demo2026!   Para borrarlos: cleanup_demo_coordinacion.sql
    ===================================================================== */
 
-INSERT INTO "P_EvaluacionDocente_Usuario" ("CorreoElectronico", "ContrasenaHash") VALUES
-    ('demo2@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
-    ('demo3@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
-    ('demo4@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
-    ('demo5@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW');
+INSERT INTO "P_EvaluacionDocente_Usuario" ("NumeroCuenta", "CorreoElectronico", "ContrasenaHash") VALUES
+    ('DEMO0002', 'demo2@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
+    ('DEMO0003', 'demo3@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
+    ('DEMO0004', 'demo4@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW'),
+    ('DEMO0005', 'demo5@dygsis.local', '$2a$10$5imIEukw3/Qtlcu46/ROK.1f4GdS7nHrnFgPGOuB439VKzG7a1ElW');
 
 INSERT INTO "P_EvaluacionDocente_UsuarioRol" ("UsuarioId", "RolId")
 SELECT u."Id", r."Id"

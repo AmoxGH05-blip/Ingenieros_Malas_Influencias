@@ -35,9 +35,9 @@ export function UsuariosPage() {
 
   const visibles = (usuarios ?? []).filter((u) => filtro === "Todos" || u.roles.includes(filtro));
 
-  async function handleCreado(correo: string) {
+  async function handleCreado(numeroCuenta: string) {
     setFormAbierto(false);
-    setAviso(`Se creó la cuenta de ${correo}.`);
+    setAviso(`Se creó la cuenta ${numeroCuenta}. Deberá cambiar su contraseña en su primer inicio de sesión.`);
     await cargar();
   }
 
@@ -115,7 +115,7 @@ export function UsuariosPage() {
               </div>
               <div className="min-w-0 text-sm">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Número de cuenta</p>
-                <p className="mt-1 truncate">{u.numeroCuenta ?? "—"}</p>
+                <p className="mt-1 truncate">{u.numeroCuenta}</p>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {u.roles.map((rol) => (

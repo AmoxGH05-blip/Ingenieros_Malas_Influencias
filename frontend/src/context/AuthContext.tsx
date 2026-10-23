@@ -1,12 +1,14 @@
 import * as React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { login as loginRequest, type Usuario } from "@/lib/auth-api";
+import { login as loginRequest, type LoginResponse, type Usuario } from "@/lib/auth-api";
 
 interface AuthContextValue {
   token: string | null;
   usuario: Usuario | null;
   isLoading: boolean;
   login: (numeroCuenta: string, password: string) => Promise<void>;
+  /** Reemplaza la sesión (p. ej. tras cambiar la contraseña, que entrega un token nuevo). */
+  actualizarSesion: (respuesta: LoginResponse) => void;
   logout: () => void;
 }
 
@@ -34,11 +36,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  async function login(numeroCuenta: string, password: string) {
-    const respuesta = await loginRequest(numeroCuenta, password);
+  function actualizarSesion(respuesta: LoginResponse) {
     setToken(respuesta.token);
     setUsuario(respuesta.usuario);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(respuesta));
+  }
+
+  async function login(numeroCuenta: string, password: string) {
+    actualizarSesion(await loginRequest(numeroCuenta, password));
   }
 
   function logout() {
@@ -48,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, usuario, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ token, usuario, isLoading, login, actualizarSesion, logout }}>
       {children}
     </AuthContext.Provider>
   );

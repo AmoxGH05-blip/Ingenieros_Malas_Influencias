@@ -3,10 +3,12 @@ import { signToken, verifyToken, type AppJwtPayload } from "./jwt";
 
 const PAYLOAD: AppJwtPayload = {
   sub: 1,
+  numeroCuenta: "A2024001",
   correo: "usuario@prueba.local",
   tipoCuenta: "Estudiante",
   roles: ["Estudiante"],
   jti: "jti-de-prueba",
+  debeCambiarPassword: false,
 };
 
 beforeEach(() => {

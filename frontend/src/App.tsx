@@ -6,6 +6,7 @@ import { AppLayout } from "@/layouts/AppLayout";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
+import { CambiarPasswordPage } from "@/pages/auth/CambiarPasswordPage";
 import { EstudianteDashboardPage } from "@/pages/dashboards/EstudianteDashboardPage";
 import { DocenteDashboardPage } from "@/pages/dashboards/DocenteDashboardPage";
 import { CoordinadorDashboardPage } from "@/pages/dashboards/CoordinadorDashboardPage";
@@ -23,6 +24,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/cambiar-password" element={<CambiarPasswordPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
