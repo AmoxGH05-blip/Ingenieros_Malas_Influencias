@@ -59,6 +59,7 @@ No corresponde a un SCRUM-XX específico (pedido directamente por el usuario). S
   - `LoginPage.tsx`, `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx` restyleados para el panel oscuro (texto claro, botón dorado).
   - Nuevo asset `frontend/src/assets/branding/dygsis-login-bg.jpg` (+ copia en `recursos/branding/`), el collage de carteles provisto por el usuario.
 - **Cómo se hizo:** paleta definida en variables CSS (formato OKLCH, mismo patrón que ya existía) extrayendo tonos del cartel de referencia (pergamino ~`#c9bb9e`, tinta casi negra). Verificado con `npm run build` (limpio) y en el navegador: login desktop/mobile, dashboard completo con la nueva paleta (sidebar, tarjetas, botones), sin colores verdes residuales (auditoría con grep).
+- **Ajuste posterior (23-oct-2026):** el texto que se escribe en los campos del login era claro sobre fondo pergamino y casi no se veía (el componente `Input` heredaba el color del panel oscuro): ahora usa la tinta oscura del tema. Además el panel de la imagen ya no es un cuadrado fijo, sino que ocupa todo el alto de la tarjeta, sin la franja vacía de abajo. Verificado en escritorio y móvil, en login y recuperación.
 
 ## Migración de base de datos: Azure SQL Server → Supabase (PostgreSQL) (25-sep-2026)
 

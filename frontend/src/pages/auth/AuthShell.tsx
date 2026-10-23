@@ -19,7 +19,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
 
       <div className="relative grid w-full max-w-4xl overflow-hidden rounded-2xl shadow-2xl lg:grid-cols-2">
         <div
-          className="relative hidden aspect-square items-center justify-center bg-cover bg-center lg:flex"
+          // Sin proporcion fija: el panel ocupa toda la altura de la tarjeta (la del formulario) y la imagen se recorta en vez de dejar un hueco.
+          className="relative hidden items-center justify-center bg-cover bg-center lg:flex"
           style={{ backgroundImage: `url(${loginBg})` }}
         >
           <div className="absolute inset-0 bg-sidebar/55" aria-hidden />
