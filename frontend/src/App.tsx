@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
@@ -20,6 +21,7 @@ import { GrupoDetallePage } from "@/pages/grupos/GrupoDetallePage";
 import { AdministradorDashboardPage } from "@/pages/dashboards/AdministradorDashboardPage";
 import { DocenteComparativoPage } from "@/pages/docente/DocenteComparativoPage";
 import { IndicadoresPage } from "@/pages/indicadores/IndicadoresPage";
+const EstadisticasPage = lazy(() => import("@/pages/estadisticas/EstadisticasPage").then((m) => ({ default: m.EstadisticasPage })));
 import { IndicadorDocenteDetallePage } from "@/pages/indicadores/IndicadorDocenteDetallePage";
 
 function App() {
@@ -53,6 +55,14 @@ function App() {
               <Route path="/coordinador/grupos" element={<GruposPage />} />
               <Route path="/coordinador/grupos/:id" element={<GrupoDetallePage />} />
               <Route path="/coordinador/solicitudes" element={<SolicitudesPasswordPage />} />
+              <Route
+                path="/coordinador/estadisticas"
+                element={
+                  <Suspense fallback={<p role="status" className="text-sm text-muted-foreground">Cargando…</p>}>
+                    <EstadisticasPage />
+                  </Suspense>
+                }
+              />
               <Route path="/coordinador/indicadores" element={<IndicadoresPage />} />
               <Route path="/coordinador/indicadores/:id" element={<IndicadorDocenteDetallePage />} />
             </Route>

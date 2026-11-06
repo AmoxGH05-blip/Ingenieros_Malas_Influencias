@@ -257,9 +257,15 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
 
 - [ ] **SCRUM-53** — Tablas de talleres/laboratorios configurables por carrera + criterios de evaluación (Responsable: Amoxhua Ochoa)
 - [ ] **SCRUM-54** — API de evaluación de talleres/laboratorios, activación configurable por carrera (Responsable: Juan Antonio)
-- [ ] **SCRUM-55** — API de agregación para gráficos institucionales (promedio, participación, ranking) (Responsable: Juan Antonio)
+- [x] **SCRUM-55** — API de agregación para gráficos institucionales (promedio, participación, ranking) (Responsable: Juan Antonio)
+  - **Qué se hizo (06-nov-2026), con plan aprobado:** `GET /api/estadisticas/institucional?periodoId=` (Coordinador y Administrador; alumno y docente 403, sin sesión 401, ciclo inexistente 404, id inválido 400). Devuelve participación, promedio institucional, distribución por categoría, concentrado por carrera y tendencia de los últimos 6 ciclos. Detalle en `docs/estadisticas-institucionales.md`.
+  - **Cómo se hizo:** `EstadisticaRepository` (SQL parametrizado sobre las vistas de participación y de indicadores, sin vistas ni tablas nuevas), `EstadisticaService` (convierte los textos de pg y calcula los porcentajes; `null` y no 0 cuando no hay nada que medir) y `estadisticas.routes.ts`. Dos porcentajes distintos a propósito: alumnos que participaron (4 de 5 = 80 %) y evaluaciones enviadas (10 de 25 = 40 %). La categoría de cada carrera sale de la función SQL de clasificación, para que los rangos sigan en un solo lugar.
+  - **Verificado** contra Supabase: 24 comprobaciones, 0 fallas; las cifras coinciden con consultas independientes sobre las tablas y con el ranking de indicadores. 293 pruebas en backend.
 - [ ] **SCRUM-56** — Formulario de evaluación de talleres y laboratorios (Responsable: Nieto Guerra Emiliano)
-- [ ] **SCRUM-57** — Dashboard de gráficos institucionales + concentrado por carrera (Responsable: Nieto Guerra Emiliano)
+- [x] **SCRUM-57** — Dashboard de gráficos institucionales + concentrado por carrera (Responsable: Nieto Guerra Emiliano)
+  - **Qué se hizo (06-nov-2026), con plan aprobado:** pantalla `/coordinador/estadisticas` ("Estadísticas" en el menú de Coordinador y de Administrador) con selector de ciclo, cuatro tarjetas (alumnos que participaron, evaluaciones enviadas, promedio institucional, docentes con promedio), dona de docentes por categoría, línea del promedio institucional por ciclo y concentrado por carrera (barras y tabla).
+  - **Cómo se hizo:** Recharts, sin animaciones; las gráficas son decorativas para el lector de pantalla y sus cifras se repiten en listas y tablas. La pantalla se carga con `React.lazy` para que el paquete principal no crezca. Cada respuesta lleva su ciclo, así que cambiar de ciclo no muestra datos ni errores de otro.
+  - **Verificado** en navegador contra Supabase: las tres gráficas se dibujan, vista móvil sin desbordes, menú de ambos roles.
 - [ ] **SCRUM-58** — Pruebas de carga básicas (respuesta <3s) e integración de módulos entregados (Responsable: Mauricio Mondragón)
 - [ ] **SCRUM-59** — Preparar y documentar el Prototipo 2 funcional parcial (Responsable: Mauricio Mondragón)
 
