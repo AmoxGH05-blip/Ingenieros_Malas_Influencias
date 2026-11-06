@@ -55,6 +55,6 @@ Roles del sistema: **Administrador, Coordinador, Docente, Estudiante** (ver `doc
 ## 4. Trazabilidad con la base de datos y el backend
 
 - Modelo de datos: `database/postgres_schema.sql` (esquema consolidado de PostgreSQL en Supabase, 22 tablas, 3 vistas de participación y 2 de indicadores docentes) y `database/migrations/` (migraciones 002 a 011, repetibles y con su reversa). `database/evaluacion_docente_schema.sql` es historia de la versión de SQL Server.
-- Backend: `backend/src/` por capas (entidades, repositorios, servicios, controladores y rutas), con 277 pruebas automatizadas.
+- Backend: `backend/src/` por capas (entidades, repositorios, servicios, controladores y rutas), con 282 pruebas automatizadas.
 - Documentación por tema: `docs/acceso-y-cuentas.md` (RF01, RNF01), `docs/altas-y-grupos.md` (RF10), `docs/notificaciones.md` (RF05), `docs/vistas-participacion.md` (RF06) y `docs/indicadores-docentes.md` (RF07) y `docs/cambio-de-contrasena.md` (RF11).
 - El avance tarea por tarea, con "qué se hizo / cómo se hizo", está en `PROGRESS.md`.
