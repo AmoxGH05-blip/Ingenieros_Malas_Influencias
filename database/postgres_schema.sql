@@ -746,3 +746,56 @@ BEGIN
     END IF;
 END
 $$;
+
+/* ---------------------------------------------------------------------
+   14. Cerrar el acceso de la Data API de Supabase (migracion 013, SCRUM-81)
+   RLS en todas las tablas y sin privilegios para anon/authenticated; el backend usa el rol dueno.
+   --------------------------------------------------------------------- */
+DO $$
+DECLARE
+    objeto RECORD;
+    rol    TEXT;
+BEGIN
+    -- 1) RLS en todas las tablas del proyecto
+    FOR objeto IN
+        SELECT c.relname
+        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relname LIKE 'P\_EvaluacionDocente\_%'
+    LOOP
+        EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', objeto.relname);
+    END LOOP;
+
+    -- 2) Revocar privilegios de tablas, vistas y secuencias del proyecto
+    FOREACH rol IN ARRAY ARRAY['anon', 'authenticated'] LOOP
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = rol) THEN
+            FOR objeto IN
+                SELECT c.relname, c.relkind
+                FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = 'public'
+                  AND ((c.relkind IN ('r', 'v', 'm') AND (c.relname LIKE 'P\_EvaluacionDocente\_%' OR c.relname LIKE 'V\_EvaluacionDocente\_%'))
+                    OR (c.relkind = 'S' AND c.relname LIKE 'P\_EvaluacionDocente\_%'))
+            LOOP
+                IF objeto.relkind = 'S' THEN
+                    EXECUTE format('REVOKE ALL ON SEQUENCE public.%I FROM %I', objeto.relname, rol);
+                ELSE
+                    EXECUTE format('REVOKE ALL ON TABLE public.%I FROM %I', objeto.relname, rol);
+                END IF;
+            END LOOP;
+
+            -- Funciones del proyecto
+            FOR objeto IN
+                SELECT p.oid::regprocedure AS firma
+                FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+                WHERE n.nspname = 'public' AND p.proname LIKE 'F\_EvaluacionDocente\_%'
+            LOOP
+                EXECUTE format('REVOKE ALL ON FUNCTION %s FROM %I', objeto.firma, rol);
+            END LOOP;
+
+            -- 3) Privilegios por defecto de lo que cree postgres de aqui en adelante
+            EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON TABLES FROM %I', rol);
+            EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON SEQUENCES FROM %I', rol);
+            EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM %I', rol);
+        END IF;
+    END LOOP;
+END
+$$;

@@ -327,6 +327,10 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
   - **Verificado:** 277 pruebas en backend; 25 comprobaciones contra Supabase (incluido el ataque de reemplazo); en el navegador; y en producción. Migraciones 010, 011 y 012 aplicadas.
   - **Riesgos aceptados:** cualquiera que conozca un número de cuenta puede mandar una solicitud (la defensa es que alguien la apruebe tras verificar a la persona y con su código); un token ya emitido vale hasta 8 horas aunque se cierren las sesiones (validar el token en cada petición queda como tarea aparte); si el único administrador olvida su contraseña hay que restablecerla con un script.
 
+- [x] **SCRUM-81** — Cerrar permisos de tablas y vistas de Supabase a anon/authenticated (activar RLS) (sin responsable asignado; la hizo Amoxhua Ochoa)
+  - **Qué se hizo (06-nov-2026):** migración `013_cerrar_acceso_data_api.sql`. Antes, los roles públicos `anon` y `authenticated` de Supabase leían y escribían 20 tablas y 3 vistas (comprobado con conteos: 11 usuarios, 104 sesiones y 72 evaluaciones legibles con la clave pública). Ahora: RLS activado en todas las tablas, privilegios revocados en tablas, vistas, secuencias y funciones, y `ALTER DEFAULT PRIVILEGES` para que las tablas nuevas nazcan cerradas.
+  - **Verificado:** `anon` y `authenticated` reciben `permission denied` en `Usuario`, `Sesion` y `Evaluacion`; una tabla nueva creada por `postgres` no da acceso a ninguno de los dos; la migración se puede ejecutar dos veces; el backend (rol dueño con BYPASSRLS) no se afecta: 293 pruebas, verificaciones de coordinación y de estadísticas contra la base sin fallas. Detalle en `docs/seguridad-base-de-datos.md`.
+  - **Pendiente de tu lado (opcional):** en Supabase, Settings > API, quitar `public` de *Exposed schemas* para que la Data API ni siquiera exponga el esquema.
 ---
 
 ## Tareas sueltas / de prueba (no forman parte del plan de sprints)
