@@ -25,7 +25,7 @@ src/
 │   ├── api.ts          # fetch wrapper genérico (ApiError, base URL)
 │   └── auth-api.ts     # llamadas a /api/auth/*
 ├── pages/
-│   ├── auth/            # Login, ForgotPassword, ResetPassword — YA FUNCIONALES contra el backend real
+│   ├── auth/            # Login, cambio de contraseña y solicitud de cambio con aprobación — YA FUNCIONALES contra el backend real
 │   └── dashboards/       # un placeholder por rol — aquí entra el trabajo de cada sprint
 ├── routes/
 │   ├── ProtectedRoute.tsx  # exige sesión y, opcionalmente, un rol específico

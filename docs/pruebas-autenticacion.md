@@ -44,6 +44,6 @@ Los archivos de abajo se ampliaron con SCRUM-78 (login por número de cuenta): v
 
 ## Pruebas manuales end-to-end (complementarias, ya realizadas en SCRUM-26/27/28/29)
 
-Además de estas pruebas automatizadas, cada endpoint de auth se probó por HTTP contra el servidor real (`Central-Data`) y el SMTP real durante su desarrollo — con datos de prueba insertados y eliminados en la misma sesión de trabajo. Ver el detalle en `PROGRESS.md` (SCRUM-26, SCRUM-27, SCRUM-29).
+Además de estas pruebas automatizadas, cada endpoint de auth se probó por HTTP contra el servidor real durante su desarrollo (el correo se retiró después, con SCRUM-80) — con datos de prueba insertados y eliminados en la misma sesión de trabajo. Ver el detalle en `PROGRESS.md` (SCRUM-26, SCRUM-27, SCRUM-29).
 
 Ver también `docs/seguridad-checklist.md` para el checklist de seguridad asociado.

@@ -6,7 +6,7 @@ Node.js + Express + TypeScript + TypeORM, arquitectura por capas: `entities → 
 
 ```bash
 npm install
-cp .env.example .env   # pide las credenciales reales (BD, JWT, SMTP) al equipo si no las tienes
+cp .env.example .env   # pide las credenciales reales (BD, JWT) al equipo si no las tienes
 npm run dev             # http://localhost:3000
 ```
 
@@ -27,11 +27,11 @@ npm run dev             # http://localhost:3000
 src/
 ├── entities/        # Modelos TypeORM, mapeados 1:1 a las tablas P_EvaluacionDocente_* (ver database/)
 ├── repositories/     # Acceso a datos — un archivo por entidad, extiende el Repository de TypeORM
-├── services/          # Lógica de negocio (AuthService, RolService, EmailService)
+├── services/          # Lógica de negocio (AuthService, RolService, CuentaService, SolicitudPasswordService...)
 ├── controllers/       # Reciben el Request/Response de Express, delegan a services
 ├── routes/             # Definición de endpoints por módulo
 ├── middlewares/        # asyncHandler (captura errores async para el error handler global)
-├── utils/               # jwt.ts, resetToken.ts — utilidades puras, con sus propias pruebas
+├── utils/               # jwt.ts, password.ts... — utilidades puras, con sus propias pruebas
 ├── config/               # data-source.ts (conexión TypeORM)
 ├── app.ts                # Configuración de Express (middlewares, rutas, error handler)
 └── server.ts              # Punto de entrada: inicializa la conexión a BD y levanta el servidor

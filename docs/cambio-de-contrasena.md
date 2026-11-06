@@ -74,10 +74,10 @@ El sistema no puede saber si quien pidió el cambio es el dueño de la cuenta: *
 
 ## Pruebas
 
-- 16 pruebas del servicio (`SolicitudPasswordService.test.ts`): solicitud guardada cifrada y que reemplaza a la pendiente, misma respuesta con cuenta inexistente o inactiva, validación sin consultar la base, simultaneidad (`23505`), listado por jerarquía, solo vigentes, aprobar (hash aplicado, sesiones cerradas, quién resolvió), rechazar, roles frescos dentro de la transacción, autoaprobación, `404`/`409`/`400` y permisos.
-- Pruebas de permisos por ruta (`solicitudesPassword.routes.test.ts`) y del límite de ritmo.
-- Pruebas del aviso (`NotificacionService.test.ts`).
-- Verificado contra Supabase y en el navegador: solicitud pública, aviso al coordinador, aprobación en dos pasos, la contraseña vieja deja de valer y la nueva entra, jerarquía (el coordinador no ve ni resuelve solicitudes de otro coordinador), rechazo sin cambio, `400`, `401`, `403`, `404` y `409`.
+- 24 pruebas del servicio (`SolicitudPasswordService.test.ts`): código y contraseña guardados cifrados, solicitud que reemplaza a la pendiente y le borra el hash, respuesta antes de guardar, misma respuesta con cuenta inexistente o inactiva, validación sin consultar la base, reintento ante dos solicitudes simultáneas, listado por jerarquía, solo vigentes, sin la propia solicitud, aviso de reemplazo, actor leído de la base (degradado o desactivado), aprobar con el código correcto (hash aplicado, sesiones cerradas, quién resolvió), códigos incorrectos o ausentes, rechazar sin código, bloqueos de la solicitud y la cuenta, roles frescos, autoaprobación, `404`/`409`/`400` y permisos.
+- Pruebas de permisos por ruta (`solicitudesPassword.routes.test.ts`), del límite de ritmo (`limitadores.test.ts`) y del aviso (`NotificacionService.test.ts`). 277 pruebas en el backend.
+- Contra Supabase, 25 comprobaciones de punta a punta: solicitud pública (con cuenta existente e inexistente), contraseña vieja vigente mientras está pendiente, aviso al coordinador, **ataque de reemplazo** (el código de la persona real no sirve para la solicitud del atacante, y sin código o con uno equivocado no se aprueba nada), aprobación con código en minúsculas y espacios, jerarquía (el coordinador no ve ni resuelve solicitudes de coordinadores), rechazo sin código y `400`/`401`/`403`/`404`/`409`. En la base se comprobó que las solicitudes resueltas o reemplazadas quedan sin hash.
+- En el navegador: pantalla del alumno con el código, aviso y panel del coordinador, código equivocado (el error se queda visible y el formulario abierto) y aprobación con el código correcto. En producción: la solicitud pública responde con código y la ruta `forgot-password` ya no existe.
 
 ## Limitaciones
 
