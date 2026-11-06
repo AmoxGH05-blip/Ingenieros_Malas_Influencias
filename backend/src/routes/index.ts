@@ -8,6 +8,7 @@ import { gruposRouter } from "./grupos.routes";
 import { materiasRouter } from "./materias.routes";
 import { coordinacionRouter } from "./coordinacion.routes";
 import { notificacionesRouter } from "./notificaciones.routes";
+import { indicadoresRouter } from "./indicadores.routes";
 import { AppDataSource } from "../config/data-source";
 
 export const apiRouter = Router();
@@ -50,3 +51,4 @@ apiRouter.use("/grupos", gruposRouter);
 apiRouter.use("/materias", materiasRouter);
 apiRouter.use("/coordinacion", coordinacionRouter);
 apiRouter.use("/notificaciones", notificacionesRouter);
+apiRouter.use("/indicadores", indicadoresRouter);

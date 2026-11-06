@@ -18,6 +18,9 @@ import { CuentasPage } from "@/pages/cuentas/CuentasPage";
 import { GruposPage } from "@/pages/grupos/GruposPage";
 import { GrupoDetallePage } from "@/pages/grupos/GrupoDetallePage";
 import { AdministradorDashboardPage } from "@/pages/dashboards/AdministradorDashboardPage";
+import { DocenteComparativoPage } from "@/pages/docente/DocenteComparativoPage";
+import { IndicadoresPage } from "@/pages/indicadores/IndicadoresPage";
+import { IndicadorDocenteDetallePage } from "@/pages/indicadores/IndicadorDocenteDetallePage";
 
 function App() {
   return (
@@ -42,6 +45,7 @@ function App() {
 
             <Route element={<ProtectedRoute allowedRoles={["Docente"]} />}>
               <Route path="/docente" element={<DocenteDashboardPage />} />
+              <Route path="/docente/comparativo" element={<DocenteComparativoPage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["Coordinador", "Administrador"]} />}>
@@ -49,6 +53,8 @@ function App() {
               <Route path="/coordinador/usuarios" element={<CuentasPage />} />
               <Route path="/coordinador/grupos" element={<GruposPage />} />
               <Route path="/coordinador/grupos/:id" element={<GrupoDetallePage />} />
+              <Route path="/coordinador/indicadores" element={<IndicadoresPage />} />
+              <Route path="/coordinador/indicadores/:id" element={<IndicadorDocenteDetallePage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["Administrador"]} />}>

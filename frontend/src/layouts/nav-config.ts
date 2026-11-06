@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardCheck, History, Layers, LayoutDashboard, User, Users, type LucideIcon } from "lucide-react";
+import { Award, BarChart3, ClipboardCheck, History, Layers, LayoutDashboard, TrendingUp, User, Users, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -47,7 +47,15 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
       ],
     },
   ],
-  Docente: [{ label: "General", items: [{ label: "Dashboard", to: "/docente", icon: LayoutDashboard }] }],
+  Docente: [
+    {
+      label: "Mis indicadores",
+      items: [
+        { label: "Mi perfil", to: "/docente", icon: LayoutDashboard },
+        { label: "Comparativo histórico", to: "/docente/comparativo", icon: TrendingUp },
+      ],
+    },
+  ],
   Coordinador: [
     {
       label: "Coordinación",
@@ -55,6 +63,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
         { label: "Dashboard", to: "/coordinador", icon: LayoutDashboard },
         { label: "Alumnos y docentes", to: "/coordinador/usuarios", icon: Users },
         { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
+        { label: "Indicadores docentes", to: "/coordinador/indicadores", icon: Award },
       ],
     },
   ],
@@ -66,6 +75,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
         { label: "Usuarios", to: "/administrador/usuarios", icon: Users },
         { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
         { label: "Avance de evaluaciones", to: "/coordinador", icon: BarChart3 },
+        { label: "Indicadores docentes", to: "/coordinador/indicadores", icon: Award },
       ],
     },
   ],
@@ -82,6 +92,8 @@ const CRUMB_LABELS: Record<string, string> = {
   perfil: "Perfil",
   usuarios: "Usuarios",
   grupos: "Grupos",
+  indicadores: "Indicadores docentes",
+  comparativo: "Comparativo histórico",
 };
 
 /** Migas de pan a partir de la ruta; los segmentos numéricos (ids) se omiten. La última es el título de la página. */
