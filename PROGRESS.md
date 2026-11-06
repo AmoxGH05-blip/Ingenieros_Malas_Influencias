@@ -221,7 +221,7 @@ EP0 Gestión de proyecto y documentación · EP1 Autenticación y usuarios · EP
   - **Qué se hizo (06-nov-2026):** prueba de permisos y filtros por ruta (`coordinacion.routes.test.ts`, 5 pruebas: 401 sin sesión, 403 a alumno y docente, 200 a coordinador y administrador, y filtros que solo pasan como enteros positivos) y el script `backend/scripts/verificar-coordinacion.js`, que contrasta la API real contra las vistas de participación de la base (calculadas aparte en SQL). Detalle en `docs/pruebas-coordinacion.md`.
   - **Verificado** contra producción y Supabase: 29 comprobaciones, 0 fallas (permisos, filtros inválidos con 400, alumnos 5 = 5, participantes 4 = 4, inscripciones 25 = 25, los 5 grupos con los mismos inscritos que la vista, filtros por grupo y por carrera, ciclo anterior sin mezclar alumnos, y avisos). 282 pruebas en backend.
 - [x] **SCRUM-45** — Retro de sprint y actualización de backlog (Responsable: Mauricio Mondragón)
-  - **Qué se hizo (06-nov-2026):** `docs/retro-sprint-3.md`: qué se entregó y con cuántos días de atraso (cuatro de siete tareas a tiempo; el sprint cerró 28 días después), qué salió bien y mal, acciones para los siguientes sprints, y la actualización del backlog (SCRUM-44 renombrada, SCRUM-78 a 80 agregadas y cerradas, seis tareas nuevas propuestas en Jira). Con esto el Sprint 3 queda en 7 de 7.
+  - **Qué se hizo (06-nov-2026):** `docs/retro-sprint-3.md`: qué se entregó y con cuántos días de atraso (cuatro de siete tareas a tiempo; el sprint cerró 28 días después), qué salió bien y mal, acciones para los siguientes sprints, y la actualización del backlog (SCRUM-44 renombrada, SCRUM-78 a 80 agregadas y cerradas, seis tareas nuevas creadas en Jira: SCRUM-81 a SCRUM-86). Con esto el Sprint 3 queda en 7 de 7.
 
 ---
 

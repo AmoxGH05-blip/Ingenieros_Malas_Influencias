@@ -50,7 +50,7 @@ Cuatro de las siete tareas cerraron en la fecha del sprint. Las otras tres cerra
 - Se agregaron y cerraron SCRUM-78 (acceso por número de cuenta) y SCRUM-79 (altas jerárquicas, materias y grupos), y se cerró SCRUM-80 (cambio de contraseña con aprobación).
 - Los sprints 3 y 4 quedaron completos (7 de 7 cada uno). Siguen sin cerrar los sprints 5 a 8 (25 tareas).
 
-**Tareas nuevas propuestas** (salen de las revisiones de seguridad y de lo que quedó fuera de alcance):
+**Tareas nuevas** (salen de las revisiones de seguridad y de lo que quedó fuera de alcance), creadas en Jira como SCRUM-81 a SCRUM-86 en este orden, sin responsable asignado:
 
 1. Cerrar los permisos de las tablas y vistas de Supabase a los roles públicos `anon` y `authenticated` (activar RLS).
 2. Validar los tokens de sesión contra la tabla de sesiones en cada petición (hoy un token vale 8 horas aunque se cierre la sesión).
