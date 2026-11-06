@@ -1,4 +1,4 @@
-import { Award, BarChart3, KeyRound, PieChart, ClipboardCheck, History, Layers, LayoutDashboard, TrendingUp, User, Users, type LucideIcon } from "lucide-react";
+import { Award, BarChart3, FlaskConical, KeyRound, PieChart, ClipboardCheck, History, Layers, LayoutDashboard, TrendingUp, User, Users, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -37,6 +37,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
       items: [
         { label: "Dashboard", to: "/estudiante", icon: LayoutDashboard },
         { label: "Evaluaciones", to: "/estudiante/evaluaciones", icon: ClipboardCheck },
+        { label: "Talleres", to: "/estudiante/talleres", icon: FlaskConical },
       ],
     },
     {
@@ -64,6 +65,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
         { label: "Alumnos y docentes", to: "/coordinador/usuarios", icon: Users },
         { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
         { label: "Estadísticas", to: "/coordinador/estadisticas", icon: PieChart },
+        { label: "Talleres", to: "/coordinador/talleres", icon: FlaskConical },
         { label: "Indicadores docentes", to: "/coordinador/indicadores", icon: Award },
         { label: "Solicitudes de contraseña", to: "/coordinador/solicitudes", icon: KeyRound },
       ],
@@ -78,6 +80,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
         { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
         { label: "Avance de evaluaciones", to: "/coordinador", icon: BarChart3 },
         { label: "Estadísticas", to: "/coordinador/estadisticas", icon: PieChart },
+        { label: "Talleres", to: "/coordinador/talleres", icon: FlaskConical },
         { label: "Indicadores docentes", to: "/coordinador/indicadores", icon: Award },
         { label: "Solicitudes de contraseña", to: "/coordinador/solicitudes", icon: KeyRound },
       ],
@@ -98,6 +101,7 @@ const CRUMB_LABELS: Record<string, string> = {
   grupos: "Grupos",
   indicadores: "Indicadores docentes",
   estadisticas: "Estadísticas",
+  talleres: "Talleres y laboratorios",
   solicitudes: "Solicitudes de contraseña",
   comparativo: "Comparativo histórico",
 };

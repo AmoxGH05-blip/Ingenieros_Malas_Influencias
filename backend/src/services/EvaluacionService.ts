@@ -5,15 +5,16 @@ import { MateriaRepository } from "../repositories/MateriaRepository";
 import { DocenteRepository } from "../repositories/DocenteRepository";
 import { PeriodoEvaluacionRepository } from "../repositories/PeriodoEvaluacionRepository";
 import { InstrumentoEvaluacionRepository } from "../repositories/InstrumentoEvaluacionRepository";
-import { SeccionInstrumentoRepository } from "../repositories/SeccionInstrumentoRepository";
-import { PreguntaRepository } from "../repositories/PreguntaRepository";
 import { OpcionRespuestaRepository } from "../repositories/OpcionRespuestaRepository";
 import { EvaluacionRepository } from "../repositories/EvaluacionRepository";
 import { RespuestaEvaluacionRepository } from "../repositories/RespuestaEvaluacionRepository";
 import { UsuarioRepository } from "../repositories/UsuarioRepository";
 import { ProgramaEducativoRepository } from "../repositories/ProgramaEducativoRepository";
 import { FacultadRepository } from "../repositories/FacultadRepository";
+import { armarInstrumento, type InstrumentoDTO } from "./armarInstrumento";
 import type { Docente, Grupo, Materia } from "../entities";
+
+export type { InstrumentoDTO };
 
 export class EstudianteNoEncontradoError extends Error {}
 export class AsignacionNoEncontradaError extends Error {}
@@ -27,12 +28,6 @@ export interface AsignacionDTO {
   grupo: string;
   completada: boolean;
   fechaEvaluacion: string | null;
-}
-
-export interface InstrumentoDTO {
-  nombre: string;
-  escala: { texto: string; valor: number }[];
-  secciones: { id: number; nombre: string; preguntas: { id: number; texto: string }[] }[];
 }
 
 export interface PerfilDTO {
@@ -161,31 +156,7 @@ export const EvaluacionService = {
     if (!periodo) return null;
 
     const instrumento = await InstrumentoEvaluacionRepository.findById(periodo.instrumentoId);
-    if (!instrumento) return null;
-
-    const secciones = await SeccionInstrumentoRepository.findByInstrumentoId(instrumento.id);
-    const preguntas = await PreguntaRepository.findBySeccionIds(secciones.map((s) => s.id));
-    const opciones = await OpcionRespuestaRepository.findByPreguntaIds(preguntas.map((p) => p.id));
-
-    const escalaPorValor = new Map<number, string>();
-    for (const opcion of opciones) {
-      escalaPorValor.set(toNumber(opcion.valor), opcion.texto);
-    }
-    const escala = [...escalaPorValor.entries()]
-      .sort((a, b) => a[0] - b[0])
-      .map(([valor, texto]) => ({ texto, valor }));
-
-    return {
-      nombre: instrumento.nombre,
-      escala,
-      secciones: secciones.map((seccion) => ({
-        id: seccion.id,
-        nombre: seccion.nombre,
-        preguntas: preguntas
-          .filter((p) => p.seccionInstrumentoId === seccion.id)
-          .map((p) => ({ id: p.id, texto: p.texto })),
-      })),
-    };
+    return instrumento ? armarInstrumento(instrumento) : null;
   },
 
   async registrarRespuesta(usuarioId: number, asignacionId: number, respuestas: Record<number, number>): Promise<void> {

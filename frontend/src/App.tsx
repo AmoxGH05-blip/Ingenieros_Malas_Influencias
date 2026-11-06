@@ -22,6 +22,9 @@ import { AdministradorDashboardPage } from "@/pages/dashboards/AdministradorDash
 import { DocenteComparativoPage } from "@/pages/docente/DocenteComparativoPage";
 import { IndicadoresPage } from "@/pages/indicadores/IndicadoresPage";
 import { IndicadorDocenteDetallePage } from "@/pages/indicadores/IndicadorDocenteDetallePage";
+import { TalleresPage } from "@/pages/estudiante/TalleresPage";
+import { TallerCuestionarioPage } from "@/pages/estudiante/TallerCuestionarioPage";
+import { TalleresCoordinacionPage } from "@/pages/talleres/TalleresCoordinacionPage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // La pantalla (y recharts con ella) se descarga solo al abrirla.
@@ -43,6 +46,8 @@ function App() {
               <Route path="/estudiante" element={<EstudianteDashboardPage />} />
               <Route path="/estudiante/evaluaciones" element={<EvaluacionesPage />} />
               <Route path="/estudiante/evaluar/:asignacionId" element={<CuestionarioPage />} />
+              <Route path="/estudiante/talleres" element={<TalleresPage />} />
+              <Route path="/estudiante/talleres/:tallerId/evaluar" element={<TallerCuestionarioPage />} />
               <Route path="/estudiante/historial" element={<HistorialPage />} />
               <Route path="/estudiante/perfil" element={<PerfilPage />} />
             </Route>
@@ -68,6 +73,7 @@ function App() {
                   </ErrorBoundary>
                 }
               />
+              <Route path="/coordinador/talleres" element={<TalleresCoordinacionPage />} />
               <Route path="/coordinador/indicadores" element={<IndicadoresPage />} />
               <Route path="/coordinador/indicadores/:id" element={<IndicadorDocenteDetallePage />} />
             </Route>

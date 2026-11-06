@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-export type TipoEvaluado = "Docente" | "Autoevaluacion" | "Coordinador";
+export type TipoEvaluado = "Docente" | "Autoevaluacion" | "Coordinador" | "Taller";
 
 @Entity({ name: "P_EvaluacionDocente_InstrumentoEvaluacion" })
 export class InstrumentoEvaluacion {

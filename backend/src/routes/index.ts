@@ -11,6 +11,7 @@ import { notificacionesRouter } from "./notificaciones.routes";
 import { indicadoresRouter } from "./indicadores.routes";
 import { solicitudesPasswordRouter } from "./solicitudesPassword.routes";
 import { estadisticasRouter } from "./estadisticas.routes";
+import { talleresRouter } from "./talleres.routes";
 import { AppDataSource } from "../config/data-source";
 
 export const apiRouter = Router();
@@ -56,3 +57,4 @@ apiRouter.use("/notificaciones", notificacionesRouter);
 apiRouter.use("/indicadores", indicadoresRouter);
 apiRouter.use("/solicitudes-password", solicitudesPasswordRouter);
 apiRouter.use("/estadisticas", estadisticasRouter);
+apiRouter.use("/talleres", talleresRouter);

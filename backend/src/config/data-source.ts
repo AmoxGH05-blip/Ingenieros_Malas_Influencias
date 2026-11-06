@@ -22,6 +22,9 @@ import {
   PeriodoEvaluacion,
   Evaluacion,
   RespuestaEvaluacion,
+  Taller,
+  EvaluacionTaller,
+  RespuestaEvaluacionTaller,
 } from "../entities";
 
 export const AppDataSource = new DataSource({
@@ -63,5 +66,8 @@ export const AppDataSource = new DataSource({
     PeriodoEvaluacion,
     Evaluacion,
     RespuestaEvaluacion,
+    Taller,
+    EvaluacionTaller,
+    RespuestaEvaluacionTaller,
   ],
 });

@@ -19,3 +19,6 @@ export { PeriodoEvaluacion } from "./PeriodoEvaluacion";
 export { Evaluacion } from "./Evaluacion";
 export { RespuestaEvaluacion } from "./RespuestaEvaluacion";
 export { PeriodoAcademico } from "./PeriodoAcademico";
+export { Taller, type TipoTaller } from "./Taller";
+export { EvaluacionTaller } from "./EvaluacionTaller";
+export { RespuestaEvaluacionTaller } from "./RespuestaEvaluacionTaller";
