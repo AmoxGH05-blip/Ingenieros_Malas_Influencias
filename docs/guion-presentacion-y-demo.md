@@ -5,21 +5,28 @@
 
 ---
 
-## 0. Lo primero: el PDF está desactualizado
+## 0. Lo primero: usen el PDF NUEVO
 
-El PDF es del **5 de noviembre**. Desde entonces se cerraron cosas que ahí aparecen como pendientes. **O se regenera el PDF, o cada quien dice la cifra correcta en voz alta.** Este guion ya usa las cifras correctas; esta tabla dice dónde el PDF contradice lo que van a decir.
+El PDF que traías (`DYGSIS-Presentacion-Avance-2026-11-05.pdf`) estaba desactualizado. **Ya se regeneró con las cifras de hoy:**
 
-| Diapositiva | El PDF dice | Lo correcto al 6 de nov (verifiquen en `PROGRESS.md` antes de presentar) |
-|---|---|---|
-| 3 | Docente: **Pendiente** | **Implementado**: el docente ve sus indicadores y su comparativo histórico. |
-| 4 | 29 de 64 tareas (45 %); Sprint 3: 5 de 7; Sprint 4: 0 de 7; tareas nuevas 2 de 3 | **41 de 64 (64 %)**. Sprint 3: **7 de 7**. Sprint 4: **7 de 7**. Tareas nuevas 78 a 80: **3 de 3**. Sprint 5: **2 de 7** (estadísticas con gráficos listas). Además se cerró SCRUM-81 (seguridad de la base de datos). |
-| 5 | 10 listos, 5 parciales, 5 pendientes | **13 listos, 4 parciales, 3 pendientes.** Pasaron a listos RF06 (gráficos), RF07 (indicadores) y RF11 (cambio de contraseña). Quedan pendientes RF08 (talleres, en desarrollo), RF09 (reportes PDF) y RNF04 (respuesta menor a 3 s). |
-| 11 | Contraseña olvidada: "solicitud con aprobación (pendiente)" | **Implementada**, con código de verificación. |
-| 12 | 236 pruebas | **293 pruebas** en lo que está publicado (323 con talleres, que aún no se publica). |
-| 14 | Sprint 4 "vencido, 0 de 7"; Sprint 5 "cierra mañana" | Sprint 4 **terminado (7 de 7)**. Sprint 5 **venció hoy, con 2 de 7**: faltan talleres, pruebas de carga y la documentación del Prototipo 2. |
-| 15 | Sprint 4 sin cerrar | Ese riesgo ya se resolvió. Siguen vigentes: dependencia de una persona por área, servidor gratuito que se duerme, cuentas de demostración públicas y una sola base compartida. |
+- `docs/DYGSIS-Presentacion-Avance-2026-11-06.pdf` (para proyectar)
+- `docs/DYGSIS-Presentacion-Avance-2026-11-06.pptx` (editable)
 
-**Qué no deben prometer:** talleres y laboratorios (RF08) está construido y probado en el equipo de desarrollo, pero **todavía no está publicado**. Si no se publica antes de presentar, dígase "en desarrollo".
+Este guion sigue **esa** versión, con las mismas 16 diapositivas en el mismo orden. **No usen el PDF del 5 de noviembre**: dice cosas que ya no son ciertas (29 de 64 tareas, 236 pruebas, indicadores y cambio de contraseña pendientes).
+
+Cifras de la versión nueva (verifíquenlas en `PROGRESS.md` antes de presentar):
+
+| Dato | Valor |
+|---|---|
+| Tareas finalizadas | **44 de 64 (69 %)** |
+| Sprints 0 a 4 | **completos** (Sprint 3: 7 de 7; Sprint 4: 7 de 7) |
+| Sprint 5 | **5 de 7** (listos estadísticas con gráficos y talleres; faltan pruebas de carga y documentar el Prototipo 2). Venció hoy, 6 de noviembre. |
+| Tareas nuevas 78 a 80 | 3 de 3 (y SCRUM-81, seguridad de la base, también cerrada) |
+| Requerimientos | **14 listos, 4 parciales, 2 pendientes** (pendientes: RF09 reportes PDF y RNF04 respuesta menor a 3 s) |
+| Pruebas automatizadas | **325** en 26 archivos |
+| Base de datos | 25 tablas y 5 vistas |
+
+**Cosa honesta que deben saber decir:** los talleres y laboratorios están publicados y activos, pero los resultados solo se ven con **5 evaluaciones o más** (por privacidad). La revisión de seguridad recomendó además mostrarlos solo con el ciclo cerrado; **eso queda como decisión pendiente** (ver la sección de preguntas).
 
 ---
 
@@ -58,25 +65,22 @@ Las partes entre **[corchetes]** son indicaciones, no se leen.
 > Nuestra propuesta es un solo sistema web, con cuatro roles, cuestionarios que se configuran como datos, seguimiento de avance, avisos de pendientes, indicadores históricos, estadísticas y reportes.
 
 ### Diapositiva 3 — Cuatro roles · Emiliano
-> El sistema tiene cuatro roles y una jerarquía de altas. Hay una cuenta única de Administrador que da de alta a coordinadores y a otros administradores. El Coordinador da de alta a alumnos y docentes, crea materias y grupos, inscribe alumnos y ve el avance. El Estudiante responde sus evaluaciones y ve su propio avance. Y el Docente consulta sus indicadores y su comparativo histórico, en solo lectura.
-> **[Dato actualizado: el PDF marca al Docente como pendiente; ya está implementado. Decirlo.]**
+> El sistema tiene cuatro roles y una jerarquía de altas. Hay una cuenta única de Administrador que da de alta a coordinadores y a otros administradores. El Coordinador da de alta a alumnos y docentes, crea materias y grupos, inscribe alumnos y ve el avance. El Estudiante responde sus evaluaciones y ve su propio avance. Y el Docente consulta sus indicadores y su comparativo histórico, en solo lectura. Los cuatro roles ya están implementados.
 > Todos entran con su número de cuenta, no con correo, y el modelo funciona para varias carreras y facultades sin cambiar la base de datos.
 
 ### Diapositiva 4 — Avance · Mauricio
-> Les resumo dónde estamos. Llevamos **41 de las 64 tareas del plan terminadas, el 64 %**. Los sprints 0 al 2 están completos, y los sprints 3 y 4 también, siete de siete cada uno. El Sprint 4 era el de indicadores y históricos, y lo cerramos. En el Sprint 5 llevamos dos de siete: las estadísticas con gráficos están listas; faltan talleres, pruebas de carga y la documentación del Prototipo 2.
-> **[Dato actualizado: el PDF dice 29 de 64 y Sprint 4 en 0 de 7.]**
+> Les resumo dónde estamos. Llevamos **44 de las 64 tareas del plan terminadas, el 69 %**. Los sprints 0 al 4 están completos. El Sprint 4 era el de indicadores y históricos, y lo cerramos, aunque fuera de fecha. En el Sprint 5, que venció hoy, llevamos cinco de siete: ya están las estadísticas con gráficos y los talleres y laboratorios; faltan las pruebas de carga y documentar el Prototipo 2.
 > Además de las tareas del plan, cerramos tareas nuevas que salieron de las revisiones, por ejemplo la seguridad de la base de datos.
 
 ### Diapositiva 5 — Requerimientos · Mauricio
-> En requerimientos, **13 están implementados, 4 parciales y 3 pendientes**. Ya funcionan el acceso por número de cuenta, la evaluación sin duplicados, el avance del alumno, los avisos, las altas jerárquicas, y desde el último informe también las estadísticas con gráficos, los indicadores por docente y el cambio de contraseña con aprobación. Quedan pendientes talleres y laboratorios, los reportes en PDF y el tiempo de respuesta menor a tres segundos.
-> **[Dato actualizado: el PDF dice 10 / 5 / 5.]**
+> En requerimientos, **14 están implementados, 4 parciales y 2 pendientes**. Ya funcionan el acceso por número de cuenta, la evaluación sin duplicados, el avance y los avisos, las altas jerárquicas, el cambio de contraseña con aprobación, y desde el último informe también las estadísticas con gráficos, los indicadores por docente y los talleres y laboratorios. Quedan pendientes los reportes en PDF y verificar el tiempo de respuesta menor a tres segundos; y cuatro requerimientos parciales, como la bitácora de auditoría.
 
 ### Diapositiva 6 — Arquitectura · Juan Antonio
 > Del lado técnico, el sistema está hecho por capas. El frontend es React con Vite y Tailwind. La API es Express con TypeScript: los controladores reciben la petición, los servicios tienen la lógica de negocio, y los repositorios hablan con la base de datos mediante TypeORM. La base es PostgreSQL en Supabase.
 > Todo está desplegado sin costo: el frontend en Vercel, que se actualiza solo en cada push a GitHub; la API en Render, que en el plan gratuito se duerme tras quince minutos sin tráfico y tarda cerca de un minuto en despertar; y la base en Supabase, con un flujo diario de GitHub Actions que la mantiene despierta.
 
 ### Diapositiva 7 — Modelo de datos · Amoxhua
-> Yo me encargué del modelo de datos. Son más de veinte tablas; aquí mostramos ocho. Lo importante es la idea: el cuestionario es **un dato**, no código. Un instrumento tiene secciones, preguntas y opciones de respuesta, así que crear un cuestionario nuevo es insertar filas. Una evaluación es la respuesta de un alumno a un grupo en un periodo, y es única por alumno, grupo y periodo. No hay borrado en cascada y todas las restricciones tienen nombre propio, lo que facilita los mensajes de error y el mantenimiento.
+> Yo me encargué del modelo de datos. Son 25 tablas y 5 vistas; aquí mostramos ocho tablas. Lo importante es la idea: el cuestionario es **un dato**, no código. Un instrumento tiene secciones, preguntas y opciones de respuesta, así que crear un cuestionario nuevo es insertar filas. Una evaluación es la respuesta de un alumno a un grupo en un periodo, y es única por alumno, grupo y periodo. No hay borrado en cascada y todas las restricciones tienen nombre propio, lo que facilita los mensajes de error y el mantenimiento.
 
 ### Diapositiva 8 — Acceso · Juan Antonio
 > El acceso es por número de cuenta, con varios controles. La cuenta nueva trae una contraseña temporal y está obligada a cambiarla en su primer ingreso; mientras no lo haga, el servidor responde 403. Las contraseñas se guardan con bcrypt, nunca en texto plano. La sesión es un token firmado con vigencia de ocho horas. Hay un límite de intentos: cinco por cuenta y treinta por IP cada quince minutos. Y el error es genérico: no se distingue entre cuenta inexistente y contraseña incorrecta, para no dar pistas a un atacante.
@@ -86,26 +90,25 @@ Las partes entre **[corchetes]** son indicaciones, no se leen.
 > Lo clave es la regla del recuadro: **una sola evaluación por docente y grupo en cada periodo**, y esa regla la hace cumplir el servidor, no la interfaz. Si alguien intenta reenviar, recibe un 409.
 
 ### Diapositiva 10 — Coordinación · Emiliano
-> Para coordinación ya funciona la gestión de grupos con cupo opcional e inscripciones, protegidas con una transacción para que dos inscripciones simultáneas no rebasen el cupo. Funciona también el avance en vivo, con filtros por carrera, grupo y ciclo. Y los avisos: al iniciar sesión, el alumno con evaluaciones pendientes ve una ventana y una campana, desde siete días antes del cierre. Decidimos no usar correos porque las cuentas no tienen buzón real.
-> **[Dato actualizado: el PDF dice que los gráficos institucionales están pendientes; ya existen. Los vamos a ver en la demostración.]**
+> Para coordinación ya funciona la gestión de grupos con cupo opcional e inscripciones, protegidas con una transacción para que dos inscripciones simultáneas no rebasen el cupo. Funciona también el avance en vivo, con filtros por carrera, grupo y ciclo. Y los avisos: al iniciar sesión, el alumno con evaluaciones pendientes ve una ventana y una campana, desde siete días antes del cierre. Decidimos no usar correos porque las cuentas no tienen buzón real. Y desde el último informe, coordinación también tiene estadísticas con gráficos y la configuración de talleres por carrera, que vamos a ver en la demostración.
 
 ### Diapositiva 11 — Decisiones · Amoxhua
-> Esta diapositiva es de las decisiones que cambiaron el rumbo, y varias nos tocaron a la base de datos. Pasamos de Azure SQL Server a Supabase con PostgreSQL, porque la suscripción de Azure superó el crédito. Cambiamos el inicio de sesión de correo a número de cuenta porque la coordinadora nos dijo que no se usan correos personales. Cambiamos los recordatorios por correo por avisos en pantalla, porque el servidor gratuito bloquea el correo. Y la contraseña olvidada pasó de un enlace por correo a una **solicitud con aprobación**: quien olvidó su contraseña la solicita, y un coordinador o administrador la aprueba tecleando un código de verificación. **[Dato actualizado: ya está implementada; el PDF dice pendiente.]**
+> Esta diapositiva es de las decisiones que cambiaron el rumbo, y varias nos tocaron a la base de datos. Pasamos de Azure SQL Server a Supabase con PostgreSQL, porque la suscripción de Azure superó el crédito. Cambiamos el inicio de sesión de correo a número de cuenta porque la coordinadora nos dijo que no se usan correos personales. Cambiamos los recordatorios por correo por avisos en pantalla, porque el servidor gratuito bloquea el correo. Y la contraseña olvidada pasó de un enlace por correo a una **solicitud con aprobación**: quien olvidó su contraseña la solicita, y un coordinador o administrador la aprueba tecleando un código de verificación.
 > Algo más: una revisión de seguridad nos mostró que las tablas de la base estaban abiertas a los roles públicos de Supabase. Lo corregimos: ahora esas tablas tienen seguridad por filas y el único acceso es nuestro backend.
 
 ### Diapositiva 12 — Calidad · Juan Antonio
-> En calidad tenemos **293 pruebas automatizadas en verde**. **[Dato actualizado: el PDF dice 236.]** Cubren acceso, evaluación, cuentas, grupos, avisos, indicadores, estadísticas y el cambio de contraseña. Probamos que un token manipulado se rechaza, que reenviar una evaluación da 409, que los permisos cruzados entre roles dan 403 y que el sexto intento de acceso da 429. Además tenemos scripts que comparan lo que devuelve la API con consultas independientes contra la base real.
+> En calidad tenemos **325 pruebas automatizadas en verde**. Cubren acceso, evaluación, cuentas, grupos, avisos, indicadores, estadísticas, talleres y el cambio de contraseña. Probamos que un token manipulado se rechaza, que reenviar una evaluación da 409, que los permisos cruzados entre roles dan 403 y que el sexto intento de acceso da 429. Además tenemos scripts que comparan lo que devuelve la API con consultas independientes contra la base real.
 > Sabemos qué falta: una bitácora de auditoría, poder revocar una sesión antes de las ocho horas, y las pruebas de carga.
 
 ### Diapositiva 13 — Demostración · Mauricio
 > Con esto pasamos a la parte más importante: les mostramos el sistema funcionando, en producción, con la base real. Lo vamos a hacer entre los cuatro.
 
 ### Diapositiva 14 — Lo que falta · Mauricio
-> Lo que falta: el Sprint 5 venció hoy con dos de siete tareas; quedan talleres y laboratorios, las pruebas de carga y documentar el Prototipo 2. Siguen el Sprint 6, con los cinco reportes en PDF y la bitácora de auditoría; el 7, de estabilización y QA; y el 8, de cierre y entrega. Hubo atrasos: el Sprint 4 terminó fuera de fecha. Priorizamos lo demostrable, y por eso hoy ya hay indicadores y gráficos funcionando.
-> **[Dato actualizado: el PDF muestra Sprint 4 vencido en 0 de 7.]**
+> Lo que falta: el Sprint 5 vence hoy con cinco de siete; quedan las pruebas de carga y documentar el Prototipo 2. Siguen el Sprint 6, con los cinco reportes en PDF y la bitácora de auditoría; el 7, de estabilización y QA; y el 8, de cierre y entrega. Hubo atrasos: el Sprint 4 terminó fuera de fecha. Priorizamos lo demostrable, y por eso hoy ya hay indicadores, gráficos y talleres funcionando. En el backlog también quedan tareas nuevas que salieron de las revisiones, como poder revocar sesiones.
 
-### Diapositiva 15 — Riesgos · Amoxhua
-> Los riesgos que seguimos vigilando: cada área depende de una sola persona; el servidor gratuito se duerme y puede afectar una demo; las cuentas de demostración tienen contraseña pública en un repositorio público, y las desactivaremos antes de la entrega final; y local y producción comparten la misma base de datos, así que cualquier prueba toca los mismos datos. Para mitigar, congelamos el alcance a mitad de cada sprint y repartimos las tareas por áreas en paralelo.
+### Diapositiva 15 — Riesgos y siguientes pasos · Amoxhua
+> Los riesgos que seguimos vigilando: el Sprint 5 vence hoy con dos tareas pendientes; cada área depende de una sola persona; el servidor gratuito se duerme y puede afectar una demo; las cuentas de demostración tienen contraseña pública en un repositorio público, y las desactivaremos antes de la entrega final; y local y producción comparten la misma base de datos, así que cualquier prueba toca los mismos datos.
+> Los siguientes pasos: cerrar las pruebas de carga y el Prototipo 2, hacer en el Sprint 6 los reportes en PDF y la bitácora, revocar sesiones y proteger la privacidad de los promedios, y congelar el alcance a mitad de cada sprint.
 
 ### Diapositiva 16 — Aprendizajes · los cuatro
 > **Mauricio:** Aprendimos a escuchar al usuario real: la coordinadora nos hizo rediseñar el acceso y las altas.
@@ -116,7 +119,7 @@ Las partes entre **[corchetes]** son indicaciones, no se leen.
 
 ---
 
-## 3. Guía de la demostración (8–10 min)
+## 3. Guía de la demostración (9–10 min)
 
 ### Quién maneja qué
 
@@ -128,8 +131,9 @@ Una persona maneja el teclado y la pantalla en cada bloque y los demás compleme
 | 2 | Alumno: avance y evaluar a un docente | **Emiliano** | 2 |
 | 3 | Coordinador: avance, alta de alumno, inscripción | **Mauricio** | 2 |
 | 4 | Indicadores y estadísticas con gráficos | **Amoxhua** | 2.5 |
-| 5 | Docente: su propio perfil | **Emiliano** | 0.5 |
-| 6 | Base de datos real en Supabase | **Amoxhua** | 1 |
+| 5 | Talleres y laboratorios (configuración y evaluación) | **Juan Antonio** | 1.5 |
+| 6 | Docente: su propio perfil | **Emiliano** | 0.5 |
+| 7 | Base de datos real en Supabase | **Amoxhua** | 1 |
 
 ### Antes de empezar (30 minutos antes)
 
@@ -145,19 +149,20 @@ Una persona maneja el teclado y la pantalla en cada bloque y los demás compleme
 6. **Un respaldo:** grabar antes un video corto de toda la demostración. Si falla el internet, se reproduce.
 7. **No intentar iniciar sesión mal.** Cinco intentos fallidos con una cuenta la bloquean 15 minutos (sale 429).
 
-### Estado de los datos de demostración (a la fecha de este guion)
+### Estado de los datos de demostración (6 de noviembre, por la tarde)
 
 - Ciclo activo: **Evaluacion Docente 2026-2027-1**.
-- `DEMO0005` tiene **0 de 5** evaluaciones hechas: es la cuenta ideal para evaluar en vivo. `DEMO0002` ya terminó las 5.
-- La participación hoy es **4 de 5 alumnos (80 %)** y 10 de 25 evaluaciones enviadas (40 %). **Al evaluar con `DEMO0005` esas cifras suben** (el alumno pasa a participar). No es un error: es una buena forma de mostrar que el avance se actualiza solo.
+- `DEMO0005` tiene **0 de 5** evaluaciones de docentes hechas: es la cuenta ideal para evaluar en vivo. `DEMO0002` ya terminó las 5.
+- **Talleres ya activados** para Ingeniería en Sistemas Computacionales, con tres de demostración: *Laboratorio de redes*, *Laboratorio de bases de datos* y *Taller de programación*. Ningún alumno los ha evaluado todavía.
+- La participación hoy es **4 de 5 alumnos (80 %)** y 10 de 25 evaluaciones enviadas (40 %). **Al evaluar con `DEMO0005` esas cifras suben.** No es un error: es una buena forma de mostrar que el avance se actualiza solo.
 - Ranking actual: Ana García 8.13 (Bueno); Elena Torres, Carlos Martínez y Luis Hernández 7.50 (Suficiente); Beatriz Ramírez 6.67 (No suficiente). Las evaluaciones nuevas moverán estos números.
-- **Aviso:** lo que hagan en la demostración **escribe en la base real**. Después se puede dejar como está o pedirme un script para dejar `DEMO0005` en 0 evaluaciones.
+- **Aviso:** lo que hagan en la demostración **escribe en la base real**. Pídanme un script para dejar `DEMO0005` en 0 evaluaciones y los talleres sin evaluar cuando terminen.
 
 ### Bloque 1 — Pruebas en la terminal (Juan Antonio, 1 min)
 - **Hacer:** ejecutar `npm test` en `backend`.
 - **Decir:** "Estas son las pruebas automatizadas: acceso, evaluaciones, cuentas, indicadores, estadísticas. Todas en verde." Mientras corre, comentar que cada servicio tiene sus pruebas y que además hay scripts contra la base real.
-- **Mostrar:** el resumen final, 293 pruebas.
-- **Ojo:** si en su copia local ya está el código de talleres, saldrán 323; está bien, solo no se asusten con la diferencia.
+- **Mostrar:** el resumen final, 325 pruebas.
+- **Ojo:** hay que tener la última versión del repositorio (`git pull`) y las dependencias instaladas; si no, el número será menor.
 
 ### Bloque 2 — El alumno (Emiliano, 2 min)
 - **Hacer, en la ventana del alumno `DEMO0005`:**
@@ -188,17 +193,23 @@ Una persona maneja el teclado y la pantalla en cada bloque y los demás compleme
   - "Los ciclos anteriores son datos de demostración; en un ciclo sin inscripciones el avance se muestra como un guion y no como 0 %."
 - **Mostrar el caso de privacidad:** el docente puede ver su promedio incluso con pocas evaluaciones; está anotado como mejora (SCRUM-85).
 
-### Bloque 5 — El docente (Emiliano, 30 s)
+### Bloque 5 — Talleres y laboratorios (Juan Antonio, 1.5 min)
+- **Hacer, en la ventana del Coordinador:** abrir **Talleres** en el menú. En **Configuración** mostrar la carrera con el interruptor **Habilitada** y sus tres talleres (y que se puede agregar uno o dar de baja). Pasar a **Resultados**.
+- **Hacer, en la ventana del alumno `DEMO0005`:** abrir **Talleres** en el menú, entrar a *Laboratorio de redes*, contestar y enviar. Debe aparecer "Evaluado".
+- **Volver a Resultados (Coordinador) y recargar:** el taller sigue sin cifras, con el aviso de que se muestran con 5 evaluaciones o más.
+- **Decir:** "Un taller es una actividad de la carrera, no de un docente. Cada carrera puede encender o apagar esta evaluación. Los resultados no se publican hasta que haya al menos cinco evaluaciones, para que nadie pueda adivinar quién respondió: una revisión de seguridad nos señaló ese riesgo y lo corregimos."
+- **Ojo:** con una sola evaluación **no van a ver promedios**, y está bien: es justo la protección que queremos mostrar. No intenten llegar a cinco en vivo.
+
+### Bloque 6 — El docente (Emiliano, 30 s)
 - **Hacer, en la ventana del Docente `EMP0001`:** abrir **Mi perfil** y **Comparativo histórico**.
 - **Decir:** "El docente solo ve lo suyo y en solo lectura; no puede ver a otros docentes."
 
-### Bloque 6 — La base de datos real (Amoxhua, 1 min)
+### Bloque 7 — La base de datos real (Amoxhua, 1 min)
 - **Hacer:** en Supabase, abrir `P_EvaluacionDocente_Evaluacion` y mostrar la fila de la evaluación recién enviada; abrir `P_EvaluacionDocente_RespuestaEvaluacion` y mostrar sus 15 respuestas.
 - **Decir:** "Aquí quedó lo que acaba de enviar el alumno. Cada respuesta apunta a su pregunta y a la opción elegida." Y cerrar con seguridad: "Las tablas tienen seguridad por filas activada y no son accesibles con la clave pública de Supabase; solo el backend entra."
 
 ### Si alcanza el tiempo (extra de 1 minuto)
 - **Cambio de contraseña con aprobación:** en la pantalla de inicio, "¿Olvidaste tu contraseña?" → mandar una solicitud → mostrar el **código de verificación** → como Coordinador, entrar a **Solicitudes de contraseña**, teclear el código y aprobar. **Cuidado:** esto cambia la contraseña de la cuenta que usen; usen una cuenta que no sea la de la demostración o se quedarán sin acceso. Es más seguro **solo mencionarlo**.
-- **Talleres y laboratorios:** **solo si ya está publicado.** Si no, dígase "está en desarrollo".
 
 ### Plan B
 | Si pasa esto | Hagan esto |
@@ -214,12 +225,34 @@ Una persona maneja el teclado y la pantalla en cada bloque y los demás compleme
 ## 4. Preguntas probables y cómo responderlas
 
 - **¿Por qué cambiaron de SQL Server a Supabase?** La suscripción de Azure superó el crédito; Supabase (PostgreSQL) es gratuito. El modelo y los repositorios por capas hicieron que el cambio fuera acotado.
-- **¿Cómo se garantiza el anonimato?** La evaluación del alumno no se muestra con su nombre en los reportes. Con honestidad: hoy la base sí guarda quién respondió (hace falta para impedir que se evalúe dos veces); el anonimato está en cómo se muestran los resultados. Reforzarlo es parte de la bitácora y del sprint de seguridad.
+- **¿Por qué no se ven los resultados de un taller?** Porque con menos de cinco evaluaciones (o en una carrera con menos de cinco alumnos) no se publica nada: ni promedio ni conteo. Con pocas respuestas se podría deducir quién respondió y qué calificó. Además queda una decisión pendiente: publicar los resultados solo cuando el ciclo esté cerrado.
+- **¿Cómo se garantiza el anonimato?** La evaluación del alumno no se muestra con su nombre en los reportes. Con honestidad: hoy la base sí guarda quién respondió (hace falta para impedir que se evalúe dos veces); el anonimato está en cómo se muestran los resultados. Reforzarlo es parte del sprint de seguridad.
 - **¿Por qué no mandan correos?** Las cuentas no tienen buzón real y el servidor gratuito bloquea el correo. Lo reemplazamos por avisos en pantalla y por aprobación humana del cambio de contraseña.
 - **¿Qué pasa si se olvida la contraseña?** Se manda una solicitud, y un coordinador o administrador la aprueba con un código de verificación. Si el único administrador la olvida, hoy se resuelve con un script, y está anotado.
 - **¿Qué tan seguro está?** Contraseñas con bcrypt, token firmado de ocho horas, límite de intentos, permisos por rol validados en el servidor, tablas con seguridad por filas. Pendiente: revocar sesiones antes de las ocho horas y la bitácora de auditoría.
-- **¿Qué falta para terminar?** Talleres y laboratorios, reportes en PDF, bitácora, pruebas de carga y documentación final.
+- **¿Qué falta para terminar?** Reportes en PDF, bitácora de auditoría, pruebas de carga, documentación del Prototipo 2 y la documentación final.
 - **¿Por qué hubo atraso?** Hubo sprints que se cerraron fuera de fecha; replanificamos y priorizamos lo demostrable. Cerramos el Sprint 3 y el 4 completos.
 - **¿Los rangos de clasificación son oficiales?** No: son un supuesto nuestro (9, 8 y 7). Los vamos a ajustar con la tabla oficial.
 - **¿Funciona en el celular?** Sí, la interfaz es adaptable; se puede mostrar reduciendo la ventana.
 - **¿Qué pasaría con muchos usuarios a la vez?** Falta hacer las pruebas de carga (tarea SCRUM-58). El servidor gratuito no está pensado para carga alta.
+
+---
+
+## 5. URLs y cuentas para el día de la presentación
+
+| Qué | URL |
+|---|---|
+| **Sistema (frontend)** | https://ingenieros-malas-influencias.vercel.app |
+| **API (despertarla antes)** | https://dygsis-backend.onrender.com/api/health |
+| **Repositorio** | https://github.com/AmoxGH05-blip/Ingenieros_Malas_Influencias |
+| **Jira (tablero)** | https://proyecto-dygsis-787980372587.atlassian.net/jira/software/projects/SCRUM/boards |
+| **Presentación (PDF)** | `docs/DYGSIS-Presentacion-Avance-2026-11-06.pdf` |
+
+| Rol | Cuenta | Para qué |
+|---|---|---|
+| Coordinador | `COORD0001` | Avance, altas, grupos, indicadores, estadísticas, talleres |
+| Alumno | `DEMO0005` | Evaluar un docente y un taller (0 de 5 hechas) |
+| Docente | `EMP0001` | Mi perfil y comparativo |
+| **No usar** | `DEMO0001` | También es Administrador: el menú no es el de un alumno |
+
+La contraseña de las cuentas de demostración es la sembrada en el repositorio (la conocen); no la tecleen con la pantalla visible.
