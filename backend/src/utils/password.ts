@@ -1,4 +1,4 @@
-/** Politica de contrasenas, compartida por login, altas, cambio y recuperacion. */
+/** Politica de contrasenas, compartida por login, altas, cambio y solicitud de cambio de contrasena. */
 export const PASSWORD_MIN_CARACTERES = 8;
 // bcrypt solo usa los primeros 72 BYTES: contar caracteres no basta, porque ñ, acentos y emojis ocupan mas de uno.
 export const PASSWORD_MAX_BYTES = 72;

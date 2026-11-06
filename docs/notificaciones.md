@@ -9,7 +9,8 @@ El sistema no envía correos. Los avisos se muestran dentro de la página, al in
 | Rol | Aviso |
 |---|---|
 | Alumno | Cuando faltan **7 días o menos** para el cierre del periodo de evaluación y tiene evaluaciones pendientes: título con los días, mensaje con la cantidad y la fecha de cierre, y la lista de materias pendientes con su docente. |
-| Docente, Coordinador, Administrador | Ninguno por ahora. Los avisos de solicitudes de contraseña de SCRUM-80 usarán este mismo mecanismo. |
+| Coordinador, Administrador | Cuando hay **solicitudes de cambio de contraseña** por resolver de las cuentas que gestionan (SCRUM-80): cuántas son y las primeras cinco con nombre y cuenta, con el botón "Revisar solicitudes". Ver `docs/cambio-de-contrasena.md`. |
+| Docente | Ninguno por ahora. |
 
 La gravedad sube con la cercanía del cierre: normal (4 a 7 días), aviso (2 a 3) y urgente (hoy o mañana). El mismo día del cierre el título es "Hoy cierra la evaluación docente".
 
@@ -57,4 +58,4 @@ El workflow `.github/workflows/mantener-activo.yml` llama una vez al día (09:00
 
 - Con una sola ventana por sesión, un alumno que deja la sesión abierta días no vuelve a ver la ventana, pero sí la campana, que se actualiza al volver a la pestaña y al enviar una evaluación.
 - El dashboard del alumno (`construirAsignaciones`) no filtra los grupos por ciclo, y el aviso sí. Con inscripciones de ciclos viejos el contador del menú lateral y el aviso podrían diferir. Hoy hay un solo ciclo, así que no se nota; queda anotado para corregir en el dashboard.
-- Los avisos de docentes y coordinadores llegan con SCRUM-80.
+- El aviso del coordinador usa el mismo mecanismo (ventana una vez por inicio de sesión y campana); desaparece al resolver las solicitudes.

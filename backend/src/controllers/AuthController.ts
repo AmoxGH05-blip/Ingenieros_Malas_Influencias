@@ -4,12 +4,8 @@ import {
   CredencialesInvalidasError,
   PasswordActualIncorrectaError,
   PasswordNuevaInvalidaError,
-  TokenRecuperacionInvalidoError,
 } from "../services/AuthService";
-import { MENSAJE_POLITICA_PASSWORD, passwordValida } from "../utils/password";
-
-const MENSAJE_RECUPERACION_GENERICO =
-  "Si el correo esta registrado, se envio un enlace de recuperacion.";
+import { MENSAJE_POLITICA_PASSWORD } from "../utils/password";
 
 export const AuthController = {
   async login(req: Request, res: Response) {
@@ -48,41 +44,6 @@ export const AuthController = {
       }
       if (error instanceof CredencialesInvalidasError) {
         return res.status(401).json({ error: "Sesion invalida" });
-      }
-      throw error;
-    }
-  },
-
-  async forgotPassword(req: Request, res: Response) {
-    const { correo } = req.body ?? {};
-
-    if (typeof correo !== "string" || !correo) {
-      return res.status(400).json({ error: "correo es requerido" });
-    }
-
-    const urlBaseFrontend = process.env.FRONTEND_URL ?? "http://localhost:5173";
-    await AuthService.solicitarRecuperacion(correo, urlBaseFrontend);
-
-    return res.json({ mensaje: MENSAJE_RECUPERACION_GENERICO });
-  },
-
-  async resetPassword(req: Request, res: Response) {
-    const { token, nuevaPassword } = req.body ?? {};
-
-    if (typeof token !== "string" || typeof nuevaPassword !== "string" || !token || !nuevaPassword) {
-      return res.status(400).json({ error: "token y nuevaPassword son requeridos" });
-    }
-
-    if (!passwordValida(nuevaPassword)) {
-      return res.status(400).json({ error: MENSAJE_POLITICA_PASSWORD });
-    }
-
-    try {
-      await AuthService.restablecerPassword(token, nuevaPassword);
-      return res.json({ mensaje: "Contrasena actualizada." });
-    } catch (error) {
-      if (error instanceof TokenRecuperacionInvalidoError) {
-        return res.status(400).json({ error: "Token invalido o expirado" });
       }
       throw error;
     }

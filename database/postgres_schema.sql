@@ -331,7 +331,7 @@ CREATE TABLE "P_EvaluacionDocente_ResultadoDocente" (
 CREATE INDEX "ix_P_EvaluacionDocente_ResultadoDocente_DocenteId" ON "P_EvaluacionDocente_ResultadoDocente" ("DocenteId");
 
 /* ---------------------------------------------------------------------
-   7. Sesiones y recuperacion de contrasena (antes migracion 002)
+   7. Sesiones (antes migracion 002; los tokens de recuperacion por correo se retiraron con la 011)
    --------------------------------------------------------------------- */
 
 CREATE TABLE "P_EvaluacionDocente_Sesion" (
@@ -349,18 +349,6 @@ CREATE TABLE "P_EvaluacionDocente_Sesion" (
 );
 CREATE INDEX "ix_P_EvaluacionDocente_Sesion_UsuarioId" ON "P_EvaluacionDocente_Sesion" ("UsuarioId");
 
-CREATE TABLE "P_EvaluacionDocente_PasswordResetToken" (
-    "Id"                INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
-    "UsuarioId"         INTEGER         NOT NULL,
-    "TokenHash"         VARCHAR(256)    NOT NULL,  -- SHA-256 del token enviado por correo (el token en si nunca se guarda)
-    "FechaCreacion"     TIMESTAMPTZ     NOT NULL DEFAULT now(),
-    "FechaExpiracion"   TIMESTAMPTZ     NOT NULL,
-    "Usado"             BOOLEAN         NOT NULL DEFAULT false,
-    CONSTRAINT "pk_P_EvaluacionDocente_PasswordResetToken" PRIMARY KEY ("Id"),
-    CONSTRAINT "fk_P_EvaluacionDocente_PasswordResetToken_Usuario" FOREIGN KEY ("UsuarioId")
-        REFERENCES "P_EvaluacionDocente_Usuario" ("Id")
-);
-CREATE INDEX "ix_P_EvaluacionDocente_PasswordResetToken_UsuarioId" ON "P_EvaluacionDocente_PasswordResetToken" ("UsuarioId");
 
 /* ---------------------------------------------------------------------
    8. Datos semilla para catalogos base
@@ -659,6 +647,102 @@ BEGIN
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
         REVOKE ALL ON "V_EvaluacionDocente_PromedioDocenteGrupo", "V_EvaluacionDocente_IndicadorDocente" FROM authenticated;
         REVOKE ALL ON FUNCTION "F_EvaluacionDocente_Clasificar"(NUMERIC) FROM authenticated;
+    END IF;
+END
+$$;
+
+/* ---------------------------------------------------------------------
+   13. Cambio de contrasena con aprobacion (migracion 010, SCRUM-80, RF11)
+   Solicitud de contrasena nueva (ya cifrada) pendiente de aprobacion.
+   Ver docs/cambio-de-contrasena.md.
+   --------------------------------------------------------------------- */
+
+CREATE TABLE IF NOT EXISTS "P_EvaluacionDocente_SolicitudCambioPassword" (
+    "Id"                    INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
+    "UsuarioId"             INTEGER         NOT NULL,
+    "NuevaPasswordHash"     VARCHAR(256)    NOT NULL,
+    "Estado"                VARCHAR(12)     NOT NULL DEFAULT 'Pendiente',
+    "FechaSolicitud"        TIMESTAMPTZ     NOT NULL DEFAULT now(),
+    "FechaResolucion"       TIMESTAMPTZ     NULL,
+    "ResueltaPorUsuarioId"  INTEGER         NULL,
+    CONSTRAINT "pk_P_EvaluacionDocente_SolicitudCambioPassword" PRIMARY KEY ("Id"),
+    CONSTRAINT "ck_P_EvaluacionDocente_SolicitudCambioPassword_Estado"
+        CHECK ("Estado" IN ('Pendiente', 'Aprobada', 'Rechazada', 'Reemplazada')),
+    CONSTRAINT "ck_P_EvaluacionDocente_SolicitudCambioPassword_Resolucion"
+        CHECK (("Estado" = 'Pendiente') = ("FechaResolucion" IS NULL)),
+    CONSTRAINT "fk_P_EvaluacionDocente_SolicitudCambioPassword_Usuario" FOREIGN KEY ("UsuarioId")
+        REFERENCES "P_EvaluacionDocente_Usuario" ("Id"),
+    CONSTRAINT "fk_P_EvaluacionDocente_SolicitudCambioPassword_ResueltaPor" FOREIGN KEY ("ResueltaPorUsuarioId")
+        REFERENCES "P_EvaluacionDocente_Usuario" ("Id")
+);
+
+-- Una sola solicitud pendiente por cuenta: si dos llegan a la vez, una de las dos falla con 23505.
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_P_EvaluacionDocente_SolicitudCambioPassword_Pendiente"
+    ON "P_EvaluacionDocente_SolicitudCambioPassword" ("UsuarioId") WHERE "Estado" = 'Pendiente';
+CREATE INDEX IF NOT EXISTS "ix_P_EvaluacionDocente_SolicitudCambioPassword_Estado"
+    ON "P_EvaluacionDocente_SolicitudCambioPassword" ("Estado", "FechaSolicitud");
+
+ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword" ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+        REVOKE ALL ON "P_EvaluacionDocente_SolicitudCambioPassword" FROM anon;
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+        REVOKE ALL ON "P_EvaluacionDocente_SolicitudCambioPassword" FROM authenticated;
+    END IF;
+END
+$$;
+
+-- Endurecimiento (migracion 012): codigo de verificacion, hash solo en la pendiente, CHECK de coherencia e indices.
+ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword"
+    ADD COLUMN IF NOT EXISTS "CodigoHash" VARCHAR(64) NOT NULL DEFAULT '';
+ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword" ALTER COLUMN "CodigoHash" DROP DEFAULT;
+ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword" ALTER COLUMN "NuevaPasswordHash" DROP NOT NULL;
+
+DO $$
+BEGIN
+    -- Una version anterior de esta migracion uso un nombre de 64 caracteres, que PostgreSQL trunca a 63.
+    IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ck_P_EvaluacionDocente_SolicitudCambioPassword_HashSoloPendient') THEN
+        ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword"
+            RENAME CONSTRAINT "ck_P_EvaluacionDocente_SolicitudCambioPassword_HashSoloPendient"
+            TO "ck_P_EvaluacionDocente_SolicitudCambioPassword_HashPendiente";
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ck_P_EvaluacionDocente_SolicitudCambioPassword_HashPendiente') THEN
+        ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword"
+            ADD CONSTRAINT "ck_P_EvaluacionDocente_SolicitudCambioPassword_HashPendiente"
+            CHECK (("Estado" = 'Pendiente') = ("NuevaPasswordHash" IS NOT NULL));
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ck_P_EvaluacionDocente_SolicitudCambioPassword_ResueltaPor') THEN
+        ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword"
+            ADD CONSTRAINT "ck_P_EvaluacionDocente_SolicitudCambioPassword_ResueltaPor"
+            CHECK (("Estado" IN ('Aprobada', 'Rechazada')) = ("ResueltaPorUsuarioId" IS NOT NULL)
+                   AND "ResueltaPorUsuarioId" IS DISTINCT FROM "UsuarioId");
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ck_P_EvaluacionDocente_SolicitudCambioPassword_HashBcrypt') THEN
+        ALTER TABLE "P_EvaluacionDocente_SolicitudCambioPassword"
+            ADD CONSTRAINT "ck_P_EvaluacionDocente_SolicitudCambioPassword_HashBcrypt"
+            CHECK ("NuevaPasswordHash" IS NULL OR "NuevaPasswordHash" ~ '^\$2[aby]\$[0-9]{2}\$.{53}$');
+    END IF;
+END
+$$;
+
+CREATE INDEX IF NOT EXISTS "ix_P_EvaluacionDocente_SolicitudCambioPassword_Usuario"
+    ON "P_EvaluacionDocente_SolicitudCambioPassword" ("UsuarioId", "FechaSolicitud" DESC);
+CREATE INDEX IF NOT EXISTS "ix_P_EvaluacionDocente_SolicitudCambioPassword_ResueltaPor"
+    ON "P_EvaluacionDocente_SolicitudCambioPassword" ("ResueltaPorUsuarioId") WHERE "ResueltaPorUsuarioId" IS NOT NULL;
+CREATE INDEX IF NOT EXISTS "ix_P_EvaluacionDocente_SolicitudCambioPassword_Pendientes"
+    ON "P_EvaluacionDocente_SolicitudCambioPassword" ("FechaSolicitud") WHERE "Estado" = 'Pendiente';
+DROP INDEX IF EXISTS "ix_P_EvaluacionDocente_SolicitudCambioPassword_Estado";
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+        REVOKE ALL ON SEQUENCE "P_EvaluacionDocente_SolicitudCambioPassword_Id_seq" FROM anon;
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+        REVOKE ALL ON SEQUENCE "P_EvaluacionDocente_SolicitudCambioPassword_Id_seq" FROM authenticated;
     END IF;
 END
 $$;

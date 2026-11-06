@@ -31,7 +31,7 @@ Roles del sistema: **Administrador, Coordinador, Docente, Estudiante**.
 | Backend | Node.js + Express + TypeScript, arquitectura por capas |
 | Base de datos | PostgreSQL (Supabase, proyecto propio, plan Free) + TypeORM |
 | Autenticación | JWT + bcrypt, sesiones persistentes en tabla |
-| Correo | Nodemailer (Gmail SMTP) |
+| Correo | Ninguno: el sistema no envía correos (avisos en pantalla y cambio de contraseña con aprobación) |
 | Reportes | Puppeteer / pdfmake (planeado, Sprint 6) |
 | Gráficos | Recharts (planeado, Sprint 5) |
 | Gestión | Jira (Atlassian) |
@@ -115,7 +115,7 @@ Hardware, software y plataformas de apoyo. La mayoría del stack elegido es **gr
 | Hosting frontend | Vercel (plan Free/Hobby) | Frontend en producción | $0 | $0 |
 | Control de versiones | GitHub | Repositorio, historial, backup | $0 | $0 |
 | Gestión de proyecto | Jira (Atlassian, plan Free) | Backlog, sprints, tablero | $0 | $0 |
-| Correo saliente | Gmail SMTP (cuenta existente) | Recuperación de contraseña, notificaciones | $0 | $0 |
+| Correo saliente | No se usa (se descartó el 16-oct-2026) | Los avisos son en pantalla y el cambio de contraseña lo aprueba coordinación | $0 | $0 |
 | Entorno de desarrollo | Node.js, TypeScript, VS Code, npm (open source) | Desarrollo del sistema | $0 | $0 |
 | Dominio propio | — (no contratado; se usa `*.vercel.app` / `*.onrender.com`) | — | $0 | $0 *(opcional a futuro: ~$250 MXN/año)* |
 | **Total Recursos Tecnológicos** | | | | **$0.00 MXN** |

@@ -21,6 +21,9 @@ vi.mock("../repositories/DocenteRepository", () => ({
 vi.mock("../repositories/EvaluacionRepository", () => ({
   EvaluacionRepository: { findByEstudianteAndPeriodo: vi.fn() },
 }));
+vi.mock("./SolicitudPasswordService", () => ({
+  SolicitudPasswordService: { listarPendientes: vi.fn() },
+}));
 
 import { NotificacionService } from "./NotificacionService";
 import { PeriodoEvaluacionRepository } from "../repositories/PeriodoEvaluacionRepository";
@@ -30,6 +33,7 @@ import { GrupoRepository } from "../repositories/GrupoRepository";
 import { MateriaRepository } from "../repositories/MateriaRepository";
 import { DocenteRepository } from "../repositories/DocenteRepository";
 import { EvaluacionRepository } from "../repositories/EvaluacionRepository";
+import { SolicitudPasswordService } from "./SolicitudPasswordService";
 
 const DIA_MS = 24 * 60 * 60 * 1000;
 const AHORA = new Date("2026-11-10T15:00:00Z");
@@ -169,9 +173,59 @@ describe("NotificacionService.obtener (alumno)", () => {
     expect(await NotificacionService.obtener(101, ["Estudiante"], AHORA)).toEqual([]);
   });
 
-  it("no hace nada para roles que no son alumno", async () => {
+  it("no hace nada para roles que no son alumno (y sin solicitudes pendientes)", async () => {
+    vi.mocked(SolicitudPasswordService.listarPendientes).mockResolvedValue([]);
     expect(await NotificacionService.obtener(7, ["Docente"], AHORA)).toEqual([]);
     expect(await NotificacionService.obtener(8, ["Coordinador"], AHORA)).toEqual([]);
     expect(EstudianteRepository.findByUsuarioId).not.toHaveBeenCalled();
+  });
+});
+
+describe("NotificacionService.obtener: solicitudes de contrasena para quien gestiona cuentas", () => {
+  const solicitud = (id: number, cuenta: string, nombre: string | null) => ({
+    id,
+    numeroCuenta: cuenta,
+    nombre,
+    roles: ["Estudiante"],
+    fechaSolicitud: AHORA.toISOString(),
+  });
+
+  beforeEach(() => {
+    vi.mocked(SolicitudPasswordService.listarPendientes).mockReset();
+  });
+
+  it("avisa al coordinador con las cuentas que esperan aprobacion", async () => {
+    vi.mocked(SolicitudPasswordService.listarPendientes).mockResolvedValue([solicitud(1, "A1", "Ana Lopez"), solicitud(2, "B2", null)]);
+
+    const avisos = await NotificacionService.obtener(9, ["Coordinador"], AHORA);
+
+    expect(SolicitudPasswordService.listarPendientes).toHaveBeenCalledWith({ usuarioId: 9, roles: ["Coordinador"] }, AHORA);
+    expect(avisos).toHaveLength(1);
+    expect(avisos[0]).toMatchObject({
+      tipo: "solicitudes-password",
+      enlace: "/coordinador/solicitudes",
+      textoEnlace: "Revisar solicitudes",
+      pendientes: ["Ana Lopez (A1)", "Sin nombre (B2)"],
+    });
+    expect(avisos[0].mensaje).toContain("2 solicitudes");
+  });
+
+  it("resume cuando hay mas de cinco", async () => {
+    const siete = Array.from({ length: 7 }, (_, i) => solicitud(i + 1, `C${i}`, `Persona ${i}`));
+    vi.mocked(SolicitudPasswordService.listarPendientes).mockResolvedValue(siete);
+
+    const [aviso] = await NotificacionService.obtener(9, ["Administrador"], AHORA);
+
+    expect(aviso.pendientes).toHaveLength(6);
+    expect(aviso.pendientes.at(-1)).toBe("y 2 más");
+  });
+
+  it("no avisa si no hay solicitudes, ni consulta nada a un alumno o docente", async () => {
+    vi.mocked(SolicitudPasswordService.listarPendientes).mockResolvedValue([]);
+    expect(await NotificacionService.obtener(9, ["Coordinador"], AHORA)).toEqual([]);
+
+    vi.mocked(EstudianteRepository.findByUsuarioId).mockResolvedValue(null);
+    await NotificacionService.obtener(10, ["Estudiante", "Docente"], AHORA);
+    expect(SolicitudPasswordService.listarPendientes).toHaveBeenCalledTimes(1); // solo la del coordinador
   });
 });

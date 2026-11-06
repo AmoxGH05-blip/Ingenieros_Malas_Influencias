@@ -12,7 +12,7 @@ npm test              # corre la suite una vez
 npm run test:coverage # con reporte de cobertura
 ```
 
-No requieren conexión a la base de datos ni al SMTP real — la capa de repositorios y `EmailService` se mockean con Vitest (`vi.mock`), así que corren rápido y de forma determinista en cualquier máquina, incluida CI si se configura más adelante.
+No requieren conexión a la base de datos — la capa de repositorios se mockea con Vitest (`vi.mock`), así que corren rápido y de forma determinista en cualquier máquina, incluida CI si se configura más adelante.
 
 ## Qué cubren
 
@@ -29,10 +29,7 @@ Los archivos de abajo se ampliaron con SCRUM-78 (login por número de cuenta): v
 - **Cambiar contraseña:** actual incorrecta, nueva demasiado corta o larga o igual a la actual, cuenta inexistente o inactiva; en el caso válido guarda el hash nuevo, quita la marca, cierra las sesiones anteriores y entrega un token sin restricción.
 - **Contraseña incorrecta:** rechazada con el mismo error genérico (no revela si la cuenta existe).
 - **Usuario inactivo:** rechazado aunque la contraseña sea correcta.
-- **Recuperación — correo no registrado:** no envía correo ni crea token (respuesta silenciosa).
-- **Recuperación — correo registrado:** crea el token, guarda solo su hash SHA-256 (nunca el token crudo), y llama al envío de correo con el enlace correcto.
-- **Reset — token inválido/expirado/usado:** rechazado, no toca la contraseña.
-- **Reset — token válido:** actualiza el hash de la contraseña (verificado con `bcrypt.compare` contra la nueva contraseña en texto plano), marca el token como usado, y desactiva todas las sesiones activas del usuario.
+- _La recuperación por correo (token, hash SHA-256, envío) se retiró con SCRUM-80 y sus pruebas se eliminaron. Las del flujo nuevo están en `docs/cambio-de-contrasena.md`._
 
 ### `src/utils/jwt.test.ts`
 
@@ -41,16 +38,9 @@ Los archivos de abajo se ampliaron con SCRUM-78 (login por número de cuenta): v
 - Rechaza un token manipulado.
 - Falla explícitamente si `JWT_SECRET` no está configurado (en vez de firmar con un valor por defecto inseguro).
 
-### `src/utils/resetToken.test.ts`
-
-- Cada token generado es distinto.
-- El hash generado junto al token coincide con volver a hashear ese mismo token por separado.
-- El token crudo nunca es igual a su hash.
-- El hash tiene el formato esperado (SHA-256 hexadecimal, 64 caracteres).
-
 ## Cobertura actual
 
-`AuthService.ts`: 95.6% líneas · `jwt.ts`: 100% líneas. (`EmailService.ts`/`RolService.ts` sin cobertura — son wrappers triviales, no lógica de seguridad; se dejan fuera del alcance de esta tarea).
+`AuthService.ts`: 95.6% líneas · `jwt.ts`: 100% líneas. (`RolService.ts` sin cobertura: es un wrapper trivial, no lógica de seguridad).
 
 ## Pruebas manuales end-to-end (complementarias, ya realizadas en SCRUM-26/27/28/29)
 

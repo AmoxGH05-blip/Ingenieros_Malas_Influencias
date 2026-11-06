@@ -4,8 +4,8 @@ import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { RoleRedirect } from "@/routes/RoleRedirect";
 import { AppLayout } from "@/layouts/AppLayout";
 import { LoginPage } from "@/pages/auth/LoginPage";
-import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
-import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
+import { SolicitarCambioPasswordPage } from "@/pages/auth/SolicitarCambioPasswordPage";
+import { SolicitudesPasswordPage } from "@/pages/solicitudes/SolicitudesPasswordPage";
 import { CambiarPasswordPage } from "@/pages/auth/CambiarPasswordPage";
 import { EstudianteDashboardPage } from "@/pages/dashboards/EstudianteDashboardPage";
 import { DocenteDashboardPage } from "@/pages/dashboards/DocenteDashboardPage";
@@ -27,8 +27,7 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/solicitar-cambio-password" element={<SolicitarCambioPasswordPage />} />
         <Route path="/cambiar-password" element={<CambiarPasswordPage />} />
 
         <Route element={<ProtectedRoute />}>
@@ -53,6 +52,7 @@ function App() {
               <Route path="/coordinador/usuarios" element={<CuentasPage />} />
               <Route path="/coordinador/grupos" element={<GruposPage />} />
               <Route path="/coordinador/grupos/:id" element={<GrupoDetallePage />} />
+              <Route path="/coordinador/solicitudes" element={<SolicitudesPasswordPage />} />
               <Route path="/coordinador/indicadores" element={<IndicadoresPage />} />
               <Route path="/coordinador/indicadores/:id" element={<IndicadorDocenteDetallePage />} />
             </Route>

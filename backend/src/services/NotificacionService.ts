@@ -5,7 +5,9 @@ import { GrupoRepository } from "../repositories/GrupoRepository";
 import { MateriaRepository } from "../repositories/MateriaRepository";
 import { DocenteRepository } from "../repositories/DocenteRepository";
 import { EvaluacionRepository } from "../repositories/EvaluacionRepository";
+import { PermisoDenegadoError } from "../utils/errores";
 import { diasRestantes } from "../utils/fechas";
+import { SolicitudPasswordService } from "./SolicitudPasswordService";
 
 /** El aviso al alumno empieza cuando faltan 7 dias de calendario o menos para el cierre (0 = cierra hoy). */
 const DIAS_AVISO = 7;
@@ -15,13 +17,16 @@ export type Severidad = "info" | "aviso" | "urgente";
 
 export interface Notificacion {
   id: string;
-  tipo: "evaluaciones-pendientes";
+  tipo: "evaluaciones-pendientes" | "solicitudes-password";
   severidad: Severidad;
   titulo: string;
   mensaje: string;
   enlace: string;
-  diasRestantes: number;
-  /** Materias sin evaluar, como "Materia (Apellido, Nombre)". */
+  /** Texto del boton de la ventana, por ejemplo "Ir a evaluar". */
+  textoEnlace: string;
+  /** Solo en el aviso de evaluaciones: dias que faltan para el cierre. */
+  diasRestantes?: number;
+  /** Detalle del aviso: materias sin evaluar ("Materia (Apellido, Nombre)") o cuentas con solicitud ("Nombre (cuenta)"). */
   pendientes: string[];
 }
 
@@ -78,8 +83,39 @@ async function notificacionDeEvaluaciones(usuarioId: number, ahora: Date): Promi
     titulo,
     mensaje: `Tienes ${cantidad}. La evaluación cierra el ${formatearFecha(periodo.fechaFin)}.`,
     enlace: "/estudiante/evaluaciones",
+    textoEnlace: "Ir a evaluar",
     diasRestantes: dias,
     pendientes,
+  };
+}
+
+/** Cuantas cuentas se listan en el aviso antes de decir "y N mas". */
+const MAX_SOLICITUDES_LISTADAS = 5;
+
+/** Solicitudes de cambio de contrasena que este coordinador o administrador puede resolver. */
+async function notificacionDeSolicitudes(usuarioId: number, roles: string[], ahora: Date): Promise<Notificacion | null> {
+  let solicitudes;
+  try {
+    solicitudes = await SolicitudPasswordService.listarPendientes({ usuarioId, roles }, ahora);
+  } catch (error) {
+    // Una cuenta que ya no puede gestionar (desactivada o sin rol, con el token todavia vigente) simplemente no recibe el aviso.
+    if (error instanceof PermisoDenegadoError) return null;
+    throw error;
+  }
+  if (solicitudes.length === 0) return null;
+
+  const detalle = solicitudes.slice(0, MAX_SOLICITUDES_LISTADAS).map((s) => `${s.nombre ?? "Sin nombre"} (${s.numeroCuenta})`);
+  if (solicitudes.length > MAX_SOLICITUDES_LISTADAS) detalle.push(`y ${solicitudes.length - MAX_SOLICITUDES_LISTADAS} más`);
+  const cantidad = solicitudes.length === 1 ? "1 solicitud de cambio de contraseña" : `${solicitudes.length} solicitudes de cambio de contraseña`;
+  return {
+    id: "solicitudes-password",
+    tipo: "solicitudes-password",
+    severidad: "aviso",
+    titulo: solicitudes.length === 1 ? "Tienes una solicitud de contraseña pendiente" : "Tienes solicitudes de contraseña pendientes",
+    mensaje: `Hay ${cantidad} por revisar. Apruébala solo si confirmaste que la persona es quien dice ser.`,
+    enlace: "/coordinador/solicitudes",
+    textoEnlace: "Revisar solicitudes",
+    pendientes: detalle,
   };
 }
 
@@ -90,6 +126,10 @@ export const NotificacionService = {
     if (roles.includes("Estudiante")) {
       const evaluaciones = await notificacionDeEvaluaciones(usuarioId, ahora);
       if (evaluaciones) avisos.push(evaluaciones);
+    }
+    if (roles.includes("Coordinador") || roles.includes("Administrador")) {
+      const solicitudes = await notificacionDeSolicitudes(usuarioId, roles, ahora);
+      if (solicitudes) avisos.push(solicitudes);
     }
     return avisos;
   },

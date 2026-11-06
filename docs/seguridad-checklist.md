@@ -27,3 +27,13 @@
 ## Resumen
 
 12 de 15 controles cumplidos para el alcance actual del módulo de autenticación (Sprint 1). Los 3 pendientes (autorización por rol, revocación de sesión más robusta, bitácora de auditoría) están correctamente diferidos a EP10/SCRUM-62 en Sprint 6 — no son regresiones, son trabajo que el backlog ya tenía planeado más adelante.
+
+## Actualización — SCRUM-80 (5-nov-2026)
+
+La recuperación por correo se retiró y se reemplazó por una solicitud de cambio con aprobación (`docs/cambio-de-contrasena.md`). Por eso los puntos 4 a 7 y el 12 de la tabla de arriba, que describen el estado del Sprint 1, ya no aplican tal cual:
+
+- **4 (no revelar si existe la cuenta):** ahora lo cumple `POST /api/auth/solicitar-cambio-password`, con la misma respuesta exista o no la cuenta y el cifrado hecho siempre para que el tiempo de respuesta no la delate.
+- **5 y 6 (tokens de un solo uso, vigencia corta, nunca en claro):** ya no hay tokens. La contraseña pedida se guarda cifrada con bcrypt, nunca en claro, y la solicitud vence a los 7 días.
+- **7 (sesiones previas invalidadas):** al aprobar se cierran las sesiones registradas de la cuenta.
+- **11 y 12:** ya no hay variables SMTP ni la dependencia `nodemailer`.
+- **Nuevo:** quien aprueba debe confirmar la identidad fuera del sistema (cualquiera que conozca un número de cuenta puede enviar una solicitud); la tabla de solicitudes tiene RLS activado y permisos cerrados a `anon` y `authenticated`.

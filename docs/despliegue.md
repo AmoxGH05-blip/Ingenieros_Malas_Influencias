@@ -7,11 +7,10 @@
 
 ## Por qué este orden importa
 
-El backend no necesita saber la URL del frontend para funcionar (solo la usa para armar el link del correo de recuperación de contraseña), pero el frontend **sí** necesita saber la URL del backend para poder hacerle peticiones. Por eso:
+El backend no necesita saber la URL del frontend para funcionar (el sistema no envía correos), pero el frontend **sí** necesita saber la URL del backend para poder hacerle peticiones. Por eso:
 
 1. Despliega primero el **backend en Render** → obtén su URL.
 2. Despliega el **frontend en Vercel** usando esa URL.
-3. Regresa a Render y actualiza `FRONTEND_URL` con la URL de Vercel que acabas de obtener.
 
 Cada cuenta (Render, Vercel) hay que crearla ustedes mismos — inicien sesión con GitHub para que quede conectado directo al repo.
 
@@ -30,12 +29,8 @@ Cada cuenta (Render, Vercel) hay que crearla ustedes mismos — inicien sesión 
 | `DB_USER` | `postgres.<project-ref>` (incluye el ref del proyecto, lo da el pooler) |
 | `DB_PASSWORD` | *(pídesela a Amoxhua si no la tienes)* |
 | `JWT_SECRET` | *(genera una nueva — ver abajo)* |
-| `SMTP_USER` | `pokego.cuentasecundaria1@gmail.com` |
-| `SMTP_PASSWORD` | *(la contraseña de aplicación de Gmail — pídesela a Amoxhua)* |
-| `SMTP_FROM` | `pokego.cuentasecundaria1@gmail.com` |
-| `FRONTEND_URL` | déjalo vacío por ahora, lo llenas en el paso 3 de abajo |
 
-   El resto de las variables (`DB_PORT`, `DB_SSL`, `SESSION_DURATION_HOURS`, `SMTP_HOST/PORT/SECURE`) ya vienen con su valor correcto en `render.yaml`, no hay que tocarlas.
+   El resto de las variables (`DB_PORT`, `DB_SSL`, `SESSION_DURATION_HOURS`) ya vienen con su valor correcto en `render.yaml`, no hay que tocarlas. **El sistema no envía correos**, así que no hay variables de correo (SMTP): ver `docs/notificaciones.md` y `docs/acceso-y-cuentas.md`.
 
    > **Migración a Supabase (18-sep-2026):** la base de datos se movió de Azure SQL Server a [Supabase](https://supabase.com) (PostgreSQL, plan Free) porque la suscripción de Azure superó los $15 USD/mes. El esquema completo (equivalente en PostgreSQL) vive en [`database/postgres_schema.sql`](../database/postgres_schema.sql) — se pega una sola vez en el SQL Editor de un proyecto nuevo de Supabase. Los archivos con el modelo original de SQL Server (`database/evaluacion_docente_schema.sql`, `database/migrations/`) se conservan solo como referencia histórica.
 
@@ -56,14 +51,10 @@ Cada cuenta (Render, Vercel) hay que crearla ustedes mismos — inicien sesión 
    - **Environment Variables:** agrega `VITE_API_URL` = la URL de Render del paso anterior (ej. `https://dygsis-backend.onrender.com`).
 4. **Deploy**. Al terminar te da una URL tipo `https://ingenieros-malas-influencias.vercel.app`.
 
-## 3. Cerrar el círculo
-
-Regresa a Render → tu servicio `dygsis-backend` → **Environment** → edita `FRONTEND_URL` con la URL real de Vercel (ej. `https://ingenieros-malas-influencias.vercel.app`, sin `/` al final). Guarda — Render redeploya automáticamente.
-
 ## Verificación
 
 1. Abre la URL de Vercel → debe cargar la pantalla de login.
-2. Prueba "¿Olvidaste tu contraseña?" con un correo real → el enlace del correo debe apuntar a tu dominio de Vercel, no a `localhost`.
+2. Inicia sesión con una cuenta de prueba → debe entrar al dashboard de su rol. "¿Olvidaste tu contraseña?" abre la solicitud de cambio con aprobación (`/solicitar-cambio-password`).
 3. Inicia sesión con la cuenta de demo (`DEMO0001` / `Demo2026!`) → debe redirigir al dashboard.
 
 ## Actualizaciones automáticas

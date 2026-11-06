@@ -92,7 +92,7 @@ function rolesAsignablesPara(rolesActor: string[]): RolAsignable[] {
  * El Coordinador solo gestiona cuentas de alumnos y docentes; las de coordinadores y administradores son del
  * Administrador. Una cuenta sin ningun rol tampoco es del Coordinador: no hay nada que diga que sea un alumno o un docente.
  */
-function puedeGestionar(rolesActor: string[], rolesCuenta: string[]): boolean {
+export function puedeGestionar(rolesActor: string[], rolesCuenta: string[]): boolean {
   if (rolesActor.includes("Administrador")) return true;
   if (rolesActor.includes("Coordinador")) {
     return rolesCuenta.length > 0 && rolesCuenta.every((rol) => (ROLES_DEL_COORDINADOR as string[]).includes(rol));
@@ -106,7 +106,7 @@ function exigirAlgunPermiso(actor: Actor): void {
   }
 }
 
-function nombreCompleto(perfil: PerfilPersona | null): string | null {
+export function nombreCompleto(perfil: PerfilPersona | null): string | null {
   return perfil ? `${perfil.nombre} ${perfil.apellidoPaterno}` : null;
 }
 
@@ -152,7 +152,7 @@ function guardarPerfil(manager: EntityManager, rol: RolAsignable, usuarioId: num
 }
 
 /** Roles de una cuenta leidos con la conexion de la transaccion en curso (otra consulta del pool podria agotarlo). */
-async function rolesEnTransaccion(manager: EntityManager, usuarioId: number): Promise<string[]> {
+export async function rolesEnTransaccion(manager: EntityManager, usuarioId: number): Promise<string[]> {
   const asignaciones = await manager.findBy(UsuarioRol, { usuarioId });
   if (asignaciones.length === 0) return [];
   const roles = await manager.findBy(Rol, { id: In(asignaciones.map((a) => a.rolId)) });

@@ -35,7 +35,7 @@ Para ejecutarlo contra producción usa las mismas variables `DB_*` de `backend/.
 
 ## Política de contraseñas
 
-Mínimo 8 caracteres y **máximo 72 bytes**. Se miden bytes y no caracteres porque bcrypt solo usa los primeros 72 bytes, y la ñ, los acentos y los emojis ocupan más de uno (una contraseña de 40 `ñ` mide 80 bytes y se rechaza). Dos contraseñas que solo difieren después del byte 72 cuentan como la misma. La misma regla se aplica al cambio, al alta de usuarios, a la cuenta inicial y a la recuperación por correo.
+Mínimo 8 caracteres y **máximo 72 bytes**. Se miden bytes y no caracteres porque bcrypt solo usa los primeros 72 bytes, y la ñ, los acentos y los emojis ocupan más de uno (una contraseña de 40 `ñ` mide 80 bytes y se rechaza). Dos contraseñas que solo difieren después del byte 72 cuentan como la misma. La misma regla se aplica al cambio, al alta de usuarios, a la cuenta inicial y a la solicitud de cambio de contraseña.
 
 ## Límite de intentos
 
@@ -45,9 +45,13 @@ Los números de cuenta son predecibles y las contraseñas temporales las elige u
 |---|---|
 | `POST /api/auth/login` | 5 por IP y número de cuenta, y 30 por IP en total |
 | `POST /api/auth/cambiar-password` | 10 por usuario |
-| `POST /api/auth/forgot-password` y `/reset-password` | 10 por IP (se retiran con SCRUM-80) |
+| `POST /api/auth/solicitar-cambio-password` | 10 por IP y 3 por IP y cuenta (ver `docs/cambio-de-contrasena.md`) |
 
 Se cuenta por la IP real del cliente: en Render hay un Cloudflare delante, así que se lee `CF-Connecting-IP` (Cloudflare la reescribe en cada petición y el cliente no puede falsearla); sin ese encabezado, como en local, se usa la IP de la conexión. Los inicios de sesión correctos no cuentan. Los contadores viven en memoria y Render gratuito reinicia el servicio al dormirlo, así que el límite se reinicia con él; frena la fuerza bruta continua, no es un bloqueo permanente.
+
+## Contraseña olvidada
+
+Sin correo real no hay enlace de recuperación: la persona **pide** la contraseña nueva en `/solicitar-cambio-password` y quien gestiona su cuenta la aprueba desde su panel (SCRUM-80). Detalle, reglas y API en `docs/cambio-de-contrasena.md`.
 
 ## Alta de usuarios (resumen; el detalle de la jerarquía está en `docs/altas-y-grupos.md`)
 
@@ -88,10 +92,10 @@ Migración `database/migrations/007_numero_cuenta_login.sql`: agrega `Usuario.Nu
 Salieron de la revisión de seguridad de este cambio. Quedan documentados a propósito:
 
 - **Cuentas demo con contraseña pública (pendiente antes de la entrega).** `DEMO0001` (con rol Administrador), `COORD0001` y las demás usan `Demo2026!`, que aparece en el repo y en los docs, y existen también en producción. Mientras sean datos de prueba, es aceptable; **antes de la entrega final hay que desactivarlas** (`UPDATE "P_EvaluacionDocente_Usuario" SET "Activo" = false WHERE "CorreoElectronico" LIKE '%@dygsis.local'`) y crear el administrador real con el script de arriba.
-- **Los tokens valen hasta 8 horas aunque se cambie la contraseña o se desactive la cuenta.** `requireAuth` verifica la firma del token pero no consulta la tabla de sesiones, para no hacer una consulta a la base remota en cada petición. Desactivar las filas de `Sesion` queda registrado, pero no invalida tokens ya emitidos. Si SCRUM-80 (cambio de contraseña con aprobación) lo requiere, se puede validar el `jti` contra la tabla con una caché corta.
+- **Los tokens valen hasta 8 horas aunque se cambie la contraseña o se desactive la cuenta.** `requireAuth` verifica la firma del token pero no consulta la tabla de sesiones, para no hacer una consulta a la base remota en cada petición. Desactivar las filas de `Sesion` queda registrado, pero no invalida tokens ya emitidos. Al aprobar un cambio de contraseña (SCRUM-80) también se cierran las sesiones registradas, con el mismo límite: un token ya emitido sigue valiendo hasta cumplir sus 8 horas. Si hiciera falta, se puede validar el `jti` contra la tabla con una caché corta.
 - **Tokens anteriores a este cambio no traen la marca de cambio obligatorio** y se tratan como sin marca. No es explotable (falsificar el token exige el secreto), y cerrarlo dejaría sin acceso a quien tenga una sesión abierta al desplegar; expiran solos en 8 horas.
-- **`forgot-password` responde más lento cuando el correo existe** (envía el correo). Es código anterior que SCRUM-80 retira.
+- **Si el único administrador olvida su contraseña no hay quien apruebe el cambio**: se restablece con un script de base de datos. Con un segundo administrador se resuelve por la vía normal (ver `docs/cambio-de-contrasena.md`).
 
 ## Nota técnica
 
-Al revisar este trabajo se encontró un resto de la migración desde SQL Server: `SesionRepository.desactivarTodasDeUsuario` usaba `SYSDATETIME()` y `Activa = 1`, que no existen en PostgreSQL. Habría hecho fallar el cambio de contraseña en producción (y la recuperación por correo que ya existía). Quedó corregido con la API de TypeORM.
+Al revisar este trabajo se encontró un resto de la migración desde SQL Server: `SesionRepository.desactivarTodasDeUsuario` usaba `SYSDATETIME()` y `Activa = 1`, que no existen en PostgreSQL. Habría hecho fallar el cambio de contraseña en producción (y habría roto también la recuperación por correo que existía entonces y que SCRUM-80 retiró). Quedó corregido con la API de TypeORM.

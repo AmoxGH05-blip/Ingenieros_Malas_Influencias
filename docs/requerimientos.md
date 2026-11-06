@@ -3,7 +3,7 @@
 **Proyecto:** Sistema de Información de Evaluación Docente Institucional Adaptable
 **Equipo:** Ingenieros Malas Influencias · **Jira:** SCRUM-18
 **Formalizado a partir de:** el backlog de épicas y sprints cargado en Jira (`documentacion.pdf` del repo).
-**Última actualización:** 5 de noviembre de 2026 (indicadores docentes, SCRUM-46 a 52; antes, revisión con la coordinadora del proyecto, SCRUM-40 y SCRUM-78 a 80).
+**Última actualización:** 5 de noviembre de 2026 (indicadores docentes, SCRUM-46 a 52, y cambio de contraseña con aprobación, SCRUM-80; antes, revisión con la coordinadora del proyecto, SCRUM-40 y SCRUM-78 a 80).
 
 > Este documento formaliza los requerimientos que ya estaban distribuidos como tareas en el backlog Scrum, para tenerlos en un solo lugar consultable independiente de Jira. La columna **Estado** se actualiza al cerrar cada tarea.
 
@@ -36,13 +36,13 @@ Roles del sistema: **Administrador, Coordinador, Docente, Estudiante** (ver `doc
 | RF08 | EP7 · Talleres y laboratorios | El sistema debe permitir configurar, por carrera, qué talleres/laboratorios existen y sus criterios de evaluación, y habilitar/deshabilitar la evaluación de talleres de forma configurable por carrera. | **Pendiente** (Sprint 5). |
 | RF09 | EP9 · Reportes en PDF | El sistema debe generar 5 reportes en PDF: avance de evaluaciones, participación, resultados por docente, comparativo histórico, y resultados de talleres/laboratorios, filtrables y descargables. | **Pendiente** (Sprint 6). |
 | RF10 | EP1 · Autenticación y gestión de usuarios | **(Nuevo)** El Administrador debe poder dar de alta coordinadores y administradores, y el Coordinador alumnos y docentes, buscando primero el número de cuenta: si es nuevo se crea con contraseña temporal, y si ya existe se le agrega un rol sin tocar su contraseña. El Coordinador debe poder crear materias y grupos (con cupo opcional) e inscribir alumnos, también al darlos de alta. El Coordinador no puede crear ni gestionar cuentas de Coordinador o Administrador. | **Implementado** (SCRUM-43, 79). Pendiente: quitar inscripciones y editar o desactivar. |
-| RF11 | EP1 · Autenticación y gestión de usuarios | **(Nuevo)** Un alumno o docente que olvide su contraseña debe poder solicitar el cambio escribiendo la nueva; no se aplica hasta que el Coordinador o Administrador la apruebe desde su panel, y al iniciar sesión estos ven un aviso con las solicitudes pendientes. | **Pendiente** (SCRUM-80). |
+| RF11 | EP1 · Autenticación y gestión de usuarios | **(Nuevo)** Un alumno o docente que olvide su contraseña debe poder solicitar el cambio escribiendo la nueva; no se aplica hasta que quien gestiona su cuenta la apruebe desde su panel (el Coordinador las de alumnos y docentes; el Administrador, las de coordinadores y administradores), y al iniciar sesión estos ven un aviso con las solicitudes pendientes. | **Implementado** (SCRUM-80). Ver `docs/cambio-de-contrasena.md`. |
 
 ## 3. Requerimientos no funcionales (EP10 · Seguridad y no funcionales)
 
 | ID | Categoría | Requerimiento | Estado al 5-nov-2026 |
 |---|---|---|---|
-| RNF01 | Seguridad | Las contraseñas se almacenan como hash (bcrypt), nunca en texto plano, con política de mínimo 8 caracteres y máximo 72 bytes. Se limitan los intentos fallidos de inicio de sesión (5 por cuenta y 30 por IP cada 15 minutos). Los tokens de recuperación por correo (de un solo uso, 30 minutos) se retiran con RF11. | **Implementado** (SCRUM-26, 27, 78). |
+| RNF01 | Seguridad | Las contraseñas se almacenan como hash (bcrypt), nunca en texto plano, con política de mínimo 8 caracteres y máximo 72 bytes. Se limitan los intentos fallidos de inicio de sesión (5 por cuenta y 30 por IP cada 15 minutos). La recuperación por correo se retiró con RF11: las contraseñas nuevas se piden y se aprueban, y se guardan cifradas. | **Implementado** (SCRUM-26, 27, 78). |
 | RNF02 | Seguridad | Control de acceso por roles (Administrador, Coordinador, Docente, Estudiante) validado en el servidor, con trazabilidad de quién da de alta cada cuenta y bitácora de auditoría de acciones sensibles. | **Parcial.** Roles y trazabilidad de altas implementados; bitácora de auditoría pendiente (SCRUM-62). |
 | RNF03 | Seguridad | Las evaluaciones pueden marcarse como anónimas de cara a reportes, preservando el dato en base para trazabilidad si se requiere auditar. | **Parcial.** El dato existe en el modelo; se aplica en los reportes (Sprint 6). |
 | RNF04 | Rendimiento | Los endpoints y consultas deben responder en menos de 3 segundos bajo condiciones normales de carga. | **Por verificar** (SCRUM-58 y 68). |
@@ -54,7 +54,7 @@ Roles del sistema: **Administrador, Coordinador, Docente, Estudiante** (ver `doc
 
 ## 4. Trazabilidad con la base de datos y el backend
 
-- Modelo de datos: `database/postgres_schema.sql` (esquema consolidado de PostgreSQL en Supabase, 22 tablas, 3 vistas de participación y 2 de indicadores docentes) y `database/migrations/` (migraciones 002 a 009, repetibles y con su reversa). `database/evaluacion_docente_schema.sql` es historia de la versión de SQL Server.
-- Backend: `backend/src/` por capas (entidades, repositorios, servicios, controladores y rutas), con 253 pruebas automatizadas.
-- Documentación por tema: `docs/acceso-y-cuentas.md` (RF01, RNF01), `docs/altas-y-grupos.md` (RF10), `docs/notificaciones.md` (RF05), `docs/vistas-participacion.md` (RF06) y `docs/indicadores-docentes.md` (RF07).
+- Modelo de datos: `database/postgres_schema.sql` (esquema consolidado de PostgreSQL en Supabase, 22 tablas, 3 vistas de participación y 2 de indicadores docentes) y `database/migrations/` (migraciones 002 a 011, repetibles y con su reversa). `database/evaluacion_docente_schema.sql` es historia de la versión de SQL Server.
+- Backend: `backend/src/` por capas (entidades, repositorios, servicios, controladores y rutas), con 268 pruebas automatizadas.
+- Documentación por tema: `docs/acceso-y-cuentas.md` (RF01, RNF01), `docs/altas-y-grupos.md` (RF10), `docs/notificaciones.md` (RF05), `docs/vistas-participacion.md` (RF06) y `docs/indicadores-docentes.md` (RF07) y `docs/cambio-de-contrasena.md` (RF11).
 - El avance tarea por tarea, con "qué se hizo / cómo se hizo", está en `PROGRESS.md`.

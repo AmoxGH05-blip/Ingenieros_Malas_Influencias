@@ -32,17 +32,3 @@ export function cambiarPassword(passwordActual: string, nuevaPassword: string): 
     body: JSON.stringify({ passwordActual, nuevaPassword }),
   });
 }
-
-export function forgotPassword(correo: string): Promise<{ mensaje: string }> {
-  return apiFetch<{ mensaje: string }>("/auth/forgot-password", {
-    method: "POST",
-    body: JSON.stringify({ correo }),
-  });
-}
-
-export function resetPassword(token: string, nuevaPassword: string): Promise<{ mensaje: string }> {
-  return apiFetch<{ mensaje: string }>("/auth/reset-password", {
-    method: "POST",
-    body: JSON.stringify({ token, nuevaPassword }),
-  });
-}

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/AuthController";
+import { SolicitudPasswordController } from "../controllers/SolicitudPasswordController";
 import { asyncHandler } from "../middlewares/asyncHandler";
 import { limitadores } from "../middlewares/limitadores";
 import { requireAuthPermitiendoCambioPassword } from "../middlewares/requireAuth";
@@ -13,5 +14,10 @@ authRouter.post(
   limitadores.cambioPassword,
   asyncHandler(AuthController.cambiarPassword)
 );
-authRouter.post("/forgot-password", limitadores.recuperacion, asyncHandler(AuthController.forgotPassword));
-authRouter.post("/reset-password", limitadores.recuperacion, asyncHandler(AuthController.resetPassword));
+// Publica: la manda quien olvido su contrasena. No se aplica hasta que Coordinacion o Administracion la aprueba (SCRUM-80).
+authRouter.post(
+  "/solicitar-cambio-password",
+  limitadores.solicitudPasswordPorIp,
+  limitadores.solicitudPasswordPorCuenta,
+  asyncHandler(SolicitudPasswordController.solicitar)
+);

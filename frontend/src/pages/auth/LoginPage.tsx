@@ -71,7 +71,7 @@ export function LoginPage() {
             <Button type="submit" disabled={isSubmitting} className="bg-brand text-brand-foreground hover:opacity-90">
               {isSubmitting ? "Entrando..." : "Entrar"}
             </Button>
-            <Link to="/forgot-password" className="text-center text-sm text-sidebar-muted hover:text-sidebar-foreground hover:underline">
+            <Link to="/solicitar-cambio-password" className="text-center text-sm text-sidebar-muted hover:text-sidebar-foreground hover:underline">
               ¿Olvidaste tu contraseña?
             </Link>
           </form>

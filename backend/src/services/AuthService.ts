@@ -3,15 +3,11 @@ import bcrypt from "bcryptjs";
 import { UsuarioRepository } from "../repositories/UsuarioRepository";
 import { UsuarioRolRepository } from "../repositories/UsuarioRolRepository";
 import { SesionRepository } from "../repositories/SesionRepository";
-import { PasswordResetTokenRepository } from "../repositories/PasswordResetTokenRepository";
 import type { Usuario } from "../entities";
 import { signToken, getSessionDurationHours, type TipoCuenta } from "../utils/jwt";
 import { mismaPasswordParaBcrypt, passwordValida } from "../utils/password";
-import { generarTokenRecuperacion, hashearToken } from "../utils/resetToken";
-import { EmailService } from "./EmailService";
 
 export class CredencialesInvalidasError extends Error {}
-export class TokenRecuperacionInvalidoError extends Error {}
 export class PasswordActualIncorrectaError extends Error {}
 export class PasswordNuevaInvalidaError extends Error {}
 
@@ -27,7 +23,6 @@ export interface LoginResult {
   };
 }
 
-const RESET_TOKEN_DURATION_MINUTOS = 30;
 const NUMERO_CUENTA_REGEX = /^[A-Z0-9]{1,20}$/;
 // Hash de una contrasena cualquiera: se compara cuando la cuenta no existe, para que responder
 // "cuenta inexistente" no sea notablemente mas rapido que "contrasena incorrecta".
@@ -120,53 +115,5 @@ export const AuthService = {
 
     const roles = await UsuarioRolRepository.findRoleNamesByUsuarioId(usuario.id);
     return abrirSesion({ ...usuario, contrasenaHash, debeCambiarPassword: false }, roles);
-  },
-
-  async solicitarRecuperacion(correo: string, urlBaseFrontend: string): Promise<void> {
-    // Los correos se guardan en minusculas (SCRUM-79): quien escribe "Ana@X.com" debe encontrarse igual.
-    const usuario = await UsuarioRepository.findOneBy({ correoElectronico: correo.trim().toLowerCase() });
-    if (!usuario || !usuario.activo) {
-      // Respuesta silenciosa: no se revela si el correo existe o no.
-      return;
-    }
-
-    const { token, tokenHash } = generarTokenRecuperacion();
-    const ahora = new Date();
-    const expiracion = new Date(ahora.getTime() + RESET_TOKEN_DURATION_MINUTOS * 60 * 1000);
-
-    await PasswordResetTokenRepository.save(
-      PasswordResetTokenRepository.create({
-        usuarioId: usuario.id,
-        tokenHash,
-        fechaCreacion: ahora,
-        fechaExpiracion: expiracion,
-        usado: false,
-      })
-    );
-
-    const enlaceRecuperacion = `${urlBaseFrontend}/reset-password?token=${token}`;
-    await EmailService.enviarCorreoRecuperacion(usuario.correoElectronico, enlaceRecuperacion);
-  },
-
-  async restablecerPassword(token: string, nuevaPassword: string): Promise<void> {
-    const tokenHash = hashearToken(token);
-    const registro = await PasswordResetTokenRepository.findValidByHash(tokenHash);
-    if (!registro) {
-      throw new TokenRecuperacionInvalidoError("Token invalido o expirado");
-    }
-
-    const usuario = await UsuarioRepository.findById(registro.usuarioId);
-    if (!usuario) {
-      throw new TokenRecuperacionInvalidoError("Token invalido o expirado");
-    }
-
-    const nuevoHash = await bcrypt.hash(nuevaPassword, 10);
-    // Quien recupera la cuenta por correo ya eligio su contrasena: si tenia una temporal pendiente, deja de estarlo.
-    await UsuarioRepository.update({ id: usuario.id }, { contrasenaHash: nuevoHash, debeCambiarPassword: false });
-
-    registro.usado = true;
-    await PasswordResetTokenRepository.save(registro);
-
-    await SesionRepository.desactivarTodasDeUsuario(usuario.id);
   },
 };

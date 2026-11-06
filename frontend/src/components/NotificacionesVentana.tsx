@@ -80,6 +80,11 @@ export function NotificacionesVentana() {
                       <li key={`${i}-${pendiente}`}>{pendiente}</li>
                     ))}
                   </ul>
+                  <Button asChild size="sm" className="mt-1">
+                    <Link to={aviso.enlace} onClick={cerrarVentana}>
+                      {aviso.textoEnlace}
+                    </Link>
+                  </Button>
                 </div>
               </li>
             );
@@ -89,11 +94,6 @@ export function NotificacionesVentana() {
         <div className="flex justify-end gap-2 pt-2">
           <Button autoFocus variant="outline" onClick={cerrarVentana}>
             Cerrar
-          </Button>
-          <Button asChild>
-            <Link to={notificaciones[0].enlace} onClick={cerrarVentana}>
-              Ir a evaluar
-            </Link>
           </Button>
         </div>
       </div>

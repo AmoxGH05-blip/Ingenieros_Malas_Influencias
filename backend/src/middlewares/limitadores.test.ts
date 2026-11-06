@@ -37,7 +37,7 @@ async function levantar(opciones = {}) {
     limitadores.gestion,
     (_req, res) => res.json({})
   );
-  app.post("/recuperar", limitadores.recuperacion, (_req, res) => res.json({}));
+  app.post("/solicitar", limitadores.solicitudPasswordPorIp, limitadores.solicitudPasswordPorCuenta, (_req, res) => res.json({}));
   await new Promise<void>((listo) => {
     servidor = app.listen(0, listo);
   });
@@ -120,10 +120,14 @@ describe("limitadores de intentos", () => {
     expect(await post("/gestion", { password: "buena" }, { "x-usuario": "8" })).toBe(200);
   });
 
-  it("recuperacion por correo: limita por IP", async () => {
-    const { post } = await levantar({ intentosRecuperacion: 2 });
-    expect(await post("/recuperar", {})).toBe(200);
-    expect(await post("/recuperar", {})).toBe(200);
-    expect(await post("/recuperar", {})).toBe(429);
+  it("solicitud de cambio de contrasena: tope por IP y, aparte, por IP y cuenta", async () => {
+    const { post } = await levantar({ intentosSolicitudPorIp: 4, intentosSolicitudPorCuenta: 2 });
+    expect(await post("/solicitar", { numeroCuenta: "A1" })).toBe(200);
+    expect(await post("/solicitar", { numeroCuenta: "a1 " })).toBe(200);
+    // La tercera de la misma cuenta ya no pasa, aunque el tope por IP todavia no se agote...
+    expect(await post("/solicitar", { numeroCuenta: "A1" })).toBe(429);
+    // ...y otra cuenta desde la misma IP sigue pudiendo, hasta que se agota el tope por IP.
+    expect(await post("/solicitar", { numeroCuenta: "B2" })).toBe(200);
+    expect(await post("/solicitar", { numeroCuenta: "C3" })).toBe(429);
   });
 });

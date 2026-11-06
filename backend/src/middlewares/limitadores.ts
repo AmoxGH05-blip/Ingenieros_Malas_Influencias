@@ -7,7 +7,8 @@ export interface OpcionesLimitadores {
   intentosLoginPorIp?: number;
   intentosLoginPorCuenta?: number;
   intentosCambioPassword?: number;
-  intentosRecuperacion?: number;
+  intentosSolicitudPorIp?: number;
+  intentosSolicitudPorCuenta?: number;
   intentosGestion?: number;
 }
 
@@ -58,8 +59,14 @@ export function crearLimitadores(opciones: OpcionesLimitadores = {}) {
       limit: opciones.intentosGestion ?? 200,
       keyGenerator: (req) => (req.usuarioId ? `usuario:${req.usuarioId}` : ipDe(req)),
     }),
-    /** Recuperacion por correo (se retira con SCRUM-80): por IP, cuente o no el intento. */
-    recuperacion: rateLimit({ ...base, limit: opciones.intentosRecuperacion ?? 10, keyGenerator: ipDe }),
+    /** Solicitud de cambio de contrasena (publica, SCRUM-80): tope por IP, aunque se pruebe una cuenta distinta cada vez. Holgado (30) porque un campus puede salir por una sola IP. */
+    solicitudPasswordPorIp: rateLimit({ ...base, limit: opciones.intentosSolicitudPorIp ?? 30, keyGenerator: ipDe }),
+    /** Por IP y cuenta: frena inundar de solicitudes a una sola persona sin dejar fuera a las demas. */
+    solicitudPasswordPorCuenta: rateLimit({
+      ...base,
+      limit: opciones.intentosSolicitudPorCuenta ?? 3,
+      keyGenerator: (req) => `${ipDe(req)}:${String(req.body?.numeroCuenta ?? "").trim().toUpperCase()}`,
+    }),
   };
 }
 

@@ -1,4 +1,4 @@
-import { Award, BarChart3, ClipboardCheck, History, Layers, LayoutDashboard, TrendingUp, User, Users, type LucideIcon } from "lucide-react";
+import { Award, BarChart3, KeyRound, ClipboardCheck, History, Layers, LayoutDashboard, TrendingUp, User, Users, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -64,6 +64,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
         { label: "Alumnos y docentes", to: "/coordinador/usuarios", icon: Users },
         { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
         { label: "Indicadores docentes", to: "/coordinador/indicadores", icon: Award },
+        { label: "Solicitudes de contraseña", to: "/coordinador/solicitudes", icon: KeyRound },
       ],
     },
   ],
@@ -76,6 +77,7 @@ export const NAV_BY_ROLE: Record<string, NavGroup[]> = {
         { label: "Grupos", to: "/coordinador/grupos", icon: Layers },
         { label: "Avance de evaluaciones", to: "/coordinador", icon: BarChart3 },
         { label: "Indicadores docentes", to: "/coordinador/indicadores", icon: Award },
+        { label: "Solicitudes de contraseña", to: "/coordinador/solicitudes", icon: KeyRound },
       ],
     },
   ],
@@ -93,6 +95,7 @@ const CRUMB_LABELS: Record<string, string> = {
   usuarios: "Usuarios",
   grupos: "Grupos",
   indicadores: "Indicadores docentes",
+  solicitudes: "Solicitudes de contraseña",
   comparativo: "Comparativo histórico",
 };
 

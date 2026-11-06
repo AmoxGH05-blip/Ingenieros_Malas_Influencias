@@ -61,7 +61,7 @@ Ejemplos reales de este repo: `feat: crear base de datos en SQL Server e impleme
 
 ### Credenciales
 
-**Nunca van en el repo.** Cada carpeta (`backend/`, `frontend/`) tiene su `.env.example` como plantilla — cópialo a `.env` y pide las credenciales reales (servidor SQL, JWT secret, SMTP) a Amoxhua si no las tienes. Los `.env` están en `.gitignore`; si `git status` te muestra un `.env` como cambio para commitear, **detente** y revisa tu `.gitignore` antes de continuar.
+**Nunca van en el repo.** Cada carpeta (`backend/`, `frontend/`) tiene su `.env.example` como plantilla — cópialo a `.env` y pide las credenciales reales (base de datos, JWT secret) a Amoxhua si no las tienes. Los `.env` están en `.gitignore`; si `git status` te muestra un `.env` como cambio para commitear, **detente** y revisa tu `.gitignore` antes de continuar.
 
 ### Levantar todo en paralelo
 

@@ -27,7 +27,7 @@ Pantalla **Usuarios** (Administrador) o **Alumnos y docentes** (Coordinador) →
 
 1. Se escribe el número de cuenta y se pulsa **Buscar**.
 2. **Cuenta nueva:** se elige el rol (solo los que tu rol puede asignar), la contraseña temporal y los datos del rol. Para un alumno, el correo es opcional (sin él se asigna `a<matrícula>@my.uvm.edu.mx`) y se pueden marcar los **grupos** en los que se inscribe. Para un docente no se elige grupo: sus grupos aparecen cuando se crea un grupo con él.
-3. **Cuenta existente:** se muestran nombre y roles actuales y solo se puede **agregar un rol** de los que faltan. La contraseña de una cuenta existente **nunca** se toca desde aquí (eso es SCRUM-80). Si el rol necesita un perfil que la cuenta no tiene (nombre, carrera o facultad), se pide; si ya lo tiene, no se duplica.
+3. **Cuenta existente:** se muestran nombre y roles actuales y solo se puede **agregar un rol** de los que faltan. La contraseña de una cuenta existente **nunca** se toca desde aquí (para eso existe la solicitud con aprobación, SCRUM-80: `docs/cambio-de-contrasena.md`). Si el rol necesita un perfil que la cuenta no tiene (nombre, carrera o facultad), se pide; si ya lo tiene, no se duplica.
 4. Las cuentas nuevas nacen con contraseña temporal y **cambio obligatorio** en el primer acceso (ver `docs/acceso-y-cuentas.md`), y quedan marcadas con quién las creó (`Usuario.CreadoPorUsuarioId`, migración 008).
 
 El alta con grupos es **atómica**: la cuenta, el perfil y las inscripciones se guardan en una sola transacción. Si algún grupo no existe o está lleno, no se crea nada.

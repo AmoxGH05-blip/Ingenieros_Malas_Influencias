@@ -9,7 +9,7 @@ export { Grupo } from "./Grupo";
 export { Inscripcion } from "./Inscripcion";
 export { UsuarioRol } from "./UsuarioRol";
 export { Sesion } from "./Sesion";
-export { PasswordResetToken } from "./PasswordResetToken";
+export { SolicitudCambioPassword } from "./SolicitudCambioPassword";
 export { TipoPregunta } from "./TipoPregunta";
 export { InstrumentoEvaluacion } from "./InstrumentoEvaluacion";
 export { SeccionInstrumento } from "./SeccionInstrumento";

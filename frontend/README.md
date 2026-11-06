@@ -35,7 +35,7 @@ src/
 
 ## Qué ya funciona
 
-- Login real (`POST /api/auth/login`), recuperación de contraseña (`forgot-password` / `reset-password`) — probado contra el backend y la base de datos reales.
+- Login real (`POST /api/auth/login`), solicitud de cambio de contraseña con aprobación (`/solicitar-cambio-password`) — probado contra el backend y la base de datos reales.
 - Rutas protegidas por rol: `/estudiante`, `/docente`, `/coordinador`, `/administrador`. Si no hay sesión, redirige a `/login`; si el rol no coincide, redirige a su propio dashboard.
 - Modo oscuro automático (sigue `prefers-color-scheme`, variables CSS en `src/index.css`).
 

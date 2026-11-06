@@ -14,29 +14,16 @@ vi.mock("../repositories/SesionRepository", () => ({
     desactivarTodasDeUsuario: vi.fn(),
   },
 }));
-vi.mock("../repositories/PasswordResetTokenRepository", () => ({
-  PasswordResetTokenRepository: {
-    save: vi.fn(),
-    create: vi.fn((entity) => entity),
-    findValidByHash: vi.fn(),
-  },
-}));
-vi.mock("./EmailService", () => ({
-  EmailService: { enviarCorreoRecuperacion: vi.fn() },
-}));
 
 import {
   AuthService,
   CredencialesInvalidasError,
   PasswordActualIncorrectaError,
   PasswordNuevaInvalidaError,
-  TokenRecuperacionInvalidoError,
 } from "./AuthService";
 import { UsuarioRepository } from "../repositories/UsuarioRepository";
 import { UsuarioRolRepository } from "../repositories/UsuarioRolRepository";
 import { SesionRepository } from "../repositories/SesionRepository";
-import { PasswordResetTokenRepository } from "../repositories/PasswordResetTokenRepository";
-import { EmailService } from "./EmailService";
 import { verifyToken } from "../utils/jwt";
 
 const PASSWORD_PLANA = "ClaveDePrueba123!";
@@ -202,77 +189,5 @@ describe("AuthService.cambiarPassword", () => {
     const inactivo = await usuarioDePrueba({ activo: false });
     vi.mocked(UsuarioRepository.findById).mockResolvedValue(inactivo as never);
     await expect(AuthService.cambiarPassword(inactivo.id, PASSWORD_PLANA, NUEVA)).rejects.toThrow(CredencialesInvalidasError);
-  });
-});
-
-describe("AuthService.solicitarRecuperacion", () => {
-  it("no envia correo ni revela nada cuando el correo no esta registrado", async () => {
-    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(null);
-
-    await AuthService.solicitarRecuperacion("nadie@ejemplo.local", "http://localhost:5173");
-
-    expect(EmailService.enviarCorreoRecuperacion).not.toHaveBeenCalled();
-    expect(PasswordResetTokenRepository.save).not.toHaveBeenCalled();
-  });
-
-  it("busca el correo sin importar mayusculas ni espacios, porque los correos se guardan en minusculas", async () => {
-    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(null);
-    await AuthService.solicitarRecuperacion("  Ana@Prueba.LOCAL ", "http://localhost:5173");
-    expect(UsuarioRepository.findOneBy).toHaveBeenCalledWith({ correoElectronico: "ana@prueba.local" });
-  });
-
-  it("genera un token de un solo uso y envia el correo cuando el usuario existe", async () => {
-    const usuario = await usuarioDePrueba();
-    vi.mocked(UsuarioRepository.findOneBy).mockResolvedValue(usuario as never);
-
-    await AuthService.solicitarRecuperacion(usuario.correoElectronico, "http://localhost:5173");
-
-    expect(PasswordResetTokenRepository.save).toHaveBeenCalledTimes(1);
-    const tokenGuardado = vi.mocked(PasswordResetTokenRepository.save).mock.calls[0][0] as {
-      tokenHash: string;
-      usado: boolean;
-    };
-    // El token crudo nunca debe llegar a la base de datos, solo su hash.
-    expect(tokenGuardado.tokenHash).toHaveLength(64); // sha256 en hex
-    expect(tokenGuardado.usado).toBe(false);
-    expect(EmailService.enviarCorreoRecuperacion).toHaveBeenCalledWith(
-      usuario.correoElectronico,
-      expect.stringContaining("/reset-password?token=")
-    );
-  });
-});
-
-describe("AuthService.restablecerPassword", () => {
-  it("rechaza un token inexistente, ya usado o expirado", async () => {
-    vi.mocked(PasswordResetTokenRepository.findValidByHash).mockResolvedValue(null);
-
-    await expect(AuthService.restablecerPassword("token-invalido", "NuevaClave123!")).rejects.toThrow(
-      TokenRecuperacionInvalidoError
-    );
-    expect(UsuarioRepository.update).not.toHaveBeenCalled();
-  });
-
-  it("actualiza el hash de la contrasena y desactiva todas las sesiones activas del usuario", async () => {
-    const usuario = await usuarioDePrueba();
-    vi.mocked(PasswordResetTokenRepository.findValidByHash).mockResolvedValue({
-      id: 1,
-      usuarioId: usuario.id,
-      tokenHash: "hash-de-prueba",
-      fechaCreacion: new Date(),
-      fechaExpiracion: new Date(Date.now() + 60_000),
-      usado: false,
-    } as never);
-    vi.mocked(UsuarioRepository.findById).mockResolvedValue(usuario as never);
-
-    await AuthService.restablecerPassword("token-valido", "NuevaClave123!");
-
-    expect(UsuarioRepository.update).toHaveBeenCalledWith(
-      { id: usuario.id },
-      { contrasenaHash: expect.any(String), debeCambiarPassword: false }
-    );
-    const nuevoHash = vi.mocked(UsuarioRepository.update).mock.calls[0][1].contrasenaHash as string;
-    expect(await bcrypt.compare("NuevaClave123!", nuevoHash)).toBe(true);
-    expect(PasswordResetTokenRepository.save).toHaveBeenCalledWith(expect.objectContaining({ usado: true }));
-    expect(SesionRepository.desactivarTodasDeUsuario).toHaveBeenCalledWith(usuario.id);
   });
 });
