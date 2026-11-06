@@ -4,6 +4,7 @@ import { ConcentradoCarreras } from "@/components/estadisticas/ConcentradoCarrer
 import { GraficaDistribucion } from "@/components/estadisticas/GraficaDistribucion";
 import { GraficaTendencia } from "@/components/estadisticas/GraficaTendencia";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ApiError } from "@/lib/api";
@@ -21,12 +22,12 @@ interface Resultado {
 }
 
 /** Estadísticas institucionales de un ciclo con gráficos (RF06). Para Coordinación y Administración. */
-export function EstadisticasPage() {
-  const [filtros, setFiltros] = useState<FiltrosCoordinacion | null>(null);
+export function EstadisticasPage() {  const [filtros, setFiltros] = useState<FiltrosCoordinacion | null>(null);
   const [periodoId, setPeriodoId] = useState("");
   const [errorFiltros, setErrorFiltros] = useState<string | null>(null);
   // Cada respuesta lleva su ciclo: lo que no corresponde al ciclo elegido ahora no se muestra, ni dato ni error.
   const [resultado, setResultado] = useState<Resultado | null>(null);
+  const [intento, setIntento] = useState(0);
 
   useEffect(() => {
     getFiltros()
@@ -48,11 +49,18 @@ export function EstadisticasPage() {
     return () => {
       vigente = false;
     };
-  }, [periodoId]);
+  }, [periodoId, intento]);
+
+  // Volver a pedir el mismo ciclo: elegirlo otra vez en la lista no cambia nada, así que el error trae su propio botón.
+  const reintentar = () => {
+    setResultado(null);
+    setIntento((n) => n + 1);
+  };
 
   const actual = resultado?.clave === periodoId ? resultado : null;
   const datos = actual?.datos ?? null;
-  const mensajeError = actual?.error ?? errorFiltros;
+  const errorEstadisticas = actual?.error ?? null;
+  const mensajeError = errorEstadisticas ?? errorFiltros;
   const cicloActivo = filtros?.periodos.find((p) => p.activo);
 
   return (
@@ -79,11 +87,16 @@ export function EstadisticasPage() {
       </Card>
 
       {mensajeError && (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {mensajeError}
-        </p>
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p>{mensajeError}</p>
+          {errorEstadisticas && (
+            <Button type="button" variant="outline" size="sm" onClick={reintentar}>
+              Reintentar
+            </Button>
+          )}
+        </div>
       )}
-      {!datos && !mensajeError && (
+      {!datos && !errorEstadisticas && (
         <div role="status" aria-busy className="h-64 animate-pulse rounded-xl bg-card">
           <span className="sr-only">Cargando…</span>
         </div>

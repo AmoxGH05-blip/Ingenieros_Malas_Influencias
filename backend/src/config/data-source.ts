@@ -34,6 +34,13 @@ export const AppDataSource = new DataSource({
   ssl: (process.env.DB_SSL ?? "true") === "true" ? { rejectUnauthorized: false } : false,
   synchronize: false,
   logging: false,
+  // Opciones del pool de pg. Supabase limita las conexiones, y cada llamada de estadisticas lanza 4 consultas en paralelo:
+  // un tope explicito evita agotarlas, y el timeout hace fallar rapido en vez de colgar la peticion.
+  extra: {
+    max: Number(process.env.DB_POOL_MAX ?? 10),
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
+  },
   entities: [
     Rol,
     Usuario,

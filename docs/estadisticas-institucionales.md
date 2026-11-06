@@ -49,8 +49,8 @@ Recharts (`recharts` 3). Sin animaciones, para respetar a quien prefiere menos m
 
 - `EstadisticaService.test.ts` (8 pruebas): conversión de los textos de pg, los dos porcentajes por separado, distribución con las cuatro categorías, carreras sin alumnos con `null`, ciclo sin inscripciones en la tendencia, ciclo indicado contra el activo, ciclo vacío, sin ciclo activo, `404` y `400`.
 - `estadisticas.routes.test.ts` (3 pruebas): 401 sin sesión, 403 a alumno y docente, 200 a coordinador y administrador.
-- Contra Supabase, 24 comprobaciones: las cifras de la API coinciden con consultas independientes sobre las **tablas** (no sobre las vistas): alumnos, inscripciones, evaluaciones enviadas, participantes, docentes con promedio y promedio institucional; además coinciden con el ranking de indicadores; la suma por carrera cuadra con el total; la tendencia termina en el ciclo elegido; y un ciclo anterior responde sin mezclar alumnos del activo.
-- En el navegador: las tres gráficas se dibujan, vista móvil sin desbordes y navegación desde el menú de Coordinador y de Administrador.
+- Contra Supabase, `backend/scripts/verificar-estadisticas.js` (solo lee; cuentas y contraseña por variables de entorno, ver el encabezado del script), 26 comprobaciones: las cifras de la API coinciden con consultas independientes sobre las **tablas** (no sobre las vistas): alumnos, inscripciones, evaluaciones enviadas, participantes, docentes con promedio y promedio institucional; además coinciden con el ranking de indicadores; la ventana de 6 ciclos de la tendencia coincide con una consulta aparte; `periodoId` repetido responde 400; la suma por carrera cuadra con el total; la tendencia termina en el ciclo elegido; y un ciclo anterior responde sin mezclar alumnos del activo.
+- En el navegador: el botón «Reintentar» tras un error de carga y el aviso del `ErrorBoundary` (probado forzando un error de render) en vez de pantalla en blanco; las tres gráficas se dibujan, vista móvil sin desbordes y navegación desde el menú de Coordinador y de Administrador.
 
 ## Limitaciones
 
@@ -59,5 +59,6 @@ Recharts (`recharts` 3). Sin animaciones, para respetar a quien prefiere menos m
 - Si no hay ningún ciclo activo, la pantalla avisa que se elija uno de la lista y no muestra tarjetas en cero.
 - La categoría de cada carrera se muestra como texto junto a la barra, no solo con color.
 - Solo hay una carrera con alumnos en los datos demo, así que el concentrado por carrera no se ha visto con varias carreras con datos.
+- El pool de conexiones tiene tope explícito (`DB_POOL_MAX`, 10 por defecto) y falla a los 10 s si no hay conexión libre, para no agotar las de Supabase ni colgar la petición.
 - No hay filtro por carrera ni por facultad: el concentrado muestra todas las carreras a la vez.
 - Los ciclos históricos demo no tienen inscripciones, por eso su avance de evaluaciones aparece como guion.

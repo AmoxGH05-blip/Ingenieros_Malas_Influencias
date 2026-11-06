@@ -21,8 +21,11 @@ import { GrupoDetallePage } from "@/pages/grupos/GrupoDetallePage";
 import { AdministradorDashboardPage } from "@/pages/dashboards/AdministradorDashboardPage";
 import { DocenteComparativoPage } from "@/pages/docente/DocenteComparativoPage";
 import { IndicadoresPage } from "@/pages/indicadores/IndicadoresPage";
-const EstadisticasPage = lazy(() => import("@/pages/estadisticas/EstadisticasPage").then((m) => ({ default: m.EstadisticasPage })));
 import { IndicadorDocenteDetallePage } from "@/pages/indicadores/IndicadorDocenteDetallePage";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+// La pantalla (y recharts con ella) se descarga solo al abrirla.
+const EstadisticasPage = lazy(() => import("@/pages/estadisticas/EstadisticasPage").then((m) => ({ default: m.EstadisticasPage })));
 
 function App() {
   return (
@@ -58,9 +61,11 @@ function App() {
               <Route
                 path="/coordinador/estadisticas"
                 element={
-                  <Suspense fallback={<p role="status" className="text-sm text-muted-foreground">Cargando…</p>}>
-                    <EstadisticasPage />
-                  </Suspense>
+                  <ErrorBoundary nombre="las estadísticas">
+                    <Suspense fallback={<p role="status" className="text-sm text-muted-foreground">Cargando…</p>}>
+                      <EstadisticasPage />
+                    </Suspense>
+                  </ErrorBoundary>
                 }
               />
               <Route path="/coordinador/indicadores" element={<IndicadoresPage />} />
